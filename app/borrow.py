@@ -15,11 +15,20 @@ import logging
 import queue
 import threading
 import time
+from pathlib import Path
 from typing import Callable
 
 import requests
 
+try:
+    import tomllib
+except ImportError:  # pragma: no cover
+    import tomli as tomllib  # type: ignore
+
 log = logging.getLogger(__name__)
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+SECRETS_PATH = ROOT_DIR / "secrets" / "keys.toml"
 
 STATUS_EASY = "easy"       # Easy to borrow -> Red
 STATUS_HARD = "hard"       # Hard to borrow -> Yellow
@@ -34,8 +43,26 @@ LABEL_MAP = {
 }
 
 
+def load_alpaca_secrets() -> tuple[str, str]:
+    if SECRETS_PATH.exists():
+        try:
+            with open(SECRETS_PATH, "rb") as f:
+                data = tomllib.load(f)
+                alp = data.get("alpaca", {})
+                k = alp.get("tradingApi_key") or alp.get("brockerApi_sandbox1_api_key") or ""
+                s = alp.get("tradingApi_secret") or alp.get("brockerApi_sandbox1_api_secret") or ""
+                return str(k).strip(), str(s).strip()
+        except Exception:
+            pass
+    return "", ""
+
+
 class BorrowService:
     def __init__(self, key_id: str = "", secret_key: str = "", mode: str = "auto") -> None:
+        if not (key_id and secret_key):
+            k, s = load_alpaca_secrets()
+            key_id = key_id or k
+            secret_key = secret_key or s
         self.key_id = key_id.strip()
         self.secret_key = secret_key.strip()
         self.mode = mode  # "auto", "alpaca", "heuristic"
@@ -47,6 +74,10 @@ class BorrowService:
 
     def update_credentials(self, key_id: str, secret_key: str, mode: str = "auto") -> None:
         with self._lock:
+            if not (key_id and secret_key):
+                k, s = load_alpaca_secrets()
+                key_id = key_id or k
+                secret_key = secret_key or s
             self.key_id = (key_id or "").strip()
             self.secret_key = (secret_key or "").strip()
             self.mode = mode

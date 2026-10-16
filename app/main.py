@@ -12,6 +12,7 @@ from .borrow import BorrowService
 from .config import APP_DIR, Config
 from .news import NewsService, TradingViewNews
 from .screener import ScreenerWorker
+from .server import start_server
 from .sounds import SoundPlayer
 from .tape import TapeWorker
 from .telegram import TelegramService
@@ -36,33 +37,35 @@ class App:
         self.screener = ScreenerWorker(self.cfg, self.client, self.news, self.sounds, self.bus.emit, self.borrow, self.telegram)
         self.tape = TapeWorker(self.cfg, self.client, self.sounds, self.bus.emit, self.borrow)
         self.api = Api(self)
+        self.server_url, self.http_server = start_server(self.api, WEB)
         self.main_window = None
         self.tape_window = None
 
     def open_tape_window(self) -> None:
         if self.tape_window is not None:
             return
-        w = webview.create_window("Tape — Small Cap High of Day Momentum",
-                                  str(WEB / "tape.html"), js_api=self.api,
-                                  width=1100, height=700, background_color="#0b0e14")
+        w = webview.create_window(
+            "Tape — Small Cap High of Day Momentum",
+            f"{self.server_url}/tape.html",
+            width=1100, height=700, background_color="#0b0e14"
+        )
         self.tape_window = w
 
         def on_closed():
-            self.bus.remove(w)
             self.tape_window = None
             self.bus.emit("tape_popped", False)
 
-        w.events.loaded += lambda: self.bus.add(w)
         w.events.closed += on_closed
         self.bus.emit("tape_popped", True)
 
     def run(self) -> None:
         c = self.cfg.get()
         self.main_window = webview.create_window(
-            "NewsAlerts — Momentum Screener", str(WEB / "index.html"), js_api=self.api,
+            "NewsAlerts — Momentum Screener",
+            f"{self.server_url}/index.html",
             width=1600, height=950, min_size=(1000, 600), background_color="#0b0e14",
-            on_top=bool(c["ui"]["always_on_top"]))
-        self.main_window.events.loaded += lambda: self.bus.add(self.main_window)
+            on_top=bool(c["ui"]["always_on_top"])
+        )
 
         def start_workers():
             self.screener.start()

@@ -149,7 +149,8 @@ class Api:
 
     def set_on_top(self, on: bool):
         try:
-            self._app.main_window.on_top = bool(on)
+            if self._app.main_window is not None:
+                self._app.main_window.on_top = bool(on)
         except Exception:
             pass
         return True

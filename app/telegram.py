@@ -39,8 +39,21 @@ def load_secrets() -> dict:
             with open(SECRETS_PATH, "rb") as f:
                 data = tomllib.load(f)
                 return data.get("telegram", {})
-        except Exception as e:
-            log.warning("Failed to parse %s: %s", SECRETS_PATH, e)
+        except Exception:
+            try:
+                res = {}
+                in_tg = False
+                for line in SECRETS_PATH.read_text(encoding="utf-8").splitlines():
+                    line = line.strip()
+                    if line.startswith("["):
+                        in_tg = line.lower() == "[telegram]"
+                        continue
+                    if in_tg and "=" in line and not line.startswith("#"):
+                        k, v = line.split("=", 1)
+                        res[k.strip()] = v.strip().strip('"\'')
+                return res
+            except Exception as e:
+                log.warning("Failed to parse %s: %s", SECRETS_PATH, e)
     return {}
 
 

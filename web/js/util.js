@@ -1,6 +1,56 @@
 /* Shared helpers + event hub. Python pushes events via App.on(event, payload). */
 (function () {
   const handlers = {};
+  const _api = {
+    get_state: () => fetch("/api/state").then((r) => r.json()),
+    poll_events: (after_id) => fetch(`/api/events?after=${encodeURIComponent(after_id || 0)}`).then((r) => r.json()),
+    save_config: (cfg) => fetch("/api/config", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(cfg),
+    }).then((r) => r.json()),
+    send_telegram_test: () => fetch("/api/test_telegram", { method: "POST" }).then((r) => r.json()),
+    set_focused: (focused) => fetch("/api/set_focused", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ focused }),
+    }).then((r) => r.json()).catch(() => {}),
+    get_news: (ticker, force) => fetch(`/api/news?ticker=${encodeURIComponent(ticker)}&force=${force ? "1" : "0"}`).then((r) => r.json()),
+    get_story: (id) => fetch(`/api/story?id=${encodeURIComponent(id)}`).then((r) => r.json()),
+    get_quote: (ticker) => fetch(`/api/quote?ticker=${encodeURIComponent(ticker)}`).then((r) => r.json()),
+    play_sound: (path) => fetch("/api/play_sound", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ path }),
+    }).then((r) => r.json()),
+    play_alert: (kind) => fetch("/api/play_alert", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind }),
+    }).then((r) => r.json()),
+    open_url: (url) => fetch("/api/open_url", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url }),
+    }).then((r) => r.json()),
+    open_chart: (ticker) => fetch("/api/open_chart", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ticker }),
+    }).then((r) => r.json()),
+    pop_tape: () => fetch("/api/pop_tape", { method: "POST" }).then((r) => r.json()),
+    select_symbol: (ticker) => fetch("/api/select_symbol", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ticker }),
+    }).then((r) => r.json()),
+    set_on_top: (on) => fetch("/api/set_on_top", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ on }),
+    }).then((r) => r.json()),
+  };
+
   const App = {
     config: null,
     sounds: [],
@@ -14,11 +64,8 @@
       });
     },
     sub(event, fn) { (handlers[event] = handlers[event] || []).push(fn); },
-    api() { return window.pywebview && window.pywebview.api; },
-    ready: new Promise((res) => {
-      if (window.pywebview && window.pywebview.api) res();
-      else window.addEventListener("pywebviewready", () => res());
-    }),
+    api() { return _api; },
+    ready: Promise.resolve(),
     _saveT: null,
     _lastSave: 0,
     saveConfig(immediate) {
@@ -143,9 +190,21 @@
     const a = e.target.closest("a[href]");
     if (a && /^https?:/.test(a.getAttribute("href"))) {
       e.preventDefault();
-      App.api() && App.api().open_url(a.getAttribute("href"));
+      App.api().open_url(a.getAttribute("href"));
     }
   });
-  window.addEventListener("focus", () => App.api() && App.api().set_focused(true));
-  window.addEventListener("blur", () => App.api() && App.api().set_focused(false));
+
+  let _isFocused = true;
+  window.addEventListener("focus", () => {
+    if (!_isFocused) {
+      _isFocused = true;
+      App.api().set_focused(true);
+    }
+  });
+  window.addEventListener("blur", () => {
+    if (_isFocused) {
+      _isFocused = false;
+      App.api().set_focused(false);
+    }
+  });
 })();
