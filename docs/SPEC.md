@@ -179,14 +179,18 @@ Row background per strategy family (Low Float = mint, Medium Float = sand, Squee
 volume cell darker the larger the volume, float cell green when < 20M.
 Optional tape sound (default off — the tape is noisy).
 
+### 8.5 Telegram Push Alerts for Tape Momentum
+- **Real-Time Push Notifications**: When momentum tickers print on the Tape (e.g. `NCPL` popping up on HOD / low-float runner), an instant Telegram push alert is dispatched to the user's configured chat.
+- **Rich Message Format**: Includes Symbol, Strategy name, Session, Price, Change %, Volume, Float, Relative Volume (daily + 5m%), Short Borrow Status (`HTB` / `ETB` / `NO BORROW` / `N/A`), 52w range position, and a direct TradingView chart link.
+- **Per-Symbol Cooldown**: A per-ticker cooldown (default 60s, configurable in Settings) prevents rapid duplicate push notifications when a runner repeatedly prints new HODs in seconds.
+
 ## 9. Sounds
 - Settings lists all `.wav` in `C:\Windows\Media` (Windows Notify, Ding, chimes, Alarm01–10, …).
 - Separate pickers: **New screener symbol**, **New news**, **Tape event**; ▶ test button each.
 - Played async via `winsound.PlaySound(path, SND_FILENAME | SND_ASYNC)`; throttled to 1 per 1.5 s.
 
-## 10. Settings
-TradingView `sessionid`/`sessionid_sign` · poll intervals · re-entry window · news recency &
-provider · sounds · tape universe & strategy thresholds · always-on-top · font size.
+## 10. Settings & Integrations
+TradingView `sessionid`/`sessionid_sign` & real-time connection status · poll intervals · re-entry window · news recency & provider · sounds · tape universe & strategy thresholds · Alpaca keys for short borrow locates · Telegram Bot Token, Chat ID, and independent toggles for Screener alerts and Tape momentum alerts (with per-symbol cooldown) · always-on-top · font size.
 
 ## 11. Architecture
 ```
@@ -197,8 +201,10 @@ app/
   sessions.py    – ET clock, session detection, field mapping
   tv_client.py   – scanner + news HTTP client (cookie, retries, backoff)
   screener.py    – screen poller, query builder, diff / new-symbol detection
-  tape.py        – tape universe poller, rolling history, strategy engine
-  news.py        – NewsProvider interface, TradingView provider, cache, AST→HTML
+  tape.py        – tape universe poller, rolling history, strategy engine, telegram push
+  news.py        – NewsProvider interface, TradingView provider, Alpaca provider, cache, AST→HTML
+  borrow.py      – short borrow locate service (Alpaca + TV + heuristics fallback)
+  telegram.py    – Telegram Bot API integration for Screener & Tape push notifications
   sounds.py      – list Windows sounds, throttled async playback
 web/
   index.html, tape.html

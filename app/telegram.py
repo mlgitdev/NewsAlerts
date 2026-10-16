@@ -165,6 +165,62 @@ class TelegramService:
 
         self.send_raw("\n".join(lines))
 
+    def send_tape_alert(self, event: dict, session: str = "") -> None:
+        if not self.enabled:
+            return
+
+        sym = html.escape(str(event.get("symbol") or event.get("ticker", "")))
+        ticker = event.get("ticker", sym)
+        strat = html.escape(str(event.get("strategy") or "Momentum Alert"))
+        fam = str(event.get("family") or "low")
+        price = event.get("price")
+        chg = event.get("chg")
+        vol = event.get("volume")
+        flt = event.get("float")
+        relvol = event.get("relvol")
+        relvol5 = event.get("relvol5")
+        borrow = event.get("borrow") or {}
+        bst = borrow.get("status", "na")
+        borrow_str = BORROW_EMOJI.get(bst, f"🟠 {borrow.get('label', 'N/A')}")
+        pos52 = event.get("pos52")
+
+        price_str = f"${price:.2f}" if price is not None else "—"
+        chg_sign = "+" if (chg or 0) > 0 else ""
+        chg_str = f"{chg_sign}{chg:.2f}%" if chg is not None else "—"
+
+        def fmt_big(v):
+            if not v:
+                return "—"
+            if v >= 1e9:
+                return f"{v / 1e9:.2f}B"
+            if v >= 1e6:
+                return f"{v / 1e6:.2f}M"
+            if v >= 1e3:
+                return f"{v / 1e3:.2f}K"
+            return str(v)
+
+        sess_label = {"pre": "Pre-Market", "regular": "Regular Hours", "post": "Post-Market"}.get(session, session.upper()) if session else ""
+        sess_part = f" ({sess_label})" if sess_label else ""
+        fam_icon = {"low": "⚡", "medium": "🌊", "squeeze": "🚀"}.get(fam, "⚡")
+
+        lines = [
+            f"{fam_icon} <b>TAPE MOMENTUM ALERT: {sym}</b>{sess_part}",
+            f"🎯 <b>Strategy:</b> <i>{strat}</i>",
+            "",
+            f"💵 <b>Price:</b> {price_str} ({chg_str})",
+            f"📊 <b>Volume:</b> {fmt_big(vol)}",
+            f"🌊 <b>Float:</b> {fmt_big(flt)}",
+            f"⚡ <b>Rel Vol:</b> {f'{relvol:.2f}' if relvol else '—'}" + (f" (5m: {relvol5:.0f}%)" if relvol5 is not None else ""),
+            f"🩳 <b>Borrow:</b> {borrow_str}",
+        ]
+        if pos52 is not None:
+            lines.append(f"📈 <b>52w Range:</b> {pos52:.1f}%")
+
+        chart_url = f"https://www.tradingview.com/chart/?symbol={ticker}"
+        lines.append(f"\n🔗 <a href=\"{chart_url}\">Open TradingView Chart</a>")
+
+        self.send_raw("\n".join(lines))
+
     def _worker(self) -> None:
         while True:
             text = self._queue.get()

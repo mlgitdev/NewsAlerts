@@ -101,7 +101,9 @@
         ...Settings.field("Play tape sound", Settings.check(a, "tape_sound_enabled", "Fires on every enabled-strategy event (noisy)")),
         ...Settings.field("Tape sound", Settings.sound(a, "sound_tape")),
         U.el("h3", {}, "Telegram Bot Push Alerts"),
-        ...Settings.field("Enable Telegram Alerts", Settings.check(a, "telegram_enabled", "Send instant push alert when a new symbol pops up")),
+        ...Settings.field("Enable Telegram Alerts", Settings.check(a, "telegram_enabled", "Master toggle for Telegram notifications")),
+        ...Settings.field("Tape Momentum Alerts", Settings.check(a, "telegram_tape_enabled", "Send push alert when a momentum symbol pops up on the tape (e.g. HOD / Squeeze breakout)")),
+        ...Settings.field("Tape Alert Cooldown (sec)", Settings.num(a, "telegram_tape_cooldown_sec"), "Minimum seconds between alerts for the same symbol to prevent spam (default: 60s)"),
         ...Settings.field("Test Bot Connection", U.el("button", {
           class: "btn sm primary",
           style: "width:180px",

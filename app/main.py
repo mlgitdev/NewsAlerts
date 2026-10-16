@@ -41,7 +41,7 @@ class App:
         self.sounds = SoundPlayer()
         self.sounds.muted = bool(c["alerts"]["mute"])
         self.screener = ScreenerWorker(self.cfg, self.client, self.news, self.sounds, self.bus.emit, self.borrow, self.telegram)
-        self.tape = TapeWorker(self.cfg, self.client, self.sounds, self.bus.emit, self.borrow)
+        self.tape = TapeWorker(self.cfg, self.client, self.sounds, self.bus.emit, self.borrow, self.telegram)
         self.api = Api(self)
         self.server_url, self.http_server = start_server(self.api, WEB)
         self.main_window = None

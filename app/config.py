@@ -47,6 +47,8 @@ DEFAULT_CONFIG = {
         "tape_sound_enabled": False,
         "sound_tape": MEDIA + r"\Windows Navigation Start.wav",
         "telegram_enabled": True,
+        "telegram_tape_enabled": True,
+        "telegram_tape_cooldown_sec": 60,
     },
     "news": {"recency_hours": 12, "benzinga_only": False},
     "screens": [

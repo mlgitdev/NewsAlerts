@@ -13,6 +13,7 @@ from . import sessions as S
 from .borrow import BorrowService
 from .config import APP_DIR, Config
 from .sounds import SoundPlayer
+from .telegram import TelegramService
 from .tv_client import TVClient, TVError
 
 log = logging.getLogger(__name__)
@@ -57,14 +58,17 @@ def _match(strat: dict, v: dict) -> bool:
 
 class TapeWorker(threading.Thread):
     def __init__(self, cfg: Config, client: TVClient, sounds: SoundPlayer,
-                 emit: Callable[[str, object], None], borrow: BorrowService | None = None) -> None:
+                 emit: Callable[[str, object], None], borrow: BorrowService | None = None,
+                 telegram: TelegramService | None = None) -> None:
         super().__init__(daemon=True, name="tape")
         self.cfg = cfg
         self.client = client
         self.sounds = sounds
         self.emit = emit
         self.borrow = borrow
+        self.telegram = telegram
         self.state: dict[str, _SymState] = {}
+        self._tg_last_alert: dict[str, float] = {}
         self._history_file = APP_DIR / "tape_history.json"
         self._save_lock = threading.RLock()
         self.events: list[dict] = self._load_history()
@@ -174,6 +178,18 @@ class TapeWorker(threading.Thread):
             self.emit("tape", new_events)
             if c["alerts"]["tape_sound_enabled"] and any(e["strategy"] in enabled for e in new_events):
                 self.sounds.play(c["alerts"]["sound_tape"])
+
+            # Send Telegram push alert for matching tape momentum events
+            tg_on = c["alerts"].get("telegram_enabled", True) and c["alerts"].get("telegram_tape_enabled", True)
+            if self.telegram and tg_on:
+                tg_cd = float(c["alerts"].get("telegram_tape_cooldown_sec", 60))
+                for ev in new_events:
+                    if ev.get("strategy") in enabled:
+                        sym = str(ev.get("symbol") or ev.get("ticker", ""))
+                        last_t = self._tg_last_alert.get(sym, 0)
+                        if now - last_t >= tg_cd:
+                            self._tg_last_alert[sym] = now
+                            self.telegram.send_tape_alert(ev, session=session)
 
     def _process(self, r: dict, session: str, now: float, strategies: list, cooldown: float) -> list:
         lg = S.logical_row(r, session)
