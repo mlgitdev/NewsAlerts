@@ -50,7 +50,7 @@ button, input, select { font: inherit; color: inherit; }
 .num { font-variant-numeric: tabular-nums; }
 
 /* ---------------------------------------------------------------- layout */
-.app { display: grid; grid-template-rows: auto auto 1fr; height: 100vh; }
+.app { display: grid; grid-template-rows: auto auto 1fr; height: 100vh; min-height: 0; overflow: hidden; }
 .topbar {
   display: flex; align-items: center; gap: 14px; padding: 8px 14px;
   background: linear-gradient(180deg, rgba(18,23,34,.95), rgba(14,18,27,.9));
@@ -131,9 +131,10 @@ button, input, select { font: inherit; color: inherit; }
 .filterbar .hint { margin-left: auto; color: var(--muted); font-size: 12px; }
 
 /* ---------------------------------------------------------------- main grid */
-.main { display: grid; min-height: 0; grid-template-rows: 1fr 6px var(--tape-h, 300px); }
+.main { display: grid; min-height: 0; height: 100%; overflow: hidden; grid-template-rows: 1fr 6px var(--tape-h, 300px); }
 .main.tape-hidden { grid-template-rows: 1fr 0 0; }
-.main.tape-hidden .tape-pane, .main.tape-hidden .split-h { display: none; }
+.main.tape-hidden #tape-host, .main.tape-hidden .split-h { display: none; }
+#tape-host { min-height: 0; min-width: 0; height: 100%; display: flex; flex-direction: column; overflow: hidden; position: relative; }
 .upper { display: grid; min-height: 0; grid-template-columns: 1fr 6px var(--news-w, 420px); }
 .split-v, .split-h { background: transparent; position: relative; z-index: 2; }
 .split-v { cursor: col-resize; }
@@ -242,6 +243,28 @@ table.grid { width: 100%; border-collapse: separate; border-spacing: 0; font-var
 .age.hot { color: var(--amber); font-weight: 600; }
 
 /* ---------------------------------------------------------------- tape */
+.tape-pane {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+.tape-pane .pane-body {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: auto;
+  position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: #262e40 transparent;
+}
+.tape-pane table.grid { min-width: 980px; }
+.tape-pane thead th { position: sticky; top: 0; z-index: 3; }
 .tape-pane .grid td { height: 26px; font-size: 12.5px; border-bottom: 1px solid rgba(0,0,0,.25); }
 .tape-pane .grid tr.low td { background: rgba(52,227,164,.10); }
 .tape-pane .grid tr.medium td { background: rgba(243,207,138,.10); }
@@ -351,5 +374,7 @@ table.strat td.name input { width: 100%; }
 .drawer .d-time { color: var(--muted); font-size: 11.5px; width: 66px; }
 
 /* stand-alone tape window */
-body.tape-only .app { grid-template-rows: 1fr; }
-body.tape-only .tape-pane { height: 100vh; }
+body.tape-only { height: 100vh; overflow: hidden; }
+body.tape-only .app { grid-template-rows: 1fr; height: 100vh; overflow: hidden; }
+body.tape-only #tape-host { height: 100vh; min-height: 0; overflow: hidden; }
+body.tape-only .tape-pane { height: 100vh; min-height: 0; overflow: hidden; }
