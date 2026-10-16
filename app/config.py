@@ -46,6 +46,7 @@ DEFAULT_CONFIG = {
         "sound_news": MEDIA + r"\Windows Ding.wav",
         "tape_sound_enabled": False,
         "sound_tape": MEDIA + r"\Windows Navigation Start.wav",
+        "telegram_enabled": True,
     },
     "news": {"recency_hours": 12, "benzinga_only": False},
     "screens": [

@@ -93,7 +93,32 @@
         ...Settings.field("News sound", Settings.sound(a, "sound_news")),
         U.el("h3", {}, "Tape"),
         ...Settings.field("Play tape sound", Settings.check(a, "tape_sound_enabled", "Fires on every enabled-strategy event (noisy)")),
-        ...Settings.field("Tape sound", Settings.sound(a, "sound_tape")));
+        ...Settings.field("Tape sound", Settings.sound(a, "sound_tape")),
+        U.el("h3", {}, "Telegram Bot Push Alerts"),
+        ...Settings.field("Enable Telegram Alerts", Settings.check(a, "telegram_enabled", "Send instant push alert when a new symbol pops up")),
+        ...Settings.field("Test Bot Connection", U.el("button", {
+          class: "btn sm primary",
+          style: "width:180px",
+          onclick: async (e) => {
+            const btn = e.target;
+            btn.disabled = true;
+            btn.textContent = "Sending…";
+            try {
+              const res = await App.api().send_telegram_test();
+              if (res.ok) {
+                U.toast("alert", "✈️ Telegram Sent", res.message);
+                btn.textContent = "✓ Sent!";
+              } else {
+                U.toast("alert", "⚠️ Telegram Failed", res.message);
+                btn.textContent = "Failed";
+              }
+            } catch (err) {
+              U.toast("alert", "⚠️ Error", String(err));
+              btn.textContent = "Error";
+            }
+            setTimeout(() => { btn.disabled = false; btn.textContent = "✈️ Send Test Message"; }, 2500);
+          }
+        }, "✈️ Send Test Message"), "Credentials loaded from secrets/keys.toml"));
       return g;
     },
 

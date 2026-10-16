@@ -13,6 +13,7 @@ from .borrow import BorrowService
 from .config import Config
 from .news import NewsService
 from .sounds import SoundPlayer
+from .telegram import TelegramService
 from .tv_client import TVClient, TVError
 
 log = logging.getLogger(__name__)
@@ -93,7 +94,8 @@ class NewsPrefetcher(threading.Thread):
 
 class ScreenerWorker(threading.Thread):
     def __init__(self, cfg: Config, client: TVClient, news: NewsService, sounds: SoundPlayer,
-                 emit: Callable[[str, object], None], borrow: BorrowService | None = None) -> None:
+                 emit: Callable[[str, object], None], borrow: BorrowService | None = None,
+                 telegram: TelegramService | None = None) -> None:
         super().__init__(daemon=True, name="screener")
         self.cfg = cfg
         self.client = client
@@ -101,6 +103,7 @@ class ScreenerWorker(threading.Thread):
         self.sounds = sounds
         self.emit = emit
         self.borrow = borrow
+        self.telegram = telegram
         self.prefetch = NewsPrefetcher(news)
         self._states: dict[str, _ScreenState] = {}
         self._wake = threading.Event()
@@ -188,6 +191,12 @@ class ScreenerWorker(threading.Thread):
             self.emit("new_symbols", payload)
             self.sounds.play(c["alerts"]["sound_new_symbol"])
             for t in new_syms:
+                row_data = by_t[t]
+                if self.telegram and c["alerts"].get("telegram_enabled", True):
+                    cached = self.news.cached(t)
+                    fresh = NewsService.recent(cached, c["news"]["recency_hours"]) if cached else []
+                    latest_title = fresh[0]["title"] if fresh else ""
+                    self.telegram.send_new_symbol_alert(screen["name"], session, row_data, latest_title)
                 self.prefetch.want(t, self._on_new_symbol_news, priority=True)
 
     def _on_new_symbol_news(self, ticker: str, items: list[dict]) -> None:

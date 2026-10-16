@@ -75,10 +75,15 @@ class Api:
         a.client.set_cookies(c["tv"]["sessionid"], c["tv"]["sessionid_sign"])
         bc = c.get("borrow", {})
         a.borrow.update_credentials(bc.get("alpaca_key_id", ""), bc.get("alpaca_secret_key", ""), bc.get("mode", "auto"))
+        a.telegram.update(enabled=bool(c["alerts"].get("telegram_enabled", True)))
         a.sounds.muted = bool(c["alerts"]["mute"])
         a.screener.poke()
         a.bus.emit("config", c)
         return True
+
+    def send_telegram_test(self):
+        ok, msg = self._app.telegram.send_test_message()
+        return {"ok": ok, "message": msg}
 
     def set_focused(self, focused: bool):
         a = self._app

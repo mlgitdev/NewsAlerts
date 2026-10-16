@@ -14,6 +14,7 @@ from .news import NewsService, TradingViewNews
 from .screener import ScreenerWorker
 from .sounds import SoundPlayer
 from .tape import TapeWorker
+from .telegram import TelegramService
 from .tv_client import TVClient
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -29,9 +30,10 @@ class App:
         self.news = NewsService(TradingViewNews(self.client))
         bc = c.get("borrow", {})
         self.borrow = BorrowService(bc.get("alpaca_key_id", ""), bc.get("alpaca_secret_key", ""), bc.get("mode", "auto"))
+        self.telegram = TelegramService(enabled=bool(c["alerts"].get("telegram_enabled", True)))
         self.sounds = SoundPlayer()
         self.sounds.muted = bool(c["alerts"]["mute"])
-        self.screener = ScreenerWorker(self.cfg, self.client, self.news, self.sounds, self.bus.emit, self.borrow)
+        self.screener = ScreenerWorker(self.cfg, self.client, self.news, self.sounds, self.bus.emit, self.borrow, self.telegram)
         self.tape = TapeWorker(self.cfg, self.client, self.sounds, self.bus.emit, self.borrow)
         self.api = Api(self)
         self.main_window = None
