@@ -67,10 +67,14 @@ class BorrowService:
         self.secret_key = secret_key.strip()
         self.mode = mode  # "auto", "alpaca", "heuristic"
         self._cache: dict[str, dict] = {}
+        self._details: dict[str, dict] = {}
         self._lock = threading.RLock()
         self.q: "queue.Queue[tuple[str, float | None, Callable | None]]" = queue.Queue()
         self._worker_thread = threading.Thread(target=self._worker, daemon=True, name="borrow-fetch")
         self._worker_thread.start()
+        if self.key_id and self.secret_key and self.mode in ("auto", "alpaca"):
+            self._sync_thread = threading.Thread(target=self._sync_bulk_assets, daemon=True, name="alpaca-bulk-assets")
+            self._sync_thread.start()
 
     def update_credentials(self, key_id: str, secret_key: str, mode: str = "auto") -> None:
         with self._lock:
@@ -81,6 +85,42 @@ class BorrowService:
             self.key_id = (key_id or "").strip()
             self.secret_key = (secret_key or "").strip()
             self.mode = mode
+            if self.key_id and self.secret_key and self.mode in ("auto", "alpaca"):
+                threading.Thread(target=self._sync_bulk_assets, daemon=True, name="alpaca-bulk-assets").start()
+
+    def _sync_bulk_assets(self) -> None:
+        """Fetch all active US equity assets from Alpaca to pre-populate locate data in memory."""
+        try:
+            url = "https://paper-api.alpaca.markets/v2/assets?status=active&asset_class=us_equity"
+            headers = {
+                "APCA-API-KEY-ID": self.key_id,
+                "APCA-API-SECRET-KEY": self.secret_key,
+            }
+            r = requests.get(url, headers=headers, timeout=15)
+            if r.status_code == 200:
+                assets = r.json()
+                with self._lock:
+                    for a in assets:
+                        sym = str(a.get("symbol", "")).upper()
+                        etb = bool(a.get("easy_to_borrow", False))
+                        shortable = bool(a.get("shortable", False))
+                        if etb:
+                            st = STATUS_EASY
+                        elif shortable:
+                            st = STATUS_HARD
+                        else:
+                            st = STATUS_NONE
+                        self._cache[sym] = {"status": st, "label": LABEL_MAP[st], "source": "alpaca"}
+                        self._details[sym] = {
+                            "exchange": a.get("exchange", ""),
+                            "marginable": a.get("marginable", False),
+                            "fractionable": a.get("fractionable", False),
+                            "etb": etb,
+                            "shortable": shortable,
+                        }
+                log.info("Synced %d active US equities from Alpaca for instant locate resolution", len(assets))
+        except Exception as e:
+            log.warning("Bulk asset sync from Alpaca failed: %s", e)
 
     def get_status(self, symbol: str, float_shares: float | None = None) -> dict:
         """Returns cached status immediately or returns best estimate and enqueues lookup."""
@@ -99,6 +139,47 @@ class BorrowService:
             self.q.put((sym, float_shares, None))
 
         return est
+
+    def get_details(self, symbol: str) -> dict:
+        sym = symbol.split(":")[-1].upper().strip()
+        with self._lock:
+            return self._details.get(sym, {})
+
+    def get_snapshot(self, symbol: str) -> dict | None:
+        """Fetches real-time snapshot (Bid, Ask, Sizes, VWAP, last trade) from Alpaca."""
+        if not (self.key_id and self.secret_key):
+            return None
+        sym = symbol.split(":")[-1].upper().strip()
+        url = f"https://data.alpaca.markets/v2/stocks/snapshots?symbols={sym}"
+        headers = {
+            "APCA-API-KEY-ID": self.key_id,
+            "APCA-API-SECRET-KEY": self.secret_key,
+        }
+        try:
+            r = requests.get(url, headers=headers, timeout=5)
+            if r.status_code == 200:
+                data = r.json().get(sym)
+                if not data:
+                    return None
+                q = data.get("latestQuote") or {}
+                t = data.get("latestTrade") or {}
+                m = data.get("minuteBar") or {}
+                d = data.get("dailyBar") or {}
+                pd = data.get("prevDailyBar") or {}
+                return {
+                    "bid": q.get("bp"),
+                    "ask": q.get("ap"),
+                    "bid_size": q.get("bs"),
+                    "ask_size": q.get("as"),
+                    "last_trade_price": t.get("p"),
+                    "last_trade_size": t.get("s"),
+                    "vwap": m.get("vw") or d.get("vw"),
+                    "prev_close": pd.get("c"),
+                    "daily_volume": d.get("v"),
+                }
+        except Exception as e:
+            log.warning("Alpaca snapshot query for %s failed: %s", sym, e)
+        return None
 
     def enqueue(self, symbol: str, float_shares: float | None = None, cb: Callable | None = None) -> None:
         sym = symbol.split(":")[-1].upper().strip()
@@ -137,7 +218,16 @@ class BorrowService:
                     st = STATUS_HARD
                 else:
                     st = STATUS_NONE
-                return {"status": st, "label": LABEL_MAP[st], "source": "alpaca"}
+                res = {"status": st, "label": LABEL_MAP[st], "source": "alpaca"}
+                with self._lock:
+                    self._details[sym] = {
+                        "exchange": d.get("exchange", ""),
+                        "marginable": d.get("marginable", False),
+                        "fractionable": d.get("fractionable", False),
+                        "etb": etb,
+                        "shortable": shortable,
+                    }
+                return res
             elif r.status_code == 404:
                 return {"status": STATUS_NONE, "label": LABEL_MAP[STATUS_NONE], "source": "alpaca"}
         except Exception as e:

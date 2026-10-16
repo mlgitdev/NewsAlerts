@@ -41,7 +41,12 @@
       News.ticker = ticker;
       News.info = info || null;
       News.renderHead();
-      if (!info) App.api().get_quote(ticker).then((q) => { if (q && News.ticker === ticker) { News.info = q; News.renderHead(); } });
+      App.api().get_quote(ticker).then((q) => {
+        if (q && News.ticker === ticker) {
+          News.info = Object.assign({}, News.info, q);
+          News.renderHead();
+        }
+      });
       News.list.replaceChildren(U.el("div", { class: "empty" }, "Loading news…"));
       await News.load(false, true);
       clearInterval(News.timer);
@@ -61,13 +66,31 @@
         style: "margin-left:8px;vertical-align:middle;",
         title: `Borrow: ${b.label} (${b.status === "easy" ? "Easy to borrow" : b.status === "hard" ? "Hard to borrow" : b.status === "none" ? "No borrow available" : "N/A"})`
       }, b.label);
+
+      // Snapshot & Market Data from Alpaca
+      const snap = i.snapshot || {};
+      const details = i.details || {};
+      const metaParts = [];
+      if (i.desc) metaParts.push(i.desc);
+      if (i.float) metaParts.push("Float " + U.big(i.float));
+      if (snap.bid != null && snap.ask != null && (snap.bid > 0 || snap.ask > 0)) {
+        metaParts.push(`B/A: $${snap.bid.toFixed(2)} × ${snap.bid_size || 0} / $${snap.ask.toFixed(2)} × ${snap.ask_size || 0}`);
+      }
+      if (snap.vwap != null && snap.vwap > 0) {
+        metaParts.push(`VWAP: $${snap.vwap.toFixed(2)}`);
+      }
+      if (details.marginable) {
+        metaParts.push("Marginable");
+      }
+
       News.head.replaceChildren(
         U.el("div", { class: "news-head" }, U.logo(i.logoid, sym),
-          U.el("div", {}, U.el("div", { class: "name" }, sym, " ",
-            i.sp != null ? U.el("span", { class: "num", style: "font-weight:500;margin-left:6px" }, U.price(i.sp)) : null,
-            i.sc != null ? U.el("span", { class: "num " + U.cls(i.sc), style: "font-weight:600;margin-left:6px;font-size:12.5px" }, U.pct(i.sc)) : null,
-            bTag),
-          U.el("div", { class: "sub", title: i.desc || "" }, [i.desc, i.float ? "Float " + U.big(i.float) : null].filter(Boolean).join(" · ")))),
+          U.el("div", {},
+            U.el("div", { class: "name" }, sym, " ",
+              i.sp != null ? U.el("span", { class: "num", style: "font-weight:500;margin-left:6px" }, U.price(i.sp)) : null,
+              i.sc != null ? U.el("span", { class: "num " + U.cls(i.sc), style: "font-weight:600;margin-left:6px;font-size:12.5px" }, U.pct(i.sc)) : null,
+              bTag),
+            U.el("div", { class: "sub", title: metaParts.join(" · ") }, metaParts.join(" · ")))),
         U.el("div", { class: "spacer" }), chart, refresh);
     },
 
@@ -98,12 +121,14 @@
       const frag = document.createDocumentFragment();
       for (const it of items) {
         const hot = Date.now() / 1000 - it.published < 3600;
+        const prov = it.provider === "benzinga" ? "benzinga" : (it.source || it.provider);
         const el = U.el("div", { class: "news-item" + (freshIds.has(it.id) ? " fresh" : "") + (News.open.has(it.id) ? " open" : ""), "data-id": it.id, "data-link": it.link },
           U.el("div", { class: "news-meta" },
-            U.el("span", { class: "prov " + it.provider }, it.source || it.provider),
+            U.el("span", { class: "prov " + prov }, it.source || it.provider),
             U.el("span", { class: "num" }, U.timeET(it.published, false) + " ET"),
             U.el("span", { class: "age" + (hot ? " hot" : "") }, U.ago(it.published))),
-          U.el("div", { class: "news-title" }, it.title));
+          U.el("div", { class: "news-title" }, it.title),
+          it.summary ? U.el("div", { class: "news-summary", style: "font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.4;" }, it.summary) : null);
         frag.append(el);
         if (News.open.has(it.id)) News.expand(el, it.id);
       }

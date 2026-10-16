@@ -75,6 +75,8 @@ class Api:
         a.client.set_cookies(c["tv"]["sessionid"], c["tv"]["sessionid_sign"])
         bc = c.get("borrow", {})
         a.borrow.update_credentials(bc.get("alpaca_key_id", ""), bc.get("alpaca_secret_key", ""), bc.get("mode", "auto"))
+        if hasattr(a, "alp_news"):
+            a.alp_news.update_credentials(a.borrow.key_id, a.borrow.secret_key)
         a.telegram.update(enabled=bool(c["alerts"].get("telegram_enabled", True)))
         a.sounds.muted = bool(c["alerts"]["mute"])
         a.screener.poke()
@@ -114,9 +116,12 @@ class Api:
                 return None
             lg = S.logical_row(row, S.current_session())
             borrow_info = self._app.borrow.get_status(row["ticker"], lg["float"])
+            details = self._app.borrow.get_details(row["ticker"])
+            snapshot = self._app.borrow.get_snapshot(row["ticker"])
             return {"ticker": row["ticker"], "symbol": row["name"], "desc": row["description"],
                     "logoid": row.get("logoid"), "sp": lg["price"], "sc": lg["chg"],
-                    "float": lg["float"], "sector": lg["sector"], "borrow": borrow_info}
+                    "float": lg["float"], "sector": lg["sector"], "borrow": borrow_info,
+                    "details": details, "snapshot": snapshot}
         except Exception:
             return None
 

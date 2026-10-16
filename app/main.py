@@ -10,7 +10,7 @@ import webview
 from .api import Api, Bus
 from .borrow import BorrowService
 from .config import APP_DIR, Config
-from .news import NewsService, TradingViewNews
+from .news import AlpacaNews, CombinedNews, NewsService, TradingViewNews
 from .screener import ScreenerWorker
 from .server import start_server
 from .sounds import SoundPlayer
@@ -28,9 +28,11 @@ class App:
         c = self.cfg.get()
         self.bus = Bus()
         self.client = TVClient(c["tv"]["sessionid"], c["tv"]["sessionid_sign"])
-        self.news = NewsService(TradingViewNews(self.client))
         bc = c.get("borrow", {})
         self.borrow = BorrowService(bc.get("alpaca_key_id", ""), bc.get("alpaca_secret_key", ""), bc.get("mode", "auto"))
+        tv_news = TradingViewNews(self.client)
+        self.alp_news = AlpacaNews(self.borrow.key_id, self.borrow.secret_key)
+        self.news = NewsService(CombinedNews([self.alp_news, tv_news]))
         self.telegram = TelegramService(enabled=bool(c["alerts"].get("telegram_enabled", True)))
         self.sounds = SoundPlayer()
         self.sounds.muted = bool(c["alerts"]["mute"])
