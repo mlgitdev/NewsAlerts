@@ -1,6 +1,4 @@
-"""JS <-> Python bridge exposed to the web UI via pywebview."""
-from __future__ import annotations
-
+import collections
 import json
 import logging
 import threading
@@ -14,30 +12,39 @@ log = logging.getLogger(__name__)
 
 
 class Bus:
-    """Pushes events to every open window: App.on(event, payload)."""
+    """Thread-safe event journal for reliable UI streaming without COM thread deadlocks."""
 
-    def __init__(self) -> None:
-        self._windows = []
+    def __init__(self, maxlen: int = 1000) -> None:
         self._lock = threading.Lock()
+        self._seq = 0
+        self._events: collections.deque = collections.deque(maxlen=maxlen)
 
     def add(self, w) -> None:
-        with self._lock:
-            self._windows.append(w)
+        pass
 
     def remove(self, w) -> None:
-        with self._lock:
-            if w in self._windows:
-                self._windows.remove(w)
+        pass
 
     def emit(self, event: str, payload) -> None:
-        js = f"window.App && App.on({json.dumps(event)}, {json.dumps(payload, default=str)})"
         with self._lock:
-            wins = list(self._windows)
-        for w in wins:
-            try:
-                (getattr(w, "run_js", None) or w.evaluate_js)(js)
-            except Exception as e:
-                log.debug("emit to window failed: %s", e)
+            self._seq += 1
+            self._events.append({
+                "id": self._seq,
+                "event": event,
+                "payload": payload,
+            })
+
+    def latest_id(self) -> int:
+        with self._lock:
+            return self._seq
+
+    def poll(self, after_id: int = 0) -> list[dict]:
+        with self._lock:
+            if not self._events:
+                return []
+            if after_id <= 0:
+                return list(self._events)
+            return [e for e in self._events if e["id"] > after_id]
 
 
 class Api:
@@ -55,7 +62,11 @@ class Api:
             "screener": a.screener.last_rows,
             "tape": a.tape.snapshot(),
             "tape_popped": a.tape_window is not None,
+            "last_event_id": a.bus.latest_id(),
         }
+
+    def poll_events(self, after_id: int = 0):
+        return self._app.bus.poll(int(after_id))
 
     def save_config(self, cfg: dict):
         a = self._app

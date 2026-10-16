@@ -41,6 +41,27 @@
     App.sub("config", onConfig);
 
     initSplitters();
+
+    lastEventId = state.last_event_id || 0;
+    startEventPolling();
+  }
+
+  let lastEventId = 0;
+  async function startEventPolling() {
+    while (true) {
+      try {
+        const events = await App.api().poll_events(lastEventId);
+        if (events && events.length) {
+          for (const ev of events) {
+            if (ev.id > lastEventId) lastEventId = ev.id;
+            App.on(ev.event, ev.payload);
+          }
+        }
+      } catch (e) {
+        await new Promise((r) => setTimeout(r, 1000));
+      }
+      await new Promise((r) => setTimeout(r, 350));
+    }
   }
 
   function updateStatus(st) {
