@@ -55,6 +55,7 @@ class Api:
     # ----------------------------------------------------------------- state
     def get_state(self):
         a = self._app
+        kid = a.borrow.key_id
         return {
             "config": a.cfg.get(),
             "sounds": list_sounds(),
@@ -63,6 +64,8 @@ class Api:
             "tape": a.tape.snapshot(),
             "tape_popped": a.tape_window is not None,
             "last_event_id": a.bus.latest_id(),
+            "alpaca_active": bool(kid and a.borrow.secret_key),
+            "alpaca_key_masked": (kid[:6] + "..." + kid[-4:]) if kid else "",
         }
 
     def poll_events(self, after_id: int = 0):

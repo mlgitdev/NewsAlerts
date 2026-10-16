@@ -8,6 +8,8 @@
     const state = await App.api().get_state();
     App.config = state.config;
     App.sounds = state.sounds;
+    App.alpaca_active = state.alpaca_active;
+    App.alpaca_key_masked = state.alpaca_key_masked;
 
     Settings.applyUi();
 

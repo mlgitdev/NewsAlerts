@@ -171,7 +171,18 @@
         U.el("option", { value: "heuristic" }, "Float-based Heuristic only"));
       modeSel.value = b.mode || "auto";
       modeSel.onchange = () => (b.mode = modeSel.value);
+      const alpacaBanner = App.alpaca_active
+        ? U.el("div", {
+            style: "grid-column:1/-1;padding:9px 13px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);border-radius:6px;color:#4ade80;font-size:12px;font-weight:500;display:flex;align-items:center;gap:8px;",
+          }, `✓ Live Alpaca API Active · Auto-loaded from secrets/keys.toml (${App.alpaca_key_masked})`)
+        : null;
+
+      const keyHelp = App.alpaca_active
+        ? "Auto-loaded from secrets/keys.toml. Leave blank to keep using keys.toml, or enter here to override."
+        : "Free at alpaca.markets (API Keys section)";
+
       g.append(
+        alpacaBanner,
         U.el("h3", {}, "Borrow Indicator Colors (Per Spec)"),
         U.el("div", { style: "grid-column:1/-1;display:flex;gap:14px;align-items:center;padding:6px 0;" },
           U.el("span", { class: "tag-borrow easy" }, "ETB (Red: Easy)"),
@@ -181,9 +192,9 @@
         ),
         U.el("h3", {}, "Resolution Mode"),
         ...Settings.field("Borrow source", modeSel, "How shortability is determined for each ticker"),
-        U.el("h3", {}, "Alpaca API Keys (Optional, Free Paper Trading Keys)"),
-        ...Settings.field("Alpaca Key ID", Settings.text(b, "alpaca_key_id", "text", "PK..."), "Free at alpaca.markets (API Keys section)"),
-        ...Settings.field("Alpaca Secret Key", Settings.text(b, "alpaca_secret_key", "password", "Secret..."), "Enables live broker-grade ETB / HTB locates")
+        U.el("h3", {}, "Alpaca API Keys (Optional Override)"),
+        ...Settings.field("Alpaca Key ID", Settings.text(b, "alpaca_key_id", "text", App.alpaca_key_masked || "PK..."), keyHelp),
+        ...Settings.field("Alpaca Secret Key", Settings.text(b, "alpaca_secret_key", "password", App.alpaca_active ? "••••••••••••" : "Secret..."), keyHelp)
       );
       return g;
     },
