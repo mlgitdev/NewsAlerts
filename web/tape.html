@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tape — Small Cap High of Day Momentum</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body class="tape-only">
+  <div class="app">
+    <div id="tape-host"></div>
+  </div>
+
+  <script src="js/util.js"></script>
+  <script src="js/tape.js"></script>
+  <script>
+    window.addEventListener("DOMContentLoaded", async () => {
+      await App.ready;
+      const state = await App.api().get_state();
+      App.config = state.config;
+      App.sounds = state.sounds;
+      if (App.config.ui && App.config.ui.font_size) {
+        document.documentElement.style.setProperty("--fs", App.config.ui.font_size + "px");
+      }
+      document.body.classList.toggle("bright", !!(App.config.ui && App.config.ui.tape_bright));
+
+      Tape.mount(document.getElementById("tape-host"), { popout: true });
+      if (state.tape) Tape.load(state.tape);
+    });
+  </script>
+</body>
+</html>

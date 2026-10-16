@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NewsAlerts — Momentum Screener</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <div class="app">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-logo">
+          <svg viewBox="0 0 24 24" fill="#fff"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg>
+        </div>
+        <div>
+          <span>NewsAlerts</span>
+          <small>Momentum</small>
+        </div>
+      </div>
+
+      <!-- SCREEN TABS -->
+      <div class="tabs" id="tabs"></div>
+
+      <!-- SESSION SELECTOR -->
+      <div class="seg" id="session-seg">
+        <button data-s="auto" class="active" id="sess-auto">Auto</button>
+        <button data-s="pre" id="sess-pre">Pre</button>
+        <button data-s="regular" id="sess-reg">Regular</button>
+        <button data-s="post" id="sess-post">Post</button>
+      </div>
+
+      <div class="spacer"></div>
+
+      <!-- STATUS PILL -->
+      <div class="pill" id="status-pill" title="TradingView Scanner Status">
+        <span class="dot" id="status-dot"></span>
+        <span id="status-text" class="num">Connecting…</span>
+      </div>
+
+      <!-- ACTIONS -->
+      <button class="icon-btn" id="btn-mute" title="Sound alerts">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+      </button>
+
+      <button class="icon-btn" id="btn-alerts" title="Alerts log">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        <span class="badge" id="alerts-badge"></span>
+      </button>
+
+      <button class="icon-btn" id="btn-settings" title="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </header>
+
+    <!-- FILTER BAR -->
+    <div class="filterbar" id="filters"></div>
+
+    <!-- MAIN RESIZABLE GRID -->
+    <main class="main" id="main-grid">
+      <!-- UPPER: SCREENER + NEWS -->
+      <div class="upper" id="upper-grid">
+        <!-- SCREENER TABLE PANE -->
+        <section class="pane screener-pane" id="screener-pane">
+          <div class="pane-head">
+            <div class="pane-title" id="scr-title">Screener</div>
+          </div>
+          <div class="pane-body" id="scr-body-wrap">
+            <table class="grid" id="scr-grid">
+              <thead id="scr-head"></thead>
+              <tbody id="scr-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- VERTICAL SPLITTER -->
+        <div class="split-v" id="split-v" title="Drag to resize news panel"></div>
+
+        <!-- NEWS PANE -->
+        <section class="pane news-pane" id="news-pane">
+          <div class="pane-head" id="news-head"></div>
+          <div class="news-tools" id="news-tools"></div>
+          <div class="pane-body" id="news-list"></div>
+        </section>
+      </div>
+
+      <!-- HORIZONTAL SPLITTER -->
+      <div class="split-h" id="split-h" title="Drag to resize tape panel"></div>
+
+      <!-- LOWER: RUNNING TAPE HOST -->
+      <div id="tape-host"></div>
+    </main>
+  </div>
+
+  <!-- ALERTS LOG DRAWER -->
+  <aside class="drawer" id="alerts-drawer">
+    <div class="pane-head">
+      <div class="pane-title">🔔 Symbol Alert Log</div>
+    </div>
+    <div id="drawer-list"></div>
+  </aside>
+
+  <!-- SETTINGS MODAL -->
+  <div class="modal-bg" id="settings">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>Settings & Data Sources</h2>
+        <div class="spacer"></div>
+        <button class="icon-btn" id="settings-close">✕</button>
+      </div>
+      <div class="modal-tabs" id="settings-tabs">
+        <button class="active" data-tab="general">General & TV Login</button>
+        <button data-tab="borrow">Short Borrow</button>
+        <button data-tab="alerts">Sound Alerts</button>
+        <button data-tab="news">News</button>
+        <button data-tab="tape">Tape Strategies</button>
+      </div>
+      <div class="modal-body" id="settings-body"></div>
+      <div class="modal-foot">
+        <button class="btn" id="settings-cancel">Cancel</button>
+        <button class="btn primary" id="settings-save">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="js/util.js"></script>
+  <script src="js/screener.js"></script>
+  <script src="js/news.js"></script>
+  <script src="js/tape.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

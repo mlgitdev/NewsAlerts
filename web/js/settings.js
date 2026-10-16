@@ -1,0 +1,167 @@
+/* Settings modal: TradingView login, polling, sounds, news, tape strategies. */
+(function () {
+  const STRAT_COLS = [["float_min", "Float ≥"], ["float_max", "Float <"], ["relvol_min", "RelVol ≥"], ["relvol_max", "RelVol <"],
+    ["price_min", "Price ≥"], ["price_max", "Price <"], ["hi52_ratio_min", "52wH/Px ≥"], ["up_pct", "Up %"], ["window_min", "In min"]];
+
+  const Settings = {
+    open() {
+      const c = JSON.parse(JSON.stringify(App.config));
+      Settings.c = c;
+      const bg = U.$("#settings");
+      const body = U.$("#settings-body");
+      const tabs = U.$$("#settings-tabs button");
+      const show = (name) => {
+        tabs.forEach((b) => b.classList.toggle("active", b.dataset.tab === name));
+        body.replaceChildren(Settings["tab_" + name](c));
+      };
+      tabs.forEach((b) => (b.onclick = () => show(b.dataset.tab)));
+      show("general");
+      bg.classList.add("show");
+      U.$("#settings-save").onclick = () => {
+        App.config = c; App.saveConfig(true); Settings.applyUi(); bg.classList.remove("show");
+        Screener.renderBar(); Screener.renderTable(); Tape.renderAll(); News.syncTools();
+      };
+      U.$("#settings-cancel").onclick = () => bg.classList.remove("show");
+      U.$("#settings-close").onclick = () => bg.classList.remove("show");
+    },
+
+    applyUi() {
+      const ui = App.config.ui;
+      document.documentElement.style.setProperty("--fs", (ui.font_size || 13) + "px");
+      document.documentElement.style.setProperty("--row-h", Math.round((ui.font_size || 13) * 2.3) + "px");
+      document.body.classList.toggle("bright", !!ui.tape_bright);
+      App.api().set_on_top(!!ui.always_on_top);
+    },
+
+    // -- helpers
+    field(label, input, help) {
+      return [U.el("label", {}, label), input, help ? U.el("div", { class: "help" }, help) : null];
+    },
+    num(obj, key, opts = {}) {
+      const i = U.el("input", { type: "text", class: "numin", value: opts.big ? U.fmtInput(obj[key]) : (obj[key] ?? "") });
+      i.oninput = () => { obj[key] = U.parseNum(i.value); };
+      return i;
+    },
+    check(obj, key, label) {
+      const i = U.el("input", { type: "checkbox" }); i.checked = !!obj[key];
+      i.onchange = () => (obj[key] = i.checked);
+      return U.el("label", { style: "display:flex;gap:8px;align-items:center;cursor:pointer" }, i, label || "");
+    },
+    text(obj, key, type = "text", ph = "") {
+      const i = U.el("input", { type, value: obj[key] || "", placeholder: ph, style: "width:100%" });
+      i.oninput = () => (obj[key] = i.value.trim());
+      return i;
+    },
+    sound(obj, key) {
+      const sel = U.el("select", {}, U.el("option", { value: "" }, "(none)"),
+        App.sounds.map((s) => U.el("option", { value: s.path }, s.name)));
+      sel.value = obj[key] || "";
+      sel.onchange = () => (obj[key] = sel.value);
+      const test = U.el("button", { class: "btn sm", onclick: () => App.api().play_sound(sel.value) }, "▶ Test");
+      return U.el("div", { class: "sound-row" }, sel, test);
+    },
+
+    // -- tabs
+    tab_general(c) {
+      const g = U.el("div", { class: "form-grid" });
+      g.append(U.el("h3", {}, "TradingView login (real-time data)"),
+        ...Settings.field("sessionid", Settings.text(c.tv, "sessionid", "password", "paste cookie value"),
+          "tradingview.com → F12 → Application → Cookies → copy 'sessionid'. Without it data is ~15 min delayed."),
+        ...Settings.field("sessionid_sign", Settings.text(c.tv, "sessionid_sign", "password", "optional")),
+        U.el("h3", {}, "Polling"),
+        ...Settings.field("Screener refresh (sec)", Settings.num(c.poll, "screener_sec")),
+        ...Settings.field("Tape refresh (sec)", Settings.num(c.poll, "tape_sec")),
+        ...Settings.field("News refresh (sec)", Settings.num(c.poll, "news_sec")),
+        U.el("h3", {}, "Window"),
+        ...Settings.field("Always on top", Settings.check(c.ui, "always_on_top")),
+        ...Settings.field("Font size (px)", Settings.num(c.ui, "font_size")),
+        ...Settings.field("Bright tape colors", Settings.check(c.ui, "tape_bright", "Warrior-style solid row colors")));
+      return g;
+    },
+
+    tab_alerts(c) {
+      const a = c.alerts;
+      const g = U.el("div", { class: "form-grid" });
+      g.append(U.el("h3", {}, "New symbol in screener (the bell)"),
+        ...Settings.field("Sound", Settings.sound(a, "sound_new_symbol")),
+        ...Settings.field("Re-entry window (min)", Settings.num(a, "reentry_min"),
+          "A symbol that drops out and comes back within this window will not ring again."),
+        ...Settings.field("Mute all sounds", Settings.check(a, "mute")),
+        ...Settings.field("Quiet while app focused", Settings.check(a, "quiet_when_focused")),
+        U.el("h3", {}, "News"),
+        ...Settings.field("Play news sound", Settings.check(a, "news_sound_enabled", "New symbol has fresh news / new headline for selected symbol")),
+        ...Settings.field("News sound", Settings.sound(a, "sound_news")),
+        U.el("h3", {}, "Tape"),
+        ...Settings.field("Play tape sound", Settings.check(a, "tape_sound_enabled", "Fires on every enabled-strategy event (noisy)")),
+        ...Settings.field("Tape sound", Settings.sound(a, "sound_tape")));
+      return g;
+    },
+
+    tab_news(c) {
+      const g = U.el("div", { class: "form-grid" });
+      g.append(U.el("h3", {}, "News filter"),
+        ...Settings.field("Recency (hours)", Settings.num(c.news, "recency_hours"), "Only show headlines newer than this."),
+        ...Settings.field("Benzinga only", Settings.check(c.news, "benzinga_only")),
+        U.el("div", { class: "help", style: "grid-column:1/-1;margin:0" },
+          "Source: TradingView news feed (includes Benzinga, Dow Jones, Reuters, press releases)."));
+      return g;
+    },
+
+    tab_tape(c) {
+      const t = c.tape;
+      const wrap = U.el("div", {});
+      const g = U.el("div", { class: "form-grid" });
+      g.append(U.el("h3", {}, "Tape universe (stocks watched for events)"),
+        ...Settings.field("Price min / max", U.el("div", { class: "sound-row" }, Settings.num(t.universe, "price_min"), Settings.num(t.universe, "price_max"))),
+        ...Settings.field("Min session chg %", Settings.num(t.universe, "chg_min")),
+        ...Settings.field("Min session volume", Settings.num(t.universe, "vol_min", { big: 1 })),
+        ...Settings.field("Max symbols", Settings.num(t.universe, "limit")),
+        ...Settings.field("Cooldown per symbol/strategy (sec)", Settings.num(t, "cooldown_sec")),
+        U.el("h3", {}, "Strategies"));
+      const tbl = U.el("table", { class: "strat" });
+      tbl.append(U.el("tr", {}, U.el("th", {}, "Name"), U.el("th", {}, "Trigger"), STRAT_COLS.map(([, h]) => U.el("th", {}, h))));
+      t.strategies.forEach((s) => {
+        const name = U.el("input", { type: "text", value: s.name });
+        name.onchange = () => {
+          const old = s.name; s.name = name.value.trim() || old;
+          t.enabled = t.enabled.map((n) => (n === old ? s.name : n));
+        };
+        const trig = U.el("select", {}, [["hod", "New HOD"], ["52w", "52w breakout"], ["squeeze", "Up X% in N min"]].map(([v, l]) => U.el("option", { value: v }, l)));
+        trig.value = s.trigger || "hod";
+        trig.onchange = () => (s.trigger = trig.value);
+        tbl.append(U.el("tr", {}, U.el("td", { class: "name" }, name), U.el("td", {}, trig),
+          STRAT_COLS.map(([k]) => U.el("td", {}, Settings.num(s, k, { big: k.startsWith("float") })))));
+      });
+      wrap.append(g, tbl, U.el("div", { class: "help muted", style: "margin-top:10px;font-size:12px" },
+        "HOD strategies fire when a matching stock prints a new session high. Floats accept K/M suffixes. Blank = no limit."));
+      return wrap;
+    },
+
+    tab_borrow(c) {
+      const b = c.borrow || (c.borrow = { alpaca_key_id: "", alpaca_secret_key: "", mode: "auto" });
+      const g = U.el("div", { class: "form-grid" });
+      const modeSel = U.el("select", {},
+        U.el("option", { value: "auto" }, "Auto (Alpaca if keys set, else Float heuristic)"),
+        U.el("option", { value: "alpaca" }, "Alpaca API (Live broker locates)"),
+        U.el("option", { value: "heuristic" }, "Float-based Heuristic only"));
+      modeSel.value = b.mode || "auto";
+      modeSel.onchange = () => (b.mode = modeSel.value);
+      g.append(
+        U.el("h3", {}, "Borrow Indicator Colors (Per Spec)"),
+        U.el("div", { style: "grid-column:1/-1;display:flex;gap:14px;align-items:center;padding:6px 0;" },
+          U.el("span", { class: "tag-borrow easy" }, "ETB (Red: Easy)"),
+          U.el("span", { class: "tag-borrow hard" }, "HTB (Yellow: Hard)"),
+          U.el("span", { class: "tag-borrow none" }, "NO BORROW (Green: None)"),
+          U.el("span", { class: "tag-borrow na" }, "N/A (Orange: No Data)")
+        ),
+        U.el("h3", {}, "Resolution Mode"),
+        ...Settings.field("Borrow source", modeSel, "How shortability is determined for each ticker"),
+        U.el("h3", {}, "Alpaca API Keys (Optional, Free Paper Trading Keys)"),
+        ...Settings.field("Alpaca Key ID", Settings.text(b, "alpaca_key_id", "text", "PK..."), "Free at alpaca.markets (API Keys section)"),
+        ...Settings.field("Alpaca Secret Key", Settings.text(b, "alpaca_secret_key", "password", "Secret..."), "Enables live broker-grade ETB / HTB locates")
+      );
+      return g;
+    },
+  };
+  window.Settings = Settings;
+})();
