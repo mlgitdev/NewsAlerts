@@ -185,3 +185,8 @@ class Api:
         except Exception:
             pass
         return True
+
+    def clear_tape(self):
+        self._app.tape.clear()
+        self._app.bus.emit("tape_cleared", {})
+        return True

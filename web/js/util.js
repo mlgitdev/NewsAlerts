@@ -50,6 +50,7 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ on }),
     }).then((r) => r.json()),
+    clear_tape: () => fetch("/api/clear_tape", { method: "POST" }).then((r) => r.json()),
   };
 
   const App = {
@@ -121,9 +122,39 @@
     },
     fmtInput(v) { return v == null ? "" : U.big(v, v >= 1e3 && v % 1e3 ? 2 : 0).replace(/\.00(?=[KMBT])/, ""); },
     timeET(ts, secs = true) {
+      if (!ts) return "—";
       return new Date(ts * 1000).toLocaleTimeString("en-US", {
         timeZone: "America/New_York", hour: "numeric", minute: "2-digit", second: secs ? "2-digit" : undefined,
       }).toLowerCase();
+    },
+    timeTape(ts) {
+      if (!ts) return "—";
+      const d = new Date(ts * 1000);
+      const now = new Date();
+      const optDate = { timeZone: "America/New_York", year: "numeric", month: "numeric", day: "numeric" };
+      const dStr = d.toLocaleDateString("en-US", optDate);
+      const nowStr = now.toLocaleDateString("en-US", optDate);
+      if (dStr === nowStr) {
+        return d.toLocaleTimeString("en-US", {
+          timeZone: "America/New_York", hour: "numeric", minute: "2-digit", second: "2-digit",
+        }).toLowerCase();
+      }
+      const datePart = d.toLocaleDateString("en-US", { timeZone: "America/New_York", month: "short", day: "numeric" });
+      const timePart = d.toLocaleTimeString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" }).toLowerCase();
+      return `${datePart} ${timePart}`;
+    },
+    fullDateET(ts) {
+      if (!ts) return "";
+      return new Date(ts * 1000).toLocaleString("en-US", {
+        timeZone: "America/New_York",
+        weekday: "short",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit",
+      }) + ` ET (${U.ago(ts)})`;
     },
     ago(ts) {
       const s = Math.max(0, Date.now() / 1000 - ts);

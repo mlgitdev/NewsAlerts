@@ -148,8 +148,10 @@ Clicking a row selects it and loads news in the right pane (§7).
 - Engine keeps a rolling in-memory history per symbol: `(ts, price, volume, high)` for 30 min.
 - **Event** = a symbol matching ≥1 enabled strategy AND one of:
   - makes a **new high of day** (session-aware high) vs the previous poll, or
-  - triggers a squeeze condition (§8.2), with per-symbol/per-strategy cooldown (default 60 s).
-- Newest events on top; max 500 rows; ⏸ pause freezes scrolling and shows "New events ↑" button.
+  - triggers a squeeze condition (§8.2), with per-symbol/per-strategy cooldown (default 30 s).
+- **Persistent Storage & Off-Hours Review**: Tape alerts are automatically saved to `%APPDATA%\NewsAlerts\tape_history.json` and retained for at least 4 days (configurable). When the app restarts, reloads, or opens during off-hours / weekends, all historical alerts are immediately loaded into the tape for retrospective review.
+- **Timestamp Formatting**: Displays `H:MM:SS am/pm` for alerts triggered today, and `MMM DD H:MM am/pm` for older alerts, with full ET date/time and relative age tooltips.
+- Newest events on top; up to 3,000 scrollable rows; ⏸ pause freezes scrolling and shows "New events ↑"; 🗑️ clear button removes history.
 
 ### 8.2 Predefined strategies (toggle list like the Warrior screenshot)
 | Strategy | Rule (defaults, all editable in Settings) |

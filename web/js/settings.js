@@ -148,6 +148,7 @@
         ...Settings.field("Min session volume", Settings.num(t.universe, "vol_min", { big: 1 })),
         ...Settings.field("Max symbols", Settings.num(t.universe, "limit")),
         ...Settings.field("Cooldown per symbol/strategy (sec)", Settings.num(t, "cooldown_sec")),
+        ...Settings.field("History retention (days)", Settings.num(t, "retention_days"), "Keeps tape alerts saved on disk for off-hours and weekend review (default: 4 days)."),
         U.el("h3", {}, "Strategies"));
       const tbl = U.el("table", { class: "strat" });
       tbl.append(U.el("tr", {}, U.el("th", {}, "Name"), U.el("th", {}, "Trigger"), STRAT_COLS.map(([, h]) => U.el("th", {}, h))));

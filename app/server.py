@@ -184,6 +184,14 @@ def make_app(api, web_dir: Path) -> Bottle:
             log.exception("Error in /api/pop_tape: %s", e)
             return json_resp({"ok": False})
 
+    @app.route("/api/clear_tape", method=["POST"])
+    def clear_tape():
+        try:
+            return json_resp({"ok": api.clear_tape()})
+        except Exception as e:
+            log.exception("Error in /api/clear_tape: %s", e)
+            return json_resp({"ok": False})
+
     @app.route("/api/select_symbol", method=["POST"])
     def select_symbol():
         try:

@@ -69,7 +69,8 @@ DEFAULT_CONFIG = {
     "tape": {
         "universe": {"price_min": 1, "price_max": 50, "chg_min": 3, "vol_min": 20e3, "limit": 300},
         "cooldown_sec": 30,
-        "max_events": 1000,
+        "max_events": 5000,
+        "retention_days": 4,
         "enabled": [s["name"] for s in DEFAULT_STRATEGIES],
         "strategies": DEFAULT_STRATEGIES,
     },

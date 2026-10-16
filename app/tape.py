@@ -2,14 +2,16 @@
 from __future__ import annotations
 
 import collections
+import json
 import logging
 import threading
 import time
+from pathlib import Path
 from typing import Callable
 
 from . import sessions as S
 from .borrow import BorrowService
-from .config import Config
+from .config import APP_DIR, Config
 from .sounds import SoundPlayer
 from .tv_client import TVClient, TVError
 
@@ -63,11 +65,64 @@ class TapeWorker(threading.Thread):
         self.emit = emit
         self.borrow = borrow
         self.state: dict[str, _SymState] = {}
-        self.events: collections.deque = collections.deque(maxlen=2000)
+        self._history_file = APP_DIR / "tape_history.json"
+        self._save_lock = threading.RLock()
+        self.events: list[dict] = self._load_history()
         self._session = None
 
+    def _load_history(self) -> list[dict]:
+        try:
+            if not self._history_file.exists():
+                return []
+            with open(self._history_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if not isinstance(data, list):
+                return []
+            c = self.cfg.get()
+            retention_days = float(c.get("tape", {}).get("retention_days", 4))
+            retention_sec = max(retention_days, 4.0) * 86400  # at least 4 days
+            now = time.time()
+            cutoff = now - retention_sec
+            valid = [e for e in data if isinstance(e, dict) and float(e.get("ts", 0)) >= cutoff]
+            valid.sort(key=lambda e: float(e.get("ts", 0)), reverse=True)
+            log.info("Loaded %d historical tape alerts from %s (pruned %d older than %.1f days)",
+                     len(valid), self._history_file, len(data) - len(valid), retention_days)
+            return valid
+        except Exception as e:
+            log.warning("Failed to load tape history from %s: %s", self._history_file, e)
+            return []
+
+    def _save_history(self) -> None:
+        try:
+            with self._save_lock:
+                APP_DIR.mkdir(parents=True, exist_ok=True)
+                c = self.cfg.get()
+                retention_days = float(c.get("tape", {}).get("retention_days", 4))
+                retention_sec = max(retention_days, 4.0) * 86400
+                max_events = max(int(c.get("tape", {}).get("max_events", 5000)), 5000)
+                now = time.time()
+                cutoff = now - retention_sec
+
+                events_to_save = [e for e in self.events if float(e.get("ts", 0)) >= cutoff][:max_events]
+                tmp = self._history_file.with_suffix(".tmp")
+                with open(tmp, "w", encoding="utf-8") as f:
+                    json.dump(events_to_save, f, separators=(",", ":"))
+                tmp.replace(self._history_file)
+        except Exception as e:
+            log.warning("Failed to save tape history to %s: %s", self._history_file, e)
+
     def snapshot(self) -> list[dict]:
-        return list(self.events)
+        with self._save_lock:
+            return list(self.events)
+
+    def clear(self) -> None:
+        with self._save_lock:
+            self.events = []
+            try:
+                if self._history_file.exists():
+                    self._history_file.unlink()
+            except Exception:
+                pass
 
     def run(self) -> None:
         while True:
@@ -106,9 +161,16 @@ class TapeWorker(threading.Thread):
             ev = self._process(r, session, now, tc["strategies"], cooldown)
             new_events.extend(ev)
         if new_events:
-            self.events.extendleft(new_events)
-            while len(self.events) > int(tc["max_events"]):
-                self.events.pop()
+            with self._save_lock:
+                retention_days = float(tc.get("retention_days", 4))
+                retention_sec = max(retention_days, 4.0) * 86400
+                max_events = max(int(tc.get("max_events", 5000)), 5000)
+                cutoff = now - retention_sec
+
+                combined = new_events + self.events
+                self.events = [e for e in combined if float(e.get("ts", 0)) >= cutoff][:max_events]
+                self._save_history()
+
             self.emit("tape", new_events)
             if c["alerts"]["tape_sound_enabled"] and any(e["strategy"] in enabled for e in new_events):
                 self.sounds.play(c["alerts"]["sound_tape"])

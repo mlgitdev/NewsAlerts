@@ -1,7 +1,7 @@
 /* Running tape (Warrior-style momentum events). Used in main window and pop-out window. */
 (function () {
   const COLS = [
-    ["Time", "l", (e) => U.timeET(e.ts)],
+    ["Time", "l", (e) => U.timeTape(e.ts)],
     ["Symbol", "l", null],
     ["Price", "", (e) => U.price(e.price)],
     ["Volume", "", (e) => U.big(e.volume)],
@@ -14,7 +14,7 @@
     ["Range<br>Today", "", (e) => U.dec(e.range)],
     ["Strategy Name", "l", (e) => e.strategy],
   ];
-  const MAX_DOM = 600;
+  const MAX_DOM = 3000;
 
   const Tape = {
     events: [],
@@ -26,6 +26,12 @@
       Tape.opts = opts;
       const strBtn = U.el("button", { class: "btn sm", id: "tape-strategies-btn" });
       const pauseBtn = U.el("button", { class: "icon-btn", id: "tape-pause-btn", title: "Pause tape", html: U.icons.pause });
+      const clearBtn = U.el("button", {
+        class: "icon-btn",
+        id: "tape-clear-btn",
+        title: "Clear tape history from disk",
+        html: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:-2px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>'
+      });
       const popBtn = opts.popout ? null : U.el("button", { class: "icon-btn", id: "tape-popout-btn", title: "Pop out tape", html: U.icons.popout });
       const count = U.el("span", { class: "sub" });
       const newBtn = U.el("button", { class: "new-events", id: "tape-new-events" }, "New Events ↑");
@@ -36,13 +42,20 @@
       const pane = U.el("section", { class: "pane tape-pane", id: "tape-pane" },
         U.el("div", { class: "pane-head" },
           U.el("div", { class: "pane-title" }, "⚡ Small Cap — High of Day Momentum", count),
-          U.el("div", { class: "spacer" }), strBtn, pauseBtn, popBtn),
+          U.el("div", { class: "spacer" }), strBtn, pauseBtn, clearBtn, popBtn),
         newBtn, body);
       host.append(pane);
-      Object.assign(Tape, { root: pane, tbody, body, newBtn, pauseBtn, strBtn, count });
+      Object.assign(Tape, { root: pane, tbody, body, newBtn, pauseBtn, clearBtn, strBtn, count });
 
       strBtn.onclick = () => Tape.strategyMenu(strBtn);
       pauseBtn.onclick = () => Tape.setPaused(!Tape.paused);
+      clearBtn.onclick = async () => {
+        if (confirm("Clear all historical tape momentum alerts saved on disk?")) {
+          await App.api().clear_tape();
+          Tape.events = [];
+          Tape.renderAll();
+        }
+      };
       if (popBtn) popBtn.onclick = () => App.api().pop_tape();
       newBtn.onclick = () => { Tape.setPaused(false); body.scrollTop = 0; Tape.updateNewBtn(); };
       body.addEventListener("scroll", () => { if (body.scrollTop < 5 && !Tape.paused) Tape.updateNewBtn(); });
@@ -55,6 +68,7 @@
         if (tr && tr.dataset.t) App.api().open_chart(tr.dataset.t);
       });
       App.sub("tape", (evs) => Tape.add(evs));
+      App.sub("tape_cleared", () => { Tape.events = []; Tape.renderAll(); });
       App.sub("config", () => Tape.renderAll());
     },
 
@@ -66,7 +80,10 @@
       const tr = U.el("tr", { class: e.family + (animate ? " in" : ""), "data-t": e.ticker });
       COLS.forEach(([h, c, fn], i) => {
         const td = U.el("td", { class: c });
-        if (i === 1) {
+        if (i === 0) {
+          td.textContent = U.timeTape(e.ts);
+          td.title = U.fullDateET(e.ts);
+        } else if (i === 1) {
           const b = e.borrow || { status: "na", label: "N/A" };
           const bTag = U.el("span", {
             class: "tag-borrow " + b.status,
@@ -105,7 +122,7 @@
     },
 
     add(evs) {
-      Tape.events = evs.concat(Tape.events).slice(0, 2000);
+      Tape.events = evs.concat(Tape.events).slice(0, 5000);
       const en = Tape.enabled();
       const vis = evs.filter((e) => en.has(e.strategy));
       if (!vis.length) return;
@@ -141,7 +158,10 @@
       const show = n > 0 || Tape.scrolledNew;
       Tape.newBtn.classList.toggle("show", show);
       Tape.newBtn.textContent = n ? `New Events ↑ (${n})` : "New Events ↑";
-      Tape.count.textContent = Tape.paused ? "· paused" : "";
+      const en = Tape.enabled();
+      const vis = Tape.events.filter((e) => en.has(e.strategy)).length;
+      const days = App.config?.tape?.retention_days || 4;
+      Tape.count.textContent = Tape.paused ? "· paused" : (vis ? `· ${vis} alerts (${days}d history)` : "");
     },
 
     updateStrBtn() {
