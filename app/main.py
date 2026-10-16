@@ -27,7 +27,11 @@ class App:
         self.cfg = Config()
         c = self.cfg.get()
         self.bus = Bus()
-        self.client = TVClient(c["tv"]["sessionid"], c["tv"]["sessionid_sign"])
+        self.client = TVClient(
+            c["tv"]["sessionid"],
+            c["tv"]["sessionid_sign"],
+            on_auth_change=lambda info: self.bus.emit("tv_auth", info)
+        )
         bc = c.get("borrow", {})
         self.borrow = BorrowService(bc.get("alpaca_key_id", ""), bc.get("alpaca_secret_key", ""), bc.get("mode", "auto"))
         tv_news = TradingViewNews(self.client)

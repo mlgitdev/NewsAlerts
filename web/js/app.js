@@ -28,6 +28,13 @@
     }
     if (state.status) {
       updateStatus(state.status);
+      updateTvStatus(state.status);
+    } else if (state.tv_connected !== undefined) {
+      updateTvStatus(state);
+    }
+    const tvBadge = U.$("#tv-status-badge");
+    if (tvBadge) {
+      tvBadge.onclick = () => Settings.open("tv");
     }
     setTapePopped(state.tape_popped);
 
@@ -37,7 +44,18 @@
     U.$("#btn-settings").onclick = () => Settings.open();
 
     // Event subscriptions from Python
-    App.sub("status", updateStatus);
+    App.sub("status", (st) => {
+      updateStatus(st);
+      updateTvStatus(st);
+    });
+    App.sub("tv_auth", (auth) => {
+      updateTvStatus({
+        tv_connected: auth.connected,
+        tv_username: auth.username,
+        tv_pro_plan: auth.pro_plan,
+        tv_error: auth.error,
+      });
+    });
     App.sub("new_symbols", onNewSymbols);
     App.sub("tape_popped", setTapePopped);
     App.sub("config", onConfig);
@@ -63,6 +81,24 @@
         await new Promise((r) => setTimeout(r, 1000));
       }
       await new Promise((r) => setTimeout(r, 350));
+    }
+  }
+
+  function updateTvStatus(st) {
+    const badge = U.$("#tv-status-badge");
+    const txt = U.$("#tv-status-text");
+    if (!badge || !txt) return;
+    const connected = !!st.tv_connected;
+    badge.className = "pill tv-status-pill " + (connected ? "connected" : "disconnected");
+    if (connected) {
+      txt.textContent = "TradingView — Connected";
+      const u = st.tv_username ? ` as ${st.tv_username}` : "";
+      const p = st.tv_pro_plan ? ` (${st.tv_pro_plan})` : "";
+      badge.title = `TradingView: Connected${u}${p} · Real-time streaming active (click for settings)`;
+    } else {
+      txt.textContent = "TradingView — Disconnected";
+      const err = st.tv_error ? `: ${st.tv_error}` : " (cookies invalid or expired)";
+      badge.title = `TradingView: Disconnected${err} · Click to update session cookies in Settings`;
     }
   }
 

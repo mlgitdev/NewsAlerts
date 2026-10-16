@@ -56,6 +56,7 @@ class Api:
     def get_state(self):
         a = self._app
         kid = a.borrow.key_id
+        tv_auth = a.client.get_auth_status() if hasattr(a.client, "get_auth_status") else {}
         return {
             "config": a.cfg.get(),
             "sounds": list_sounds(),
@@ -66,6 +67,10 @@ class Api:
             "last_event_id": a.bus.latest_id(),
             "alpaca_active": bool(kid and a.borrow.secret_key),
             "alpaca_key_masked": (kid[:6] + "..." + kid[-4:]) if kid else "",
+            "tv_connected": tv_auth.get("connected", False),
+            "tv_username": tv_auth.get("username", ""),
+            "tv_pro_plan": tv_auth.get("pro_plan", ""),
+            "tv_error": tv_auth.get("error", ""),
         }
 
     def poll_events(self, after_id: int = 0):

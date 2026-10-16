@@ -30,6 +30,9 @@ Run: `run.bat` → creates venv on first run → `python -m app.main`.
   Excludes ADRs, foreign shares, OTC, and funds.
 - Auth: user pastes `sessionid` (+ optional `sessionid_sign`) cookie from tradingview.com in
   Settings → real-time data for subscribers. Without it data is 15-min delayed.
+- **TradingView Connection Status Badge**: Positioned in the main window top-right corner directly to the left of the session & market status pill:
+  - `[▲ TradingView — Connected]` (🟢 **Green**): Session cookies are active and verified against TradingView; displays verified username and subscription tier on hover.
+  - `[▲ TradingView — Disconnected]` (🔴 **Red**): Session cookies are missing, invalid, or expired. Clicking opens Settings directly to the TradingView credentials tab.
 - The app reads the `update_mode` field and shows a **REALTIME / DELAYED** badge in the status bar.
 - Default poll interval: **3 s** (configurable 1–30 s). Backoff on HTTP 429/5xx.
 

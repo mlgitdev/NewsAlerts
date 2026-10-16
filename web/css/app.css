@@ -91,6 +91,56 @@ button, input, select { font: inherit; color: inherit; }
   display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px;
   border: 1px solid var(--border-2); background: var(--bg-2); font-size: 12px; color: var(--text-2);
 }
+.tv-status-pill {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.3px;
+  border-radius: 6px;
+  padding: 3px 9px;
+  outline: none;
+}
+.tv-status-pill .tri {
+  font-size: 8px;
+  line-height: 1;
+  display: inline-block;
+  margin-right: 2px;
+}
+.tv-status-pill.connected {
+  background: rgba(34, 201, 147, 0.16);
+  color: #38efb0;
+  border: 1px solid rgba(34, 201, 147, 0.45);
+  box-shadow: 0 0 10px rgba(34, 201, 147, 0.25);
+}
+.tv-status-pill.connected:hover {
+  background: rgba(34, 201, 147, 0.24);
+  border-color: rgba(34, 201, 147, 0.65);
+  box-shadow: 0 0 14px rgba(34, 201, 147, 0.35);
+}
+.tv-status-pill.connected .tri {
+  color: #38efb0;
+  filter: drop-shadow(0 0 4px #38efb0);
+}
+.tv-status-pill.disconnected {
+  background: rgba(246, 70, 93, 0.18);
+  color: #ff6b7e;
+  border: 1px solid rgba(246, 70, 93, 0.5);
+  box-shadow: 0 0 10px rgba(246, 70, 93, 0.25);
+  animation: tvPulse 2.5s infinite;
+}
+.tv-status-pill.disconnected:hover {
+  background: rgba(246, 70, 93, 0.26);
+  border-color: rgba(246, 70, 93, 0.7);
+}
+.tv-status-pill.disconnected .tri {
+  color: #ff6b7e;
+  filter: drop-shadow(0 0 4px #ff6b7e);
+}
+@keyframes tvPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
 .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
 .dot.ok { background: var(--up); box-shadow: 0 0 8px var(--up); animation: pulse 2s infinite; }
 .dot.warn { background: var(--amber); box-shadow: 0 0 8px var(--amber); }

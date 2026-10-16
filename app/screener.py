@@ -129,8 +129,17 @@ class ScreenerWorker(threading.Thread):
             self._wake.clear()
 
     def status_payload(self) -> dict:
-        return {**self.status, "market": S.market_state(), "auto_session": S.current_session(),
-                "et": S.now_et().strftime("%H:%M:%S")}
+        auth = self.client.get_auth_status() if hasattr(self.client, "get_auth_status") else {}
+        return {
+            **self.status,
+            "market": S.market_state(),
+            "auto_session": S.current_session(),
+            "et": S.now_et().strftime("%H:%M:%S"),
+            "tv_connected": auth.get("connected", False),
+            "tv_username": auth.get("username", ""),
+            "tv_pro_plan": auth.get("pro_plan", ""),
+            "tv_error": auth.get("error", ""),
+        }
 
     def tick(self) -> None:
         c = self.cfg.get()

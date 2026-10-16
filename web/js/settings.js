@@ -4,7 +4,7 @@
     ["price_min", "Price ≥"], ["price_max", "Price <"], ["hi52_ratio_min", "52wH/Px ≥"], ["up_pct", "Up %"], ["window_min", "In min"]];
 
   const Settings = {
-    open() {
+    open(initialTab = "general") {
       const c = JSON.parse(JSON.stringify(App.config));
       Settings.c = c;
       App.api().get_state().then((st) => {
@@ -21,7 +21,7 @@
         body.replaceChildren(Settings["tab_" + name](c));
       };
       tabs.forEach((b) => (b.onclick = () => show(b.dataset.tab)));
-      show("general");
+      show(initialTab || "general");
       bg.classList.add("show");
       U.$("#settings-save").onclick = () => {
         App.config = c; App.saveConfig(true); Settings.applyUi(); bg.classList.remove("show");
