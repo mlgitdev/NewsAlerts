@@ -47,7 +47,7 @@ Displays a color-coded status badge directly next to each symbol in both the Scr
 - **Hard to Borrow (HTB)**: 🟡 **Yellow** (`hard yellow`) — Limited supply / locate fee required
 - **No Borrow Available**: 🟢 **Green** (`no borrow is green`) — No shares available to short / highest squeeze potential
 - **N/A / Unknown**: 🟠 **Orange** (`na data orange`) — Data unavailable or symbol unlisted for locate
-- **Data Source**: Integrated with Alpaca Broker API (free paper account keys in Settings) for real-time broker locates, with an automatic float-based heuristic fallback (float < 15M = No Borrow, 15M–50M = HTB, > 50M = ETB).
+- **Data Source**: Integrated with Alpaca Broker API (free paper account keys in Settings / secrets) for real-time broker locates (`borrow_status: hard_to_borrow` -> HTB Yellow, `easy_to_borrow` -> ETB Red), with an intelligent float-based heuristic fallback (float < 500K = No Borrow, 500K–50M = HTB, > 50M = ETB).
 
 ## 4. Market sessions
 Session selector: **Auto | Pre-market | Regular | Post-market** (Auto uses ET clock:

@@ -88,6 +88,40 @@ class BorrowService:
             if self.key_id and self.secret_key and self.mode in ("auto", "alpaca"):
                 threading.Thread(target=self._sync_bulk_assets, daemon=True, name="alpaca-bulk-assets").start()
 
+    def _classify_alpaca_asset(self, a: dict) -> tuple[str, dict]:
+        sym = str(a.get("symbol", "")).upper()
+        borrow_status = str(a.get("borrow_status") or "").lower().strip()
+        etb = bool(a.get("easy_to_borrow", False))
+        shortable = bool(a.get("shortable", False))
+        tradable = bool(a.get("tradable", True))
+        status = str(a.get("status") or "").lower().strip()
+
+        # Broker borrow classification:
+        # 1. Easy to borrow (ETB) -> Red
+        if borrow_status == "easy_to_borrow" or etb:
+            st = STATUS_EASY
+        # 2. Hard to borrow (HTB) -> Yellow (requires broker locate fee, e.g. TCRT, XLAB, NCPL)
+        elif borrow_status == "hard_to_borrow" or shortable:
+            st = STATUS_HARD
+        # 3. Explicitly unborrowable / inactive / non-tradable -> Green (NO BORROW)
+        elif borrow_status in ("not_borrowable", "no_borrow") or not tradable or status != "active":
+            st = STATUS_NONE
+        else:
+            # Active US equity default when not ETB is Hard to borrow
+            st = STATUS_HARD
+
+        details = {
+            "exchange": a.get("exchange", ""),
+            "marginable": a.get("marginable", False),
+            "fractionable": a.get("fractionable", False),
+            "tradable": tradable,
+            "status": status,
+            "borrow_status": borrow_status,
+            "etb": etb,
+            "shortable": shortable,
+        }
+        return st, details
+
     def _sync_bulk_assets(self) -> None:
         """Fetch all active US equity assets from Alpaca to pre-populate locate data in memory."""
         try:
@@ -102,22 +136,9 @@ class BorrowService:
                 with self._lock:
                     for a in assets:
                         sym = str(a.get("symbol", "")).upper()
-                        etb = bool(a.get("easy_to_borrow", False))
-                        shortable = bool(a.get("shortable", False))
-                        if etb:
-                            st = STATUS_EASY
-                        elif shortable:
-                            st = STATUS_HARD
-                        else:
-                            st = STATUS_NONE
+                        st, details = self._classify_alpaca_asset(a)
                         self._cache[sym] = {"status": st, "label": LABEL_MAP[st], "source": "alpaca"}
-                        self._details[sym] = {
-                            "exchange": a.get("exchange", ""),
-                            "marginable": a.get("marginable", False),
-                            "fractionable": a.get("fractionable", False),
-                            "etb": etb,
-                            "shortable": shortable,
-                        }
+                        self._details[sym] = details
                 log.info("Synced %d active US equities from Alpaca for instant locate resolution", len(assets))
         except Exception as e:
             log.warning("Bulk asset sync from Alpaca failed: %s", e)
@@ -188,14 +209,13 @@ class BorrowService:
     def _estimate(self, sym: str, float_shares: float | None) -> dict:
         if float_shares is None or float_shares <= 0:
             return {"status": STATUS_NA, "label": LABEL_MAP[STATUS_NA], "source": "na"}
-        # Typical broker short locate boundaries for US momentum stocks:
-        if float_shares < 15_000_000:
-            # Low float: shares are heavily constrained / threshold security
+        # Extremely low nano-float (< 500k): institutional borrow inventory typically exhausted / threshold list
+        if float_shares < 500_000:
             return {"status": STATUS_NONE, "label": LABEL_MAP[STATUS_NONE], "source": "heuristic"}
+        # Small to mid-cap floats (500k to 50M): prime locate territory, Hard to Borrow (HTB)
         if float_shares <= 50_000_000:
-            # Mid float: locate required / Hard to borrow
             return {"status": STATUS_HARD, "label": LABEL_MAP[STATUS_HARD], "source": "heuristic"}
-        # High float (>50M): ample institutional inventory
+        # High float (>50M): ample institutional inventory, Easy to Borrow (ETB)
         return {"status": STATUS_EASY, "label": LABEL_MAP[STATUS_EASY], "source": "heuristic"}
 
     def _query_alpaca(self, sym: str) -> dict | None:
@@ -210,26 +230,13 @@ class BorrowService:
             r = requests.get(url, headers=headers, timeout=5)
             if r.status_code == 200:
                 d = r.json()
-                shortable = d.get("shortable", False)
-                etb = d.get("easy_to_borrow", False)
-                if etb:
-                    st = STATUS_EASY
-                elif shortable:
-                    st = STATUS_HARD
-                else:
-                    st = STATUS_NONE
+                st, details = self._classify_alpaca_asset(d)
                 res = {"status": st, "label": LABEL_MAP[st], "source": "alpaca"}
                 with self._lock:
-                    self._details[sym] = {
-                        "exchange": d.get("exchange", ""),
-                        "marginable": d.get("marginable", False),
-                        "fractionable": d.get("fractionable", False),
-                        "etb": etb,
-                        "shortable": shortable,
-                    }
+                    self._details[sym] = details
                 return res
             elif r.status_code == 404:
-                return {"status": STATUS_NONE, "label": LABEL_MAP[STATUS_NONE], "source": "alpaca"}
+                return None
         except Exception as e:
             log.warning("alpaca borrow query for %s failed: %s", sym, e)
         return None
