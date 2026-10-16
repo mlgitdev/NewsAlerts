@@ -10,6 +10,7 @@
       body: JSON.stringify(cfg),
     }).then((r) => r.json()),
     send_telegram_test: () => fetch("/api/test_telegram", { method: "POST" }).then((r) => r.json()),
+    test_alpaca: () => fetch("/api/test_alpaca", { method: "POST" }).then((r) => r.json()),
     set_focused: (focused) => fetch("/api/set_focused", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

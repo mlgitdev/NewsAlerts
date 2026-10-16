@@ -90,6 +90,29 @@ class Api:
         ok, msg = self._app.telegram.send_test_message()
         return {"ok": ok, "message": msg}
 
+    def test_alpaca(self):
+        a = self._app
+        kid = a.borrow.key_id
+        sec = a.borrow.secret_key
+        if not (kid and sec):
+            return {"ok": False, "message": "No Alpaca keys found in secrets/keys.toml or settings."}
+        try:
+            import requests
+            headers = {"APCA-API-KEY-ID": kid, "APCA-API-SECRET-KEY": sec}
+            r = requests.get("https://paper-api.alpaca.markets/v2/account", headers=headers, timeout=6)
+            if r.status_code == 200:
+                acc = r.json()
+                bp = acc.get("buying_power", "0")
+                status = acc.get("status", "ACTIVE")
+                return {
+                    "ok": True,
+                    "message": f"Connected! Account {status} · Buying Power: ${float(bp):,.2f}",
+                    "account_id": acc.get("id"),
+                }
+            return {"ok": False, "message": f"Alpaca error {r.status_code}: {r.text}"}
+        except Exception as e:
+            return {"ok": False, "message": str(e)}
+
     def set_focused(self, focused: bool):
         a = self._app
         a.sounds.suppressed = bool(focused) and bool(a.cfg["alerts"]["quiet_when_focused"])

@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 
 class ThreadingWSGIServer(ThreadingMixIn, WSGIServer):
     daemon_threads = True
-    allow_reuse_address = True
+    allow_reuse_address = False
 
 
 def make_app(api, web_dir: Path) -> Bottle:
@@ -24,6 +24,12 @@ def make_app(api, web_dir: Path) -> Bottle:
     def json_resp(data):
         response.content_type = "application/json; charset=utf-8"
         return json.dumps(data)
+
+    @app.hook("after_request")
+    def no_cache():
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
 
     # ------------------------------------------------------------- Static Files
     @app.route("/")
@@ -81,6 +87,14 @@ def make_app(api, web_dir: Path) -> Bottle:
             return json_resp(api.send_telegram_test())
         except Exception as e:
             log.exception("Error in /api/test_telegram: %s", e)
+            return json_resp({"ok": False, "message": str(e)})
+
+    @app.route("/api/test_alpaca", method=["POST"])
+    def test_alpaca():
+        try:
+            return json_resp(api.test_alpaca())
+        except Exception as e:
+            log.exception("Error in /api/test_alpaca: %s", e)
             return json_resp({"ok": False, "message": str(e)})
 
     @app.route("/api/set_focused", method=["POST"])

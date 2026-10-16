@@ -7,6 +7,12 @@
     open() {
       const c = JSON.parse(JSON.stringify(App.config));
       Settings.c = c;
+      App.api().get_state().then((st) => {
+        if (st) {
+          App.alpaca_active = st.alpaca_active;
+          App.alpaca_key_masked = st.alpaca_key_masked;
+        }
+      });
       const bg = U.$("#settings");
       const body = U.$("#settings-body");
       const tabs = U.$$("#settings-tabs button");
@@ -194,7 +200,30 @@
         ...Settings.field("Borrow source", modeSel, "How shortability is determined for each ticker"),
         U.el("h3", {}, "Alpaca API Keys (Optional Override)"),
         ...Settings.field("Alpaca Key ID", Settings.text(b, "alpaca_key_id", "text", App.alpaca_key_masked || "PK..."), keyHelp),
-        ...Settings.field("Alpaca Secret Key", Settings.text(b, "alpaca_secret_key", "password", App.alpaca_active ? "••••••••••••" : "Secret..."), keyHelp)
+        ...Settings.field("Alpaca Secret Key", Settings.text(b, "alpaca_secret_key", "password", App.alpaca_active ? "••••••••••••" : "Secret..."), keyHelp),
+        ...Settings.field("Test Alpaca Connection", U.el("button", {
+          class: "btn sm primary",
+          style: "width:210px",
+          onclick: async (e) => {
+            const btn = e.target;
+            btn.disabled = true;
+            btn.textContent = "Testing…";
+            try {
+              const res = await App.api().test_alpaca();
+              if (res.ok) {
+                U.toast("alert", "🦙 Alpaca Connected", res.message);
+                btn.textContent = "✓ Connected!";
+              } else {
+                U.toast("alert", "⚠️ Alpaca Failed", res.message);
+                btn.textContent = "Failed";
+              }
+            } catch (err) {
+              U.toast("alert", "⚠️ Error", String(err));
+              btn.textContent = "Error";
+            }
+            setTimeout(() => { btn.disabled = false; btn.textContent = "▶ Test Alpaca Connection"; }, 2500);
+          }
+        }, "▶ Test Alpaca Connection"), "Verifies account status and buying power with Alpaca API")
       );
       return g;
     },
