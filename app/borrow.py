@@ -27,8 +27,9 @@ except ImportError:  # pragma: no cover
 
 log = logging.getLogger(__name__)
 
+from .config import find_secrets_file
+
 ROOT_DIR = Path(__file__).resolve().parent.parent
-SECRETS_PATH = ROOT_DIR / "secrets" / "keys.toml"
 
 STATUS_EASY = "easy"       # Easy to borrow -> Red
 STATUS_HARD = "hard"       # Hard to borrow -> Yellow
@@ -44,9 +45,10 @@ LABEL_MAP = {
 
 
 def load_alpaca_secrets() -> tuple[str, str]:
-    if SECRETS_PATH.exists():
+    p = find_secrets_file()
+    if p and p.exists():
         try:
-            with open(SECRETS_PATH, "rb") as f:
+            with open(p, "rb") as f:
                 data = tomllib.load(f)
                 alp = data.get("alpaca", {})
                 k = alp.get("tradingApi_key") or alp.get("brockerApi_sandbox1_api_key") or ""

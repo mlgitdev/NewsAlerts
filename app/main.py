@@ -7,19 +7,38 @@ from pathlib import Path
 
 import webview
 
-from .api import Api, Bus
-from .borrow import BorrowService
-from .config import APP_DIR, Config
-from .news import AlpacaNews, CombinedNews, NewsService, TradingViewNews
-from .screener import ScreenerWorker
-from .server import start_server
-from .sounds import SoundPlayer
-from .tape import TapeWorker
-from .telegram import TelegramService
-from .tv_client import TVClient
+try:
+    from .api import Api, Bus
+    from .borrow import BorrowService
+    from .config import APP_DIR, Config
+    from .news import AlpacaNews, CombinedNews, NewsService, TradingViewNews
+    from .screener import ScreenerWorker
+    from .server import start_server
+    from .sounds import SoundPlayer
+    from .tape import TapeWorker
+    from .telegram import TelegramService
+    from .tv_client import TVClient
+except ImportError:
+    from app.api import Api, Bus
+    from app.borrow import BorrowService
+    from app.config import APP_DIR, Config
+    from app.news import AlpacaNews, CombinedNews, NewsService, TradingViewNews
+    from app.screener import ScreenerWorker
+    from app.server import start_server
+    from app.sounds import SoundPlayer
+    from app.tape import TapeWorker
+    from app.telegram import TelegramService
+    from app.tv_client import TVClient
 
-ROOT = Path(__file__).resolve().parent.parent
-WEB = ROOT / "web"
+if getattr(sys, "frozen", False):
+    BASE_DIR = Path(getattr(sys, "_MEIPASS", Path(sys.executable).resolve().parent))
+    if (BASE_DIR / "web").exists():
+        WEB = BASE_DIR / "web"
+    else:
+        WEB = Path(sys.executable).resolve().parent / "web"
+else:
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    WEB = BASE_DIR / "web"
 
 
 class App:
@@ -37,7 +56,12 @@ class App:
         tv_news = TradingViewNews(self.client)
         self.alp_news = AlpacaNews(self.borrow.key_id, self.borrow.secret_key)
         self.news = NewsService(CombinedNews([self.alp_news, tv_news]))
-        self.telegram = TelegramService(enabled=bool(c["alerts"].get("telegram_enabled", True)))
+        ac = c.get("alerts", {})
+        self.telegram = TelegramService(
+            bot_token=ac.get("telegram_bot_token", ""),
+            chat_id=ac.get("telegram_chat_id", ""),
+            enabled=bool(ac.get("telegram_enabled", True))
+        )
         self.sounds = SoundPlayer()
         self.sounds.muted = bool(c["alerts"]["mute"])
         self.screener = ScreenerWorker(self.cfg, self.client, self.news, self.sounds, self.bus.emit, self.borrow, self.telegram)

@@ -104,6 +104,8 @@
         ...Settings.field("Enable Telegram Alerts", Settings.check(a, "telegram_enabled", "Master toggle for Telegram notifications")),
         ...Settings.field("Tape Momentum Alerts", Settings.check(a, "telegram_tape_enabled", "Send push alert when a momentum symbol pops up on the tape (e.g. HOD / Squeeze breakout)")),
         ...Settings.field("Tape Alert Cooldown (sec)", Settings.num(a, "telegram_tape_cooldown_sec"), "Minimum seconds between alerts for the same symbol to prevent spam (default: 60s)"),
+        ...Settings.field("Bot Token", Settings.text(a, "telegram_bot_token", "password", "Optional (from @BotFather)"), "Leave blank to read from AppData\\NewsAlerts\\keys.toml or local keys.toml"),
+        ...Settings.field("Chat ID", Settings.text(a, "telegram_chat_id", "text", "Optional chat ID (e.g. 526065926)"), "Leave blank to read from keys.toml"),
         ...Settings.field("Test Bot Connection", U.el("button", {
           class: "btn sm primary",
           style: "width:180px",
@@ -126,7 +128,7 @@
             }
             setTimeout(() => { btn.disabled = false; btn.textContent = "✈️ Send Test Message"; }, 2500);
           }
-        }, "✈️ Send Test Message"), "Credentials loaded from secrets/keys.toml"));
+        }, "✈️ Send Test Message"), "Sends a test message using configured credentials or keys.toml"));
       return g;
     },
 

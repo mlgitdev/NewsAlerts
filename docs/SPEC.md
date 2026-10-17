@@ -215,9 +215,31 @@ web/
   `window.evaluate_js("App.onScreener(<json>)")` etc.
 - UI calls Python through `window.pywebview.api.*` (get/save config, select symbol, test sound…).
 
-## 12. Non-goals (v1)
+## 12. Portable Executable & Build Automation
+### 12.1 Standalone Portable Executable (`dist\NewsAlerts.exe`)
+- **Self-Contained**: Single `.exe` (~13 MB) bundling Python 3.11, pywebview (WebView2 Edge Chromium), bottle, requests, zoneinfo/tzdata, and frontend HTML/CSS/JS assets (`web/`).
+- **Zero Installation Required**: Runs on any 64-bit Windows machine without requiring Python, Git, or Node.js.
+- **AppData Persistence**: All user state and collected data are stored in `%APPDATA%\NewsAlerts\`:
+  - `config.json` — User screen filters, column order, session cookies, Alpaca keys, Telegram settings.
+  - `tape_history.json` — 4-day rolling tape alerts log for off-hours and weekend review.
+  - `app.log` — Application logs and diagnostic traces.
+  - `webview/` — Edge WebView2 profile, local storage, and cookies.
+- **Strict Secrets Isolation**: Zero development keys or credentials are baked into the executable. `secrets/` is explicitly excluded during packaging. Users configure credentials via:
+  - The in-app **Settings modal** (saved securely to `%APPDATA%\NewsAlerts\config.json`).
+  - Or by placing an optional `keys.toml` in `%APPDATA%\NewsAlerts\` or alongside `NewsAlerts.exe`.
+
+### 12.2 Build Automation (`build.ps1`, `Makefile`, `build.bat`)
+- **PowerShell Script (`build.ps1`)**:
+  - `.\build.ps1 -Task build` — Builds `dist\NewsAlerts.exe` via PyInstaller using `NewsAlerts.spec`.
+  - `.\build.ps1 -Task clean` — Purges `build/`, `dist/`, and Python cache artifacts.
+  - `.\build.ps1 -Task run` — Launches the compiled `dist\NewsAlerts.exe`.
+  - `.\build.ps1 -Task check` — Audits the build archive to guarantee no secrets were bundled.
+- **Makefile**: Provides standard `make build`, `make clean`, `make run`, and `make check` commands.
+- **Batch Script (`build.bat`)**: Double-clickable command wrapper for native Windows cmd.
+
+## 13. Non-goals (v1)
 Order entry, charts, historical backtests, non-US markets, Docker packaging.
 
-## 13. Future
-Official Benzinga API provider · Windows toast notifications · PyInstaller single exe ·
-mini chart on symbol click · per-symbol notes / watchlist.
+## 14. Future
+Official Benzinga API provider · Windows toast notifications · mini chart on symbol click · per-symbol notes / watchlist.
+

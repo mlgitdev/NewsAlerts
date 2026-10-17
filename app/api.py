@@ -85,8 +85,13 @@ class Api:
         a.borrow.update_credentials(bc.get("alpaca_key_id", ""), bc.get("alpaca_secret_key", ""), bc.get("mode", "auto"))
         if hasattr(a, "alp_news"):
             a.alp_news.update_credentials(a.borrow.key_id, a.borrow.secret_key)
-        a.telegram.update(enabled=bool(c["alerts"].get("telegram_enabled", True)))
-        a.sounds.muted = bool(c["alerts"]["mute"])
+        ac = c.get("alerts", {})
+        a.telegram.update(
+            bot_token=ac.get("telegram_bot_token", ""),
+            chat_id=ac.get("telegram_chat_id", ""),
+            enabled=bool(ac.get("telegram_enabled", True))
+        )
+        a.sounds.muted = bool(ac.get("mute", False))
         a.screener.poke()
         a.bus.emit("config", c)
         return True

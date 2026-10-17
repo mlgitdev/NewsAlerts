@@ -22,8 +22,9 @@ except ImportError:  # pragma: no cover
 
 log = logging.getLogger(__name__)
 
+from .config import find_secrets_file
+
 ROOT_DIR = Path(__file__).resolve().parent.parent
-SECRETS_PATH = ROOT_DIR / "secrets" / "keys.toml"
 
 BORROW_EMOJI = {
     "easy": "🔴 ETB (Easy to borrow)",
@@ -34,16 +35,17 @@ BORROW_EMOJI = {
 
 
 def load_secrets() -> dict:
-    if SECRETS_PATH.exists():
+    p = find_secrets_file()
+    if p and p.exists():
         try:
-            with open(SECRETS_PATH, "rb") as f:
+            with open(p, "rb") as f:
                 data = tomllib.load(f)
                 return data.get("telegram", {})
         except Exception:
             try:
                 res = {}
                 in_tg = False
-                for line in SECRETS_PATH.read_text(encoding="utf-8").splitlines():
+                for line in p.read_text(encoding="utf-8").splitlines():
                     line = line.strip()
                     if line.startswith("["):
                         in_tg = line.lower() == "[telegram]"
@@ -53,7 +55,7 @@ def load_secrets() -> dict:
                         res[k.strip()] = v.strip().strip('"\'')
                 return res
             except Exception as e:
-                log.warning("Failed to parse %s: %s", SECRETS_PATH, e)
+                log.warning("Failed to parse %s: %s", p, e)
     return {}
 
 
@@ -89,7 +91,7 @@ class TelegramService:
             token = self.bot_token
             cid = self.chat_id
         if not (token and cid):
-            return False, "Telegram bot_token or admin_chat_id not found in secrets/keys.toml"
+            return False, "Telegram bot_token or admin_chat_id not configured. Enter them in Settings -> Alerts or put a keys.toml file in %APPDATA%\\NewsAlerts\\keys.toml"
         msg = (
             "🔔 <b>NewsAlerts Test Notification</b>\n\n"
             "Your Telegram alert bot is configured and connected successfully!\n"

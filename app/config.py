@@ -4,12 +4,39 @@ from __future__ import annotations
 import copy
 import json
 import os
+import sys
 import threading
 from pathlib import Path
 
 APP_DIR = Path(os.environ.get("APPDATA", Path.home())) / "NewsAlerts"
 CONFIG_PATH = APP_DIR / "config.json"
 MEDIA = r"C:\Windows\Media"
+
+
+def find_secrets_file() -> Path | None:
+    """Find keys.toml / secrets.toml in standard locations:
+    1. %APPDATA%\\NewsAlerts\\keys.toml or secrets.toml
+    2. Next to the running executable (if frozen)
+    3. Project root secrets/keys.toml or secrets/secrets.toml (for dev)
+    """
+    candidates = [
+        APP_DIR / "keys.toml",
+        APP_DIR / "secrets.toml",
+    ]
+    if getattr(sys, "frozen", False):
+        exe_dir = Path(sys.executable).resolve().parent
+        candidates.extend([exe_dir / "keys.toml", exe_dir / "secrets.toml"])
+    else:
+        root = Path(__file__).resolve().parent.parent
+        candidates.extend([
+            root / "secrets" / "keys.toml",
+            root / "secrets" / "secrets.toml",
+            root / "keys.toml",
+        ])
+    for p in candidates:
+        if p.is_file():
+            return p
+    return None
 
 DEFAULT_STRATEGIES = [
     {"name": "Low Float - Former Momo Stock", "family": "low", "trigger": "hod",
@@ -49,6 +76,8 @@ DEFAULT_CONFIG = {
         "telegram_enabled": True,
         "telegram_tape_enabled": True,
         "telegram_tape_cooldown_sec": 60,
+        "telegram_bot_token": "",
+        "telegram_chat_id": "",
     },
     "news": {"recency_hours": 12, "benzinga_only": False},
     "screens": [
