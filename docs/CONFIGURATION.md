@@ -1,6 +1,6 @@
 # Configuration Guide
 
-NewsAlerts provides extensive customization options via the **In-App Settings Modal** or via `%APPDATA%\NewsAlerts\keys.toml`.
+NewsAlerts provides extensive customization options via the **In-App Settings Modal** or via `<APP_DIR>/keys.toml` (Windows `%APPDATA%\NewsAlerts\`, macOS `~/Library/Application Support/NewsAlerts/`, Linux `~/.config/NewsAlerts/` or `$HOME/.newsalerts`). Custom data directories can also be set via the `NEWSALERTS_DIR` or `NEWSALERTS_HOME` environment variables.
 
 ---
 

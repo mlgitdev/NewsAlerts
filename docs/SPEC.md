@@ -22,7 +22,7 @@ A lightweight Windows desktop app that replicates the TradingView stock screener
 | HTTP | `requests` | Scanner + news calls |
 | Sounds | `winsound` + `C:\Windows\Media\*.wav` | Native Windows sounds, zero deps |
 | Time | `zoneinfo` + `tzdata` | Session detection in America/New_York |
-| Config | JSON in `%APPDATA%\NewsAlerts\config.json` | Persist screens, filters, sounds, cookie |
+| Config | JSON in `<APP_DIR>/config.json` | Cross-platform persistence (Windows `%APPDATA%`, macOS `Application Support`, Linux `$XDG_CONFIG_HOME` or `$HOME/.newsalerts`) |
 
 Run: `run.bat` → creates venv on first run → `python -m app.main`.
 
@@ -232,14 +232,19 @@ web/
 ### 12.1 Standalone Portable Executable (`dist\NewsAlerts.exe`)
 - **Self-Contained**: Single `.exe` (~13 MB) bundling Python 3.11, pywebview (WebView2 Edge Chromium), bottle, requests, zoneinfo/tzdata, and frontend HTML/CSS/JS assets (`web/`).
 - **Zero Installation Required**: Runs on any 64-bit Windows machine without requiring Python, Git, or Node.js.
-- **AppData Persistence**: All user state and collected data are stored in `%APPDATA%\NewsAlerts\`:
-  - `config.json` — User screen filters, column order, session cookies, Alpaca keys, Telegram settings.
-  - `tape_history.json` — 4-day rolling tape alerts log for off-hours and weekend review.
-  - `app.log` — Application logs and diagnostic traces.
-  - `webview/` — Edge WebView2 profile, local storage, and cookies.
+- **Cross-Platform Application Data Root (`APP_DIR`) Persistence**: All user state and collected data are stored in a centralized, cross-platform application directory:
+  - **Windows**: `%APPDATA%\NewsAlerts\` (e.g. `C:\Users\<user>\AppData\Roaming\NewsAlerts\`, with fallback to `~/.newsalerts`).
+  - **macOS**: `~/Library/Application Support/NewsAlerts/` (with fallback to `~/.newsalerts`).
+  - **Linux / Unix**: `$XDG_CONFIG_HOME/NewsAlerts/` or `~/.config/NewsAlerts/` (with fallback to `~/.newsalerts`).
+  - **Custom Override**: Setting `NEWSALERTS_DIR` or `NEWSALERTS_HOME` (e.g. `export NEWSALERTS_DIR=$HOME/.newsalerts`) explicitly overrides the data directory across all platforms.
+  - **Automated Directory & File Provisioning**: On first launch, the application automatically provisions the directory and generates default files:
+    - `config.json` — User screen filters, column order, session cookies, Alpaca keys, Telegram settings (auto-created with defaults if absent).
+    - `tape_history.json` — 4-day rolling tape alerts log for off-hours and weekend review.
+    - `app.log` — Application logs and diagnostic traces.
+    - `webview/` — Edge WebView2 / WebKit browser engine cache, cookies, and local profile storage.
 - **Strict Secrets Isolation**: Zero development keys or credentials are baked into the executable. `secrets/` is explicitly excluded during packaging. Users configure credentials via:
-  - The in-app **Settings modal** (saved securely to `%APPDATA%\NewsAlerts\config.json`).
-  - Or by placing an optional `keys.toml` in `%APPDATA%\NewsAlerts\` or alongside `NewsAlerts.exe`.
+  - The in-app **Settings modal** (saved securely to `<APP_DIR>/config.json`).
+  - Or by placing an optional `keys.toml` in `<APP_DIR>/` or alongside `NewsAlerts.exe`.
 
 ### 12.2 Build Automation (`build.ps1`, `Makefile`, `build.bat`)
 - **PowerShell Script (`build.ps1`)**:

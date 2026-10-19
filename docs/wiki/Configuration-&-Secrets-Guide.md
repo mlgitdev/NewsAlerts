@@ -4,17 +4,22 @@ NewsAlerts enforces strict security and environment separation to protect your s
 
 ---
 
-## 🔒 Directory Isolation Policy
+## 🔒 Directory Isolation & Multi-OS Resolution Policy
 
 Under no circumstances are secrets, tokens, or configuration files committed to git repositories or included in build artifacts.
 
-All settings and secrets reside strictly in the operating system's standard user application storage:
+All settings and secrets reside strictly in the operating system's standard user application storage, automatically created and provisioned on first launch:
 
-| Operating System | Central Application Directory (`APP_DIR`) |
-| :--- | :--- |
-| **Windows** | `%APPDATA%\NewsAlerts\` (`C:\Users\<user>\AppData\Roaming\NewsAlerts\`) |
-| **macOS** | `~/Library/Application Support/NewsAlerts/` |
-| **Linux** | `~/.config/NewsAlerts/` or `$XDG_CONFIG_HOME/NewsAlerts/` |
+| Operating System | Central Application Directory (`APP_DIR`) | Fallback Location |
+| :--- | :--- | :--- |
+| **Windows** | `%APPDATA%\NewsAlerts\` (`C:\Users\<user>\AppData\Roaming\NewsAlerts\`) | `$HOME/.newsalerts\` |
+| **macOS** | `~/Library/Application Support/NewsAlerts/` | `$HOME/.newsalerts/` |
+| **Linux / BSD** | `$XDG_CONFIG_HOME/NewsAlerts/` (default `~/.config/NewsAlerts/`) | `$HOME/.newsalerts/` |
+
+### Custom Location Override & Dotfolder Support:
+- **Environment Variable**: Set `NEWSALERTS_DIR` or `NEWSALERTS_HOME` (e.g. `export NEWSALERTS_DIR=$HOME/.newsalerts`) to explicitly direct all data storage to any custom folder.
+- **Dotfolder Detection**: If `$HOME/.newsalerts` exists on disk, NewsAlerts automatically prioritizes and uses it across all platforms.
+- **Automated Provisioning**: Zero manual directory setup is required. The terminal automatically invokes `mkdir(parents=True, exist_ok=True)` and creates `config.json` with default settings upon first launch.
 
 ---
 

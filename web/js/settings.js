@@ -239,8 +239,8 @@
 
     tab_about(c) {
       const wrap = U.el("div", { class: "about-pane" });
-      const ver = App.version || "2.4.2";
-      const sem = App.semver || { major: 2, minor: 4, patch: 2 };
+      const ver = App.version || "2.4.3";
+      const sem = App.semver || { major: 2, minor: 4, patch: 3 };
       const hero = U.el("div", { class: "about-hero-wrap" },
         U.el("img", { src: "img/hero.jpg", class: "about-hero-img", alt: "NewsAlerts Hero Banner" }),
         U.el("div", { class: "about-hero-overlay" },
