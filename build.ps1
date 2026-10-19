@@ -103,7 +103,7 @@ function Verify-Secrets {
 
 function Build-Executable {
     $VersionPy = Join-Path $ScriptDir "app\version.py"
-    $appVer = "2.4.0"
+    $appVer = "2.4.1"
     if (Test-Path $VersionPy) {
         $match = Select-String -Path $VersionPy -Pattern '__version__\s*=\s*["'']([^"'']+)["'']'
         if ($match) {

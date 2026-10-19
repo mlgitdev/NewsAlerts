@@ -118,6 +118,14 @@ When an Agent creates a PR:
 - **Never bypass checks**: Do not attempt to merge directly to `main`. Only the repository owner (`@mlgitdev`) can approve and merge.
 - **Code Ownership**: Component modifications are subject to [`.github/CODEOWNERS`](.github/CODEOWNERS). Review requests are automatically routed to designated code owner `@mlgitdev`.
 
+### 4. Mandatory SemVer Bump for Rebuildable Application Changes
+Any bug fix, feature addition, or asset correction affecting runtime code or assets (`app/`, `web/`, `assets/`, `NewsAlerts.spec`, `build.ps1`, `requirements.txt`) that requires rebuilding the standalone binary MUST trigger a SemVer version bump:
+- **PATCH** (`x.y.Z`): Bug fixes, UI/CSS corrections, layout repairs, asset fixes, route handling repairs, internal refactoring.
+- **MINOR** (`x.Y.0`): New user-facing features, new trading strategies, audio browser integrations, new platform support.
+- **MAJOR** (`X.0.0`): Breaking architecture changes, breaking configuration format revisions, major terminal overhauls.
+
+Pure documentation changes (e.g., `README.md`, `docs/`, `AGENTS.md`) or standalone CI workflow edits that do not alter the compiled binary do NOT require a version bump. When a rebuild is required, all version references (`app/version.py`, `build.ps1`, HTML badges, test assertions, and release notes) must be updated simultaneously.
+
 ---
 
 ## 6. Local Verification Gate Before PR Creation
