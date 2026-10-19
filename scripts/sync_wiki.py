@@ -94,9 +94,11 @@ def main():
             return
 
         print(f"[+] Committing {synced_count} wiki pages...")
+        subprocess.run(["git", "-C", str(clone_path), "config", "user.name", "mlgitdev"], check=True)
+        subprocess.run(["git", "-C", str(clone_path), "config", "user.email", "mlgitdev@users.noreply.github.com"], check=True)
         subprocess.run(["git", "-C", str(clone_path), "add", "."], check=True)
         subprocess.run(
-            ["git", "-C", str(clone_path), "commit", "-m", "docs(wiki): synchronize full documentation suite"],
+            ["git", "-C", str(clone_path), "commit", "-m", "docs(wiki): update multi-OS data resolution and auto-provisioning guide"],
             check=True
         )
         print("[+] Pushing updates to GitHub Wiki...")
