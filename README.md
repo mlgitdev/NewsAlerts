@@ -59,7 +59,7 @@ All technical procedures are documented in detail within the [`docs/`](docs/) di
 *Guidelines for human developers and open source contributions:*
 - **Isolated Worktree Model**: Never dirty `main`. Spawn dedicated feature worktrees via `.\build.ps1 -Task worktree-new -Branch feat/<name>`.
 - **Conventional Commits**: Enforced commit structure: `type(scope): description`.
-- **Pull Request Protocol**: Mandatory PR template with automated bot validation before review.
+- **Pull Request & Code Ownership**: Mandatory PR template with automated bot validation and explicit code ownership via [`.github/CODEOWNERS`](.github/CODEOWNERS).
 &rarr; *Read the complete [Contributing Guide](CONTRIBUTING.md)*
 
 ### 🤖 6. AI Agent Operating Protocol &mdash; [AGENTS.md](AGENTS.md)
