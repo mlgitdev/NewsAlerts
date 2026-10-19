@@ -1,6 +1,15 @@
 /* News pane: recent headlines (Benzinga highlighted) for the selected symbol. */
 (function () {
-  const RECENCY = [[1, "1h"], [2, "2h"], [4, "4h"], [8, "8h"], [12, "12h"], [24, "24h"]];
+  const RECENCY = [
+    [1, "1h"],
+    [2, "2h"],
+    [4, "4h"],
+    [8, "8h"],
+    [12, "12h"],
+    [24, "24h"],
+    [72, "3d"],
+    [168, "7d"],
+  ];
 
   const News = {
     ticker: null, info: null, seen: new Set(), timer: null, open: new Set(), reqId: 0,
@@ -27,7 +36,10 @@
     syncTools() {
       News.bz.checked = !!App.config.news.benzinga_only;
       const h = App.config.news.recency_hours;
-      if (!RECENCY.some(([v]) => v === h)) News.rec.append(U.el("option", { value: h }, h + "h"));
+      if (!RECENCY.some(([v]) => v === h)) {
+        const lbl = h >= 24 && h % 24 === 0 ? `${h / 24}d` : `${h}h`;
+        News.rec.append(U.el("option", { value: h }, lbl));
+      }
       News.rec.value = h;
     },
 
@@ -112,10 +124,11 @@
 
     render(items, freshIds, total) {
       const h = App.config.news.recency_hours;
+      const recLbl = h >= 24 && h % 24 === 0 ? `${h / 24}d` : `${h}h`;
       News.count.textContent = `${items.length} of ${total}`;
       if (!items.length) {
         News.list.replaceChildren(U.el("div", { class: "empty" }, U.el("div", { class: "big" }, "🌙"),
-          `No ${App.config.news.benzinga_only ? "Benzinga " : ""}news in the last ${h}h.`));
+          `No ${App.config.news.benzinga_only ? "Benzinga " : ""}news in the last ${recLbl}.`));
         return;
       }
       const frag = document.createDocumentFragment();

@@ -77,7 +77,7 @@ class AlpacaNews(NewsProvider):
         if not (kid and sec):
             return []
         sym = ticker.split(":")[-1].upper().strip()
-        url = f"https://data.alpaca.markets/v1beta1/news?symbols={sym}&limit=25"
+        url = f"https://data.alpaca.markets/v1beta1/news?symbols={sym}&limit=50"
         headers = {
             "APCA-API-KEY-ID": kid,
             "APCA-API-SECRET-KEY": sec,

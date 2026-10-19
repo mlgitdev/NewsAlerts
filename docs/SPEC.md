@@ -41,7 +41,7 @@ Run: `run.bat` → creates venv on first run → `python -m app.main`.
 - Story body: `GET https://news-headlines.tradingview.com/v2/story?id=<id>&lang=en`
   (AST → rendered HTML in-app; "Open in browser" button for the original link).
 - Provider filter: **Benzinga only** / All providers (default: All, Benzinga highlighted).
-- Recency filter: default **last 12 h** (options: 1 h, 4 h, 12 h, since prev close, 24 h).
+- Recency filter: default **last 12 h** (options: 1 h, 2 h, 4 h, 8 h, 12 h, 24 h, 3 d, 7 d). Designed for weekend and off-hours review where catalyst news broke 2–7 days prior.
 - Pluggable `NewsProvider` interface so an official Benzinga API key can be added later.
 
 ### 3.3 Short Borrow Availability Indicator (Easy / Hard / No Borrow / NA)
