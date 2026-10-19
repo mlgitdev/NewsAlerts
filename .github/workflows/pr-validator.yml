@@ -16,12 +16,13 @@ jobs:
     steps:
       - name: Validate PR Title (Conventional Commits)
         id: title-check
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          TITLE="${{ github.event.pull_request.title }}"
-          echo "Validating PR title: '$TITLE'"
+          echo "Validating PR title: '$PR_TITLE'"
           REGEX="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9_\.\-]+\))?: .{3,80}$"
-          if [[ ! "$TITLE" =~ $REGEX ]]; then
-            echo "::error::PR Title '$TITLE' does not conform to Conventional Commits standard."
+          if [[ ! "$PR_TITLE" =~ $REGEX ]]; then
+            echo "::error::PR Title '$PR_TITLE' does not conform to Conventional Commits standard."
             echo "Expected format: '<type>(<optional-scope>): <description>'"
             echo "Allowed types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
             echo "Example: 'feat(tape): add momentum volume surge filter'"
@@ -34,8 +35,9 @@ jobs:
 
       - name: Validate PR Body Sections
         id: body-check
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
-          BODY="${{ github.event.pull_request.body }}"
           REQUIRED_SECTIONS=(
             "## Summary"
             "## Motivation / Context"
@@ -45,7 +47,7 @@ jobs:
           )
           MISSING=()
           for section in "${REQUIRED_SECTIONS[@]}"; do
-            if ! grep -qiF "$section" <<< "$BODY"; then
+            if ! grep -qiF "$section" <<< "$PR_BODY"; then
               MISSING+=("$section")
             fi
           done
