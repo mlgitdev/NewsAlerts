@@ -381,8 +381,17 @@
       const tag = document.activeElement ? document.activeElement.tagName : "";
       const isEditable = /INPUT|SELECT|TEXTAREA/.test(tag) || (document.activeElement && document.activeElement.isContentEditable);
 
-      // ESCAPE key: always allow Esc to close modal/drawer/story or unfocus active input
-      if (e.key === "Escape") {
+      const hk = App.config?.hotkeys || {};
+      const matchKey = (action, defaultKey) => {
+        const configured = (hk[action] !== undefined && hk[action] !== "") ? hk[action] : defaultKey;
+        if (!configured) return false;
+        const normKey = e.key === " " ? "Space" : e.key;
+        const normCfg = configured === " " ? "Space" : configured;
+        return normKey.toLowerCase() === normCfg.toLowerCase();
+      };
+
+      // ESCAPE key / configured close_modal: always allow Esc to close modal/drawer/story or unfocus active input
+      if (matchKey("close_modal", "Escape") || e.key === "Escape") {
         if (isEditable) {
           document.activeElement.blur();
           e.preventDefault();
@@ -409,20 +418,20 @@
       // If user is actively typing in an input/select/textarea, ignore terminal hotkeys
       if (isEditable) return;
 
-      const k = e.key;
-
       // 1 – 5: Switch screener tab presets
-      if (k >= "1" && k <= "5") {
-        const idx = parseInt(k, 10) - 1;
-        if (App.config?.screens && App.config.screens[idx]) {
-          e.preventDefault();
-          Screener.switchTab(App.config.screens[idx].id);
+      for (let i = 1; i <= 5; i++) {
+        if (matchKey(`preset_${i}`, String(i))) {
+          const idx = i - 1;
+          if (App.config?.screens && App.config.screens[idx]) {
+            e.preventDefault();
+            Screener.switchTab(App.config.screens[idx].id);
+          }
+          return;
         }
-        return;
       }
 
-      // M / m: Master Mute
-      if (k === "m" || k === "M") {
+      // Master Mute
+      if (matchKey("mute", "m")) {
         e.preventDefault();
         toggleMute();
         const isMuted = !!App.config?.alerts?.mute;
@@ -436,16 +445,16 @@
         return;
       }
 
-      // T / t: Pop-Out Tape
-      if (k === "t" || k === "T") {
+      // Pop-Out Tape
+      if (matchKey("popout_tape", "t")) {
         e.preventDefault();
         App.api().pop_tape();
         U.toast("info", "⚡ Pop-Out Tape", "Opening detached floating tape window", null, 2500);
         return;
       }
 
-      // Space: Pause / Resume tape stream
-      if (k === " ") {
+      // Space / configured pause_tape: Pause / Resume tape stream
+      if (matchKey("pause_tape", "Space") || e.key === " ") {
         e.preventDefault();
         Tape.setPaused(!Tape.paused);
         U.toast(
@@ -458,8 +467,8 @@
         return;
       }
 
-      // S / s: Open / Toggle Settings Modal
-      if (k === "s" || k === "S") {
+      // Open / Toggle Settings Modal
+      if (matchKey("settings", "s")) {
         e.preventDefault();
         if (window.Settings && Settings.isOpen && Settings.isOpen()) {
           Settings.close();
@@ -469,8 +478,8 @@
         return;
       }
 
-      // R / r: Force Refresh
-      if (k === "r" || k === "R") {
+      // Force Refresh
+      if (matchKey("refresh", "r")) {
         e.preventDefault();
         if (App.api().refresh) App.api().refresh();
         if (window.News && News.ticker) {
@@ -480,8 +489,8 @@
         return;
       }
 
-      // Enter: Focus / expand first catalyst story
-      if (k === "Enter") {
+      // Focus / expand first catalyst story
+      if (matchKey("focus_story", "Enter") || e.key === "Enter") {
         if (window.News && News.openFirstStory && News.openFirstStory()) {
           e.preventDefault();
         }

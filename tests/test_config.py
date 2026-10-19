@@ -57,7 +57,36 @@ class TestAppDirResolution(unittest.TestCase):
                         data = json.load(f)
                     self.assertIn("ui", data)
                     self.assertIn("poll", data)
+                    self.assertIn("hotkeys", data)
+                    self.assertEqual(data["hotkeys"]["mute"], "m")
+                    self.assertEqual(data["hotkeys"]["popout_tape"], "t")
+                    self.assertEqual(data["hotkeys"]["pause_tape"], "Space")
+
+    def test_hotkeys_configuration_customization_and_save(self):
+        custom = (self.temp_dir / "hotkeys_test").resolve()
+        with patch.dict(os.environ, {"NEWSALERTS_DIR": str(custom)}):
+            with patch("app.config.APP_DIR", custom):
+                cfg_path = custom / "config.json"
+                with patch("app.config.CONFIG_PATH", cfg_path):
+                    config = Config()
+                    self.assertIn("hotkeys", config.data)
+                    self.assertEqual(config.data["hotkeys"]["mute"], "m")
+                    self.assertEqual(config.data["hotkeys"]["refresh"], "r")
+
+                    # Customize hotkeys
+                    custom_hotkeys = dict(config.data["hotkeys"])
+                    custom_hotkeys["mute"] = "x"
+                    custom_hotkeys["refresh"] = "f5"
+                    config.update({"hotkeys": custom_hotkeys})
+
+                    # Reload and verify persistence
+                    reloaded = Config()
+                    self.assertEqual(reloaded.data["hotkeys"]["mute"], "x")
+                    self.assertEqual(reloaded.data["hotkeys"]["refresh"], "f5")
+                    # Untouched default remains intact
+                    self.assertEqual(reloaded.data["hotkeys"]["popout_tape"], "t")
 
 
 if __name__ == "__main__":
     unittest.main()
+

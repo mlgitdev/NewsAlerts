@@ -247,6 +247,154 @@
       return g;
     },
 
+    tab_hotkeys(c) {
+      if (!c.hotkeys) {
+        c.hotkeys = {};
+      }
+      const DEFAULTS = {
+        mute: "m",
+        popout_tape: "t",
+        pause_tape: "Space",
+        settings: "s",
+        refresh: "r",
+        close_modal: "Escape",
+        focus_story: "Enter",
+        preset_1: "1",
+        preset_2: "2",
+        preset_3: "3",
+        preset_4: "4",
+        preset_5: "5",
+      };
+      Object.keys(DEFAULTS).forEach((k) => {
+        if (c.hotkeys[k] === undefined) c.hotkeys[k] = DEFAULTS[k];
+      });
+
+      const HOTKEY_ITEMS = [
+        { key: "mute", label: "Master Mute / Pause Alerts", desc: "Instantly suppresses alert audio chimes and Telegram alerts." },
+        { key: "popout_tape", label: "Pop-Out Tape Window", desc: "Launches the floating, detached running tape window." },
+        { key: "pause_tape", label: "Pause / Resume Tape Stream", desc: "Holds incoming tape momentum alerts in buffer or resumes stream." },
+        { key: "settings", label: "Open Settings Modal", desc: "Toggles this settings dialog for feeds, audio, and strategies." },
+        { key: "refresh", label: "Force Refresh", desc: "Triggers an immediate screener re-scan and news headline fetch." },
+        { key: "close_modal", label: "Dismiss Modals & Drawers", desc: "Closes open settings, drawer, or catalyst stories, or blurs active inputs." },
+        { key: "focus_story", label: "Focus Latest Story", desc: "Expands the latest catalyst news story for the selected symbol." },
+        { key: "preset_1", label: "Screener Preset 1", desc: "Switches to screener preset filter tab #1." },
+        { key: "preset_2", label: "Screener Preset 2", desc: "Switches to screener preset filter tab #2." },
+        { key: "preset_3", label: "Screener Preset 3", desc: "Switches to screener preset filter tab #3." },
+        { key: "preset_4", label: "Screener Preset 4", desc: "Switches to screener preset filter tab #4." },
+        { key: "preset_5", label: "Screener Preset 5", desc: "Switches to screener preset filter tab #5." },
+      ];
+
+      const wrap = U.el("div", { class: "hotkeys-pane" });
+
+      const header = U.el("div", { class: "hotkeys-header" },
+        U.el("div", { style: "display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;" },
+          U.el("div", {},
+            U.el("h3", { style: "margin:0 0 4px;font-size:14px;color:var(--text);font-weight:700;" }, "⚡ Keyboard Shortcuts & Hotkey Configuration"),
+            U.el("div", { style: "font-size:12px;color:var(--muted);max-width:620px;line-height:1.4;" },
+              "Customize keyboard shortcuts for rapid execution and seamless navigation. Click any shortcut input to record a new key, or customize key characters directly."
+            )
+          ),
+          U.el("button", {
+            class: "btn sm",
+            id: "btn-reset-hotkeys",
+            style: "white-space:nowrap;display:flex;align-items:center;gap:6px;",
+            onclick: () => {
+              Object.assign(c.hotkeys, DEFAULTS);
+              U.toast("info", "Hotkeys Reset", "Restored institutional default keyboard shortcuts", null, 2500);
+              const parent = wrap.parentElement;
+              if (parent) {
+                parent.replaceChildren(Settings.tab_hotkeys(c));
+              }
+            }
+          }, "↺ Reset Defaults")
+        )
+      );
+
+      const table = U.el("table", { class: "hotkeys-table" },
+        U.el("thead", {},
+          U.el("tr", {},
+            U.el("th", { style: "width:34%;" }, "Action"),
+            U.el("th", { style: "width:48%;" }, "Description"),
+            U.el("th", { style: "width:18%;text-align:right;" }, "Shortcut Key")
+          )
+        )
+      );
+
+      const tbody = U.el("tbody");
+
+      HOTKEY_ITEMS.forEach((item) => {
+        const tr = U.el("tr", {});
+        const tdName = U.el("td", { class: "hk-action" },
+          U.el("strong", {}, item.label),
+          U.el("span", { class: "hk-id-tag" }, item.key)
+        );
+        const tdDesc = U.el("td", { class: "hk-desc" }, item.desc);
+
+        const currentVal = c.hotkeys[item.key] || DEFAULTS[item.key] || "";
+        const keyBtn = U.el("input", {
+          type: "text",
+          class: "hotkey-key-input",
+          value: currentVal,
+          title: "Click to record a new keypress for this shortcut",
+          readonly: true
+        });
+
+        keyBtn.onfocus = () => {
+          keyBtn.classList.add("recording");
+          keyBtn.value = "Press key...";
+        };
+
+        keyBtn.onblur = () => {
+          keyBtn.classList.remove("recording");
+          keyBtn.value = c.hotkeys[item.key] || DEFAULTS[item.key];
+        };
+
+        keyBtn.onkeydown = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          if (["Control", "Alt", "Shift", "Meta"].includes(e.key)) return;
+
+          let captured = e.key;
+          if (captured === " ") captured = "Space";
+          else if (captured.length === 1) captured = captured.toUpperCase();
+
+          c.hotkeys[item.key] = captured;
+          keyBtn.value = captured;
+          keyBtn.classList.remove("recording");
+          keyBtn.blur();
+
+          U.toast("info", "Shortcut Assigned", `${item.label} bound to [ ${captured} ]`, null, 2000);
+        };
+
+        const tdKey = U.el("td", { style: "text-align:right;" }, keyBtn);
+        tr.append(tdName, tdDesc, tdKey);
+        tbody.append(tr);
+      });
+
+      // Fixed row for Reserved Row Navigation (ArrowUp / ArrowDown)
+      const trNav = U.el("tr", { class: "reserved-row" },
+        U.el("td", { class: "hk-action" },
+          U.el("strong", {}, "Screener Row Selection"),
+          U.el("span", { class: "hk-id-tag" }, "navigation")
+        ),
+        U.el("td", { class: "hk-desc" }, "Move active selection up or down across momentum screener table rows."),
+        U.el("td", { style: "text-align:right;" },
+          U.el("span", { class: "hotkey-key-badge" }, "▲ / ▼")
+        )
+      );
+      tbody.append(trNav);
+
+      table.append(tbody);
+
+      const notice = U.el("div", { class: "hotkeys-notice" },
+        "💡 Note: Keyboard shortcuts are active throughout the application and floating windows. When typing inside text input fields or search boxes, shortcuts automatically yield to prevent accidental triggers."
+      );
+
+      wrap.append(header, table, notice);
+      return wrap;
+    },
+
     tab_about(c) {
       const wrap = U.el("div", { class: "about-pane" });
       const ver = App.version || "";
