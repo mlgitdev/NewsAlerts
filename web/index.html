@@ -12,9 +12,9 @@
   <div class="app">
     <!-- TOPBAR -->
     <header class="topbar">
-      <div class="brand">
+      <div class="brand" id="btn-brand-about" title="Click to view About & System Info" role="button" tabindex="0">
         <div class="brand-logo">
-          <img src="icon.png" alt="NewsAlerts Logo" width="28" height="28">
+          <img src="icon.png" onerror="if(this.src.indexOf('img/icon.png')===-1)this.src='img/icon.png'" alt="NewsAlerts Logo" width="28" height="28">
         </div>
         <div>
           <div class="brand-row">

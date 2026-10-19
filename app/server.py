@@ -71,6 +71,16 @@ def make_app(api, web_dir: Path) -> Bottle:
     def icon():
         return static_file("icon.png", root=str(web_dir))
 
+    @app.route("/<filename:re:[a-zA-Z0-9_\\-\\.]+\\.(png|ico|jpg|jpeg|svg|webp)>")
+    def static_image(filename):
+        if (web_dir / filename).exists():
+            return static_file(filename, root=str(web_dir))
+        if (web_dir / "img" / filename).exists():
+            return static_file(filename, root=str(web_dir / "img"))
+        if (web_dir.parent / "assets" / filename).exists():
+            return static_file(filename, root=str(web_dir.parent / "assets"))
+        return static_file(filename, root=str(web_dir))
+
     # ---------------------------------------------------------------- API Routes
     @app.route("/api/state", method=["GET"])
     def get_state():
