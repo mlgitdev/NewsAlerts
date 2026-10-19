@@ -151,7 +151,7 @@ Clicking a row selects it and loads news in the right pane (§7).
 - Engine keeps a rolling in-memory history per symbol: `(ts, price, volume, high)` for 30 min.
 - **Event** = a symbol matching ≥1 enabled strategy AND one of:
   - makes a **new high of day** (session-aware high) vs the previous poll, or
-  - triggers a squeeze condition (§8.2), with per-symbol/per-strategy cooldown (default 30 s).
+  - triggers a squeeze condition (§8.2), with per-symbol/per-strategy cooldown (default 30 s). **Monotonic Window Progression**: During an active time window (e.g. 5 min / 10 min), subsequent triggers for the same symbol & strategy require strictly higher prices (`price > last_alert_price`). If the price falls or is flat vs the previous trigger, alerts are suppressed; once the time window resets (`now - last_alert_time >= window_min * 60`), a new squeeze cycle can begin.
 - **Persistent Storage & Off-Hours Review**: Tape alerts are automatically saved to `%APPDATA%\NewsAlerts\tape_history.json` and retained for at least 4 days (configurable). When the app restarts, reloads, or opens during off-hours / weekends, all historical alerts are immediately loaded into the tape for retrospective review.
 - **Timestamp Formatting**: Displays `H:MM:SS am/pm` for alerts triggered today, and `MMM DD H:MM am/pm` for older alerts, with full ET date/time and relative age tooltips.
 - Newest events on top; up to 3,000 scrollable rows; ⏸ pause freezes scrolling and shows "New events ↑"; 🗑️ clear button removes history.
@@ -167,8 +167,8 @@ Clicking a row selects it and loads news in the right pane (§7).
 | Medium Float – High Rel Vol – Price under $20 | 20M ≤ float < 100M, rel vol ≥ 5, price < 20 |
 | Medium Float – Med Rel Vol – Price $20+ | 20M ≤ float < 100M, 2 ≤ rel vol < 5, price ≥ 20 |
 | Squeeze Alert – 52wk Breakout | price ≥ 52w high (fires on cross) |
-| Squeeze Alert – Up 10% in 10min | price ≥ 1.10 × lowest price in last 10 min |
-| Squeeze Alert – Up 5% in 5min | price ≥ 1.05 × lowest price in last 5 min |
+| Squeeze Alert – Up 10% in 10min | price ≥ 1.10 × lowest price in last 10 min (up-only within active 10m window) |
+| Squeeze Alert – Up 5% in 5min | price ≥ 1.05 × lowest price in last 5 min (up-only within active 5m window) |
 
 ### 8.3 Tape columns
 Time · Symbol (click → news) · Price · Volume · Float · Rel Vol (daily) · Rel Vol 5m % ·

@@ -23,7 +23,7 @@ BARS_PER_DAY = 78  # 5-min bars in a regular session
 
 
 class _SymState:
-    __slots__ = ("hist", "high", "price", "day", "last_fire")
+    __slots__ = ("hist", "high", "price", "day", "last_fire", "last_fire_price")
 
     def __init__(self) -> None:
         self.hist: collections.deque = collections.deque()  # (ts, price, volume)
@@ -31,6 +31,7 @@ class _SymState:
         self.price = None
         self.day = None
         self.last_fire: dict[str, float] = {}
+        self.last_fire_price: dict[str, float] = {}
 
 
 def _match(strat: dict, v: dict) -> bool:
@@ -230,13 +231,26 @@ class TapeWorker(threading.Thread):
             if trig in ("hod", "52w"):
                 fired = trig in triggers and _match(strat, v)
             elif trig == "squeeze" and st.hist:
-                win = now - float(strat.get("window_min", 5)) * 60
+                window_sec = float(strat.get("window_min", 5)) * 60
+                win = now - window_sec
                 lows = [h[1] for h in st.hist if h[0] >= win and h[1]]
                 if lows and now - st.hist[0][0] >= 30:
-                    fired = price >= min(lows) * (1 + float(strat.get("up_pct", 5)) / 100) \
-                        and _match(strat, v)
+                    up_pct = float(strat.get("up_pct", 5))
+                    if price >= min(lows) * (1 + up_pct / 100) and _match(strat, v):
+                        last_t = st.last_fire.get(name, 0)
+                        last_p = st.last_fire_price.get(name)
+                        # During the active time window, only trigger if price is strictly higher
+                        # than the previous alert price for this strategy (never on price drops/flat).
+                        if (now - last_t < window_sec) and last_p is not None:
+                            if price > last_p:
+                                fired = True
+                        else:
+                            # Time window has reset (or first alert for this strategy)
+                            fired = True
+
             if fired and now - st.last_fire.get(name, 0) >= cooldown:
                 st.last_fire[name] = now
+                st.last_fire_price[name] = price
                 borrow_info = self.borrow.get_status(r["ticker"], lg["float"]) if self.borrow else {"status": "na", "label": "N/A"}
                 events.append({
                     "ts": now, "ticker": r["ticker"], "symbol": r.get("name"),
