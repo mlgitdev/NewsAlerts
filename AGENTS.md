@@ -123,24 +123,40 @@ When an Agent creates a PR:
 
 Agents MUST execute the following verification steps prior to opening a PR:
 
-1. **Python Syntax & Type Cleanliness**:
+1. **Python Syntax Compilation**:
    ```powershell
-   .venv\Scripts\python.exe -m py_compile app/*.py run_app.py
+   .venv\Scripts\python.exe -m compileall app run_app.py
    ```
-2. **Execute Unit Tests**:
-   Run all test scripts in `scratch/` or `tests/`:
+2. **Execute Full Unit Test Suite**:
    ```powershell
-   .venv\Scripts\python.exe -c "import sys; sys.path.insert(0, '.'); import app.main; print('Import check passed')"
+   .venv\Scripts\python.exe -m unittest discover -s tests -p "test_*.py"
    ```
 3. **Audit Executable Build (if packaging changes made)**:
    ```powershell
    .\build.ps1 -Task build
    ```
    Verify that `dist\NewsAlerts.exe` passes the automated secret audit.
+4. **Package Verification Gate**:
+   ```powershell
+   .\build.ps1 -Task verify-packages
+   ```
+   Verify standalone binary integrity, PE magic headers, and absence of secret files.
 
 ---
 
-## 7. Frontend Coding Standards
+## 7. Package Verification & Automated Fail-Safe Rollback
+
+All build and release pipelines enforce the **Deterministic Package Verification Gate**:
+- **In-PR Gate**: If package verification fails, the PR check turns RED and merge is strictly blocked (PR is aborted).
+- **Post-PR Release Gate**: If verification fails post-merge on `main`:
+  1. The release artifact is NOT published.
+  2. The remote git tag is deleted.
+  3. The `main` branch is automatically reverted to the last known good commit.
+  4. A critical incident GitHub issue is automatically opened and assigned to `@mlgitdev`.
+
+---
+
+## 8. Frontend Coding Standards
 
 - **Core**: Vanilla HTML5 and Vanilla modern ES6+ JavaScript. **No React, Vue, or Angular**.
 - **CSS**: Pure Vanilla CSS using design system tokens defined in [`web/css/app.css`](file:///web/css/app.css). Avoid ad-hoc styling.

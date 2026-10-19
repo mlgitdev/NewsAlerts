@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 jobs:
   build-windows:
@@ -97,13 +98,20 @@ jobs:
           name: linux-release
           path: NewsAlerts-Linux-x64.tar.gz
 
-  publish-github-release:
-    name: Publish GitHub Release
+  verify-and-publish:
+    name: Verify Packages & Publish Release
     needs: [build-windows, build-macos, build-linux]
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout repository with full history
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
       - name: Download all build artifacts
         uses: actions/download-artifact@v4
@@ -131,7 +139,59 @@ jobs:
             echo "NOTES_PATH=" >> $GITHUB_ENV
           fi
 
-      - name: Flatten Artifacts
+      - name: Execute Package Verification Gate
+        id: package-gate
+        run: |
+          echo "Running Package Verification Gate on all release artifacts..."
+          python3 scripts/verify-packages.py --artifacts-dir release-artifacts
+
+      - name: Handle Package Verification Failure (Rollback, Delete Tag, Open Issue)
+        if: failure() && steps.package-gate.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "::error::CRITICAL: Package Verification Gate Failed! Executing fail-safe rollback protocol."
+          TAG="${{ env.VERSION_TAG }}"
+
+          # 1. Delete remote git tag if triggered by tag push
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "Deleting remote tag '$TAG'..."
+            git push origin --delete "$TAG" || echo "Tag deletion completed or not found"
+          fi
+
+          # 2. Revert main to last good commit
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout main
+          echo "Reverting commit ${{ github.sha }} on main..."
+          git revert --no-edit "${{ github.sha }}" || echo "Revert conflict or already handled"
+          git push origin main || echo "Push to main attempted"
+
+          # 3. Open Critical GitHub Incident Issue
+          gh issue create \
+            --title "🚨 Critical: Package Verification Failed for ${TAG} [Rollback Executed]" \
+            --body "## 🚨 Critical Release Package Verification Failure & Automated Rollback
+
+          **Failed Version Tag:** \`${TAG}\`
+          **Failed Commit SHA:** \`${{ github.sha }}\`
+          **Triggered By:** \`${{ github.actor }}\`
+          **Workflow Run:** [${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+          ### 🛡️ Automated Remediation Actions Taken:
+          - ❌ **Release Blocked**: Failed package artifacts were **NOT** published to GitHub Releases.
+          - 🗑️ **Tag Deleted**: Remote git tag \`${TAG}\` was removed from the repository.
+          - ⏪ **Branch Reverted**: \`main\` branch was reverted to prevent distribution of broken artifacts.
+          - 📋 **Incident Issue**: Opened automatically for mandatory review by @${{ github.repository_owner }}.
+
+          ### Required Actions:
+          1. Review workflow run logs to diagnose package verification failure reasons.
+          2. Resolve the build/packaging issue in an isolated git worktree (\`feat/\` or \`fix/\`).
+          3. Verify packages locally with \`build.ps1 -Task verify-packages\` before opening a new PR."
+
+          exit 1
+
+      - name: Flatten Validated Artifacts
+        if: success()
         run: |
           mkdir -p dist-release
           find release-artifacts/ -type f \( -name "*.zip" -o -name "*.tar.gz" \) -exec cp {} dist-release/ \;
@@ -141,6 +201,7 @@ jobs:
           ls -la dist-release/
 
       - name: Publish Official GitHub Release
+        if: success()
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.VERSION_TAG }}
