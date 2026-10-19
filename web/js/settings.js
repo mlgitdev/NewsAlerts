@@ -41,7 +41,9 @@
 
     // -- helpers
     field(label, input, help) {
-      return [U.el("label", {}, label), input, help ? U.el("div", { class: "help" }, help) : null];
+      const items = [U.el("label", {}, label), input];
+      if (help) items.push(U.el("div", { class: "help" }, help));
+      return items;
     },
     num(obj, key, opts = {}) {
       const i = U.el("input", { type: "text", class: "numin", value: opts.big ? U.fmtInput(obj[key]) : (obj[key] ?? "") });
@@ -194,8 +196,8 @@
         ? "Auto-loaded from secrets/keys.toml. Leave blank to keep using keys.toml, or enter here to override."
         : "Free at alpaca.markets (API Keys section)";
 
+      if (alpacaBanner) g.append(alpacaBanner);
       g.append(
-        alpacaBanner,
         U.el("h3", {}, "Borrow Indicator Colors (Per Spec)"),
         U.el("div", { style: "grid-column:1/-1;display:flex;gap:14px;align-items:center;padding:6px 0;" },
           U.el("span", { class: "tag-borrow easy" }, "ETB (Red: Easy)"),
