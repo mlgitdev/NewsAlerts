@@ -1,4 +1,4 @@
-# NewsAlerts — Momentum Screener, Tape & News
+# NewsAlerts — Momentum Screener, Tape & News Terminal
 
 <p align="center">
   <img src="assets/hero.jpg" alt="NewsAlerts Hero Banner" width="100%" style="border-radius:12px; border:1px solid #2a3347; box-shadow:0 12px 36px rgba(0,0,0,0.55);" />
@@ -14,25 +14,96 @@
   <a href="https://github.com/mlgitdev/NewsAlerts/actions/workflows/ci.yml"><img src="https://github.com/mlgitdev/NewsAlerts/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
   <a href="https://github.com/mlgitdev/NewsAlerts/actions/workflows/secret-scan.yml"><img src="https://github.com/mlgitdev/NewsAlerts/actions/workflows/secret-scan.yml/badge.svg" alt="Secret Scanning" /></a>
   <a href="https://github.com/mlgitdev/NewsAlerts/releases"><img src="https://img.shields.io/github/v/release/mlgitdev/NewsAlerts?color=10b981&label=Release" alt="Latest Release" /></a>
+  <img src="https://img.shields.io/badge/SemVer-2.0.0-emerald?logo=semver" alt="SemVer 2.0.0" />
   <img src="https://img.shields.io/badge/Platform-Windows%20x64%20%7C%20macOS%20arm64%20%7C%20Linux-blue" alt="Supported Platforms" />
+  <img src="https://img.shields.io/badge/Package%20Gate-Verified-purple" alt="Package Verification Gate" />
 </p>
 
 ---
 
-## Documentation
+## 📖 Operational Procedures & Documentation Index
 
-| Guide | Description |
-|---|---|
-| [🚀 Installation Guide](docs/INSTALLATION.md) | Setup and launch instructions for Windows, macOS, and Linux |
-| [⚙️ Configuration Guide](docs/CONFIGURATION.md) | API keys, session cookies, and runtime settings |
-| [📂 Directory Layouts](docs/DIRECTORIES.md) | Platform data storage paths and AppData directories |
-| [📦 Release History](docs/RELEASES.md) | Release notes, asset downloads, and version history |
-| [🤝 Contributing Guide](CONTRIBUTING.md) | Pull request guidelines, conventional commits, and CI rules |
-| [🤖 AI Agent Instructions](AGENTS.md) | Authoritative operating manual for AI coding agents |
+All technical procedures are documented in detail within the [`docs/`](docs/) directory. Below is an executive summary of each procedure with direct links:
+
+### 🚀 1. Installation & Launch Procedure &mdash; [docs/INSTALLATION.md](docs/INSTALLATION.md)
+*Step-by-step setup and launch instructions across all supported platforms:*
+- **Windows x64**: Zero-install portable standalone executable (`dist\NewsAlerts.exe`) with bundled custom icon, or source launch via `.\build.ps1 -Task run`.
+- **macOS (Apple Silicon arm64)**: Native Cocoa/WebKit window via `./run.sh` or automated system-wide installer `./install.sh`.
+- **Linux x86_64**: WebKit2GTK runtime setup, automated `./install.sh`, and desktop application launcher (`assets/NewsAlerts.desktop`).
+&rarr; *Read the complete [Installation Guide](docs/INSTALLATION.md)*
+
+### ⚙️ 2. Configuration & Credentials Procedure &mdash; [docs/CONFIGURATION.md](docs/CONFIGURATION.md)
+*Configuration guidelines for live market data feeds, borrow locates, and alert notifications:*
+- **In-App Settings UI**: Configure feeds, audio volume, and Telegram directly within the UI via the topbar gear icon.
+- **TradingView Real-Time Data**: Enter session cookies (`sessionid`, `sessionid_sign`) for sub-second unthrottled screener updates.
+- **Alpaca Short Borrow Locates**: Connect Alpaca API keys (`key_id`, `secret_key`) for live `HTB`, `ETB`, and `NO BORROW` badges.
+- **Telegram Bot Notifications**: Dispatch instant push alerts for newly discovered breakout symbols.
+- **Isolated `keys.toml` Storage**: Optional manual credential management strictly preserved in user `APP_DIR` (never in git).
+&rarr; *Read the complete [Configuration Guide](docs/CONFIGURATION.md)*
+
+### 📂 3. Directory Layouts & Persistence Procedure &mdash; [docs/DIRECTORIES.md](docs/DIRECTORIES.md)
+*Cross-platform directory specifications, rolling tape persistence, and worktree layouts:*
+- **User Application Roots (`APP_DIR`)**: Windows (`%APPDATA%\NewsAlerts\`), macOS (`~/Library/Application Support/NewsAlerts/`), Linux (`~/.config/NewsAlerts/`).
+- **4-Day Rolling Tape Persistence**: `tape_history.json` retains up to 5,000 historical momentum prints for off-hours and weekend analysis.
+- **Task-Isolated Git Worktrees (`.worktrees/`)**: Dedicated ignored directory hosting parallel feature branches without touching `main`.
+&rarr; *Read the complete [Directory Layout Specification](docs/DIRECTORIES.md)*
+
+### 📦 4. Release Governance & Versioning Procedure &mdash; [docs/RELEASES.md](docs/RELEASES.md)
+*Release engineering policy, SemVer 2.0.0 compliance, and multi-OS artifact bundles:*
+- **Semantic Versioning 2.0.0**: Strict `MAJOR.MINOR.PATCH` progression governed by `app/version.py`.
+- **Multi-OS Release Bundles**: Automated generation of `NewsAlerts-Windows-x64.zip`, `NewsAlerts-macOS-arm64.tar.gz`, and `NewsAlerts-Linux-x64.tar.gz`.
+- **Release Changelog Catalog**: Archived release documentation cataloged under `docs/releases/`.
+&rarr; *Read the complete [Release Governance Guide](docs/RELEASES.md)*
+
+### 🤝 5. Development & Git Worktree Workflow &mdash; [CONTRIBUTING.md](CONTRIBUTING.md)
+*Guidelines for human developers and open source contributions:*
+- **Isolated Worktree Model**: Never dirty `main`. Spawn dedicated feature worktrees via `.\build.ps1 -Task worktree-new -Branch feat/<name>`.
+- **Conventional Commits**: Enforced commit structure: `type(scope): description`.
+- **Pull Request Protocol**: Mandatory PR template with automated bot validation before review.
+&rarr; *Read the complete [Contributing Guide](CONTRIBUTING.md)*
+
+### 🤖 6. AI Agent Operating Protocol &mdash; [AGENTS.md](AGENTS.md)
+*Authoritative rules of engagement for automated AI coding agents (Antigravity, Claude, Copilot):*
+- **Absolute Security**: Strict zero-leak rule for keys, secrets, tokens, or credentials.
+- **Git Worktree Mandatory Rule**: Root checkout on `main` is immutable; all modifications must occur in `.worktrees/`.
+- **Local Verification Gate**: Mandatory Python syntax compilation, unit tests, and build check before submitting PRs.
+&rarr; *Read the complete [AI Agent Operating Guidelines](AGENTS.md)*
 
 ---
 
-## Key Features
+## 🛡️ Package Verification & Fail-Safe Rollback Policy
+
+NewsAlerts enforces a **deterministic Package Verification Gate** to ensure that broken, unverified, or incomplete binaries are never merged or distributed:
+
+```
+[ Build Artifacts ] ──> [ scripts/verify-packages.py ] 
+                               │
+            ┌──────────────────┴──────────────────┐
+            ▼                                     ▼
+     [ PASS (Code 0) ]                    [ FAIL (Code 1) ]
+            │                                     │
+   • PR Check Green                       • PR Aborted & Blocked
+   • Publish GitHub Release               • DO NOT Publish Release
+   • Distribute Multi-OS Bundles          • Delete Remote Git Tag
+                                          • Revert 'main' to Last Good Commit
+                                          • Auto-Open Critical GitHub Issue
+```
+
+### 1. In-PR Verification Gate
+- Every Pull Request triggers multi-OS builds across Windows, macOS, and Linux.
+- The package verifier audits archive structure, PE headers, executable sizes (>5MB), required launch scripts, and scans for secret file leakage.
+- If any check fails, the PR check turns red and **merging is blocked**.
+
+### 2. Post-Merge / Release Fail-Safe Rollback
+If package verification fails during a release run on `main`:
+1. **Release Blocked**: The package is **not published** to GitHub Releases or package registries.
+2. **Git Tag Deleted**: The remote tag (e.g. `v2.4.1`) is deleted via `git push --delete origin <tag>`.
+3. **Automated Branch Rollback**: The `main` branch is automatically reverted to the last known good commit (`git revert HEAD`).
+4. **Critical Incident Issue**: An automated GitHub issue is opened with full logs, commit SHA, and assigned to `@mlgitdev`.
+
+---
+
+## ✨ Key Terminal Features
 
 - 🚨 **Instant Audio & Telegram Alerts**: Fires on newly discovered momentum symbols matching user-defined screen criteria.
 - 🔔 **Unified Alert Control (The Bell)**: One-click master toggle that both mutes audio chimes and pauses Telegram alert dispatching.
@@ -40,19 +111,41 @@
 - 🌊 **Real-Time Running Tape**: Warrior-Trading style High of Day (HOD) and Squeeze Breakout momentum tape with 4-day local disk persistence for off-hours and weekend review.
 - 🩳 **Short Borrow Locates**: Real-time `HTB` (Hard to Borrow), `ETB` (Easy to Borrow), and `NO BORROW` indicators powered by live Alpaca API and TradingView market feeds.
 - 📰 **Recent News Intelligence**: Direct Benzinga and financial wire headlines with configurable recency windows (1h, 2h, 4h, 8h, 12h, 24h, 3d, 7d).
-- 📦 **100% Portable Executable**: Runs anywhere on 64-bit Windows without installing Python or Node.js. All data persists to `%APPDATA%\NewsAlerts\`.
+- 🏷️ **Interactive Corner Version Badge**: Live SemVer 2.0.0 version indicator docked in the bottom-right corner of the terminal with click-to-open system diagnostic details.
+- 📦 **100% Portable Executable**: Standalone single `.exe` (~14 MB) embedding the custom icon and running without external Python or Node.js runtimes.
 
 ---
 
-## Portable Build & Run
+## ⚡ Quick Reference Commands
 
-### Quick Run
+### Running Locally (Windows)
 ```powershell
 .\build.ps1 -Task run
 ```
 
-### Recompile Standalone Portable Executable
+### Building Portable Executable (Windows)
 ```powershell
 .\build.ps1 -Task build
 ```
-The output executable will be created at `dist\NewsAlerts.exe` (~13 MB) bundled with the new custom application icon.
+
+### Auditing & Verifying Packages
+```powershell
+.\build.ps1 -Task verify-packages
+```
+
+### Managing Git Worktrees
+```powershell
+# Create new isolated worktree
+.\build.ps1 -Task worktree-new -Branch feat/my-new-feature -Base main
+
+# List active worktrees
+.\build.ps1 -Task worktree-list
+
+# Remove worktree after PR merge
+.\build.ps1 -Task worktree-remove -Branch feat/my-new-feature
+```
+
+---
+
+## 📄 License
+This project is proprietary and maintained by [@mlgitdev](https://github.com/mlgitdev). All rights reserved.

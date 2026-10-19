@@ -9,6 +9,20 @@ NewsAlerts adheres strictly to [Semantic Versioning (SemVer 2.0.0)](https://semv
 
 ---
 
+## Single Source of Truth (`app/version.py`)
+
+Application version metadata is centrally registered in [`app/version.py`](../app/version.py):
+- `__version__ = "2.4.0"`
+- `VERSION_INFO = (2, 4, 0)`
+- **`SemVer` Dataclass**: Validates, parses, bumps, and compares version strings adhering strictly to SemVer 2.0.0.
+- **Dynamic Corner Display**: The active version is dynamically queried via `App.api().get_state()` and rendered in:
+  1. The **bottom-right corner** of the terminal window (`#corner-version-badge`). Clicking this badge opens the system and release dialog.
+  2. The **topbar brand header** (`#brand-version`).
+  3. The **popout tape window corner** (`web/tape.html`).
+  4. The **Settings -> About tab**, showing detailed SemVer component breakdown (`Major`, `Minor`, `Patch`).
+
+---
+
 ## Release Pipeline & Automation
 
 All official releases are produced deterministically through GitHub Actions:

@@ -26,24 +26,21 @@ jobs:
           pip install -r requirements.txt
           pip install pillow
 
-      - name: Syntax & Import Validation
+      - name: Syntax Compilation
         run: |
-          python -m py_compile app/*.py run_app.py
+          python -m compileall app run_app.py
 
       - name: Run Unit Tests
         run: |
-          python -c "import sys; sys.path.insert(0, '.'); import app.main, app.config, app.sounds, app.telegram; print('[OK] Core modules imported successfully')"
+          python -m unittest discover -s tests -p "test_*.py"
 
       - name: Build Standalone Windows Executable (NewsAlerts.exe)
         run: |
           powershell -File .\build.ps1 -Task build
 
-      - name: Verify Executable & Custom Icon
+      - name: Verify Executable Integrity & Embedded Custom Icon
         run: |
-          if (!(Test-Path "dist\NewsAlerts.exe")) {
-            Write-Error "dist\NewsAlerts.exe not found!"
-            exit 1
-          }
+          python scripts/verify-packages.py --exe dist/NewsAlerts.exe
           Add-Type -AssemblyName System.Drawing
           $ico = [System.Drawing.Icon]::ExtractAssociatedIcon("dist\NewsAlerts.exe")
           Write-Host "Successfully verified embedded executable icon ($($ico.Width)x$($ico.Height))"
@@ -67,15 +64,21 @@ jobs:
           pip install -r requirements.txt
           pip install pillow
 
-      - name: Syntax & Import Validation
+      - name: Syntax Compilation
         run: |
-          python3 -m py_compile app/*.py run_app.py
+          python3 -m compileall app run_app.py
 
-      - name: Verify macOS Launcher & ICNS Icon
+      - name: Run Unit Tests
         run: |
-          chmod +x run.sh install.sh
-          test -f assets/icon.icns
-          python3 -c "import sys; sys.path.insert(0, '.'); import app.main; print('[OK] macOS environment verified')"
+          python3 -m unittest discover -s tests -p "test_*.py"
+
+      - name: Package macOS Release & Verify
+        run: |
+          mkdir -p release-macos/NewsAlerts
+          cp -r app web assets run.sh install.sh requirements.txt run_app.py README.md release-macos/NewsAlerts/
+          chmod +x release-macos/NewsAlerts/*.sh
+          tar -czvf NewsAlerts-macOS-arm64.tar.gz -C release-macos NewsAlerts
+          python3 scripts/verify-packages.py --macos-tar NewsAlerts-macOS-arm64.tar.gz
 
   test-and-build-linux:
     name: Linux x64 Build & Validation
@@ -101,13 +104,18 @@ jobs:
           pip install -r requirements.txt
           pip install pillow
 
-      - name: Syntax & Import Validation
+      - name: Syntax Compilation
         run: |
-          python3 -m py_compile app/*.py run_app.py
+          python3 -m compileall app run_app.py
 
-      - name: Verify Linux Desktop Integration & install.sh
+      - name: Run Unit Tests
         run: |
-          chmod +x run.sh install.sh
-          test -f assets/NewsAlerts.desktop
-          test -f assets/app_icon_transparent.png
-          python3 -c "import sys; sys.path.insert(0, '.'); import app.config, app.sounds; print('[OK] Linux configuration & sound handlers verified')"
+          python3 -m unittest discover -s tests -p "test_*.py"
+
+      - name: Package Linux Release & Verify
+        run: |
+          mkdir -p release-linux/NewsAlerts
+          cp -r app web assets run.sh install.sh requirements.txt run_app.py README.md release-linux/NewsAlerts/
+          chmod +x release-linux/NewsAlerts/*.sh
+          tar -czvf NewsAlerts-Linux-x64.tar.gz -C release-linux NewsAlerts
+          python3 scripts/verify-packages.py --linux-tar NewsAlerts-Linux-x64.tar.gz
