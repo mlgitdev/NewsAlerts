@@ -237,19 +237,22 @@
 
     tab_about(c) {
       const wrap = U.el("div", { class: "about-pane" });
+      const ver = App.version || "2.4.0";
+      const sem = App.semver || { major: 2, minor: 4, patch: 0 };
       const hero = U.el("div", { class: "about-hero-wrap" },
         U.el("img", { src: "img/hero.jpg", class: "about-hero-img", alt: "NewsAlerts Hero Banner" }),
         U.el("div", { class: "about-hero-overlay" },
           U.el("div", { class: "about-title" }, "NewsAlerts — Momentum Intelligence"),
-          U.el("div", { class: "about-ver" }, "v2.4 Portable Edition")
+          U.el("div", { class: "about-ver" }, `v${ver} (SemVer 2.0.0)`)
         )
       );
 
       const grid = U.el("div", { class: "form-grid", style: "margin-top:12px" });
       grid.append(
-        U.el("h3", {}, "System & Architecture"),
-        ...Settings.field("Platform Engine", U.el("span", { style: "color:var(--text);font-family:var(--mono);font-size:12px" }, "Python 3.11 · Edge WebView2 · WinMM Per-Process Audio")),
-        ...Settings.field("Data Storage", U.el("span", { style: "color:var(--text);font-family:var(--mono);font-size:12px" }, "%APPDATA%\\NewsAlerts\\ (Config & 4-Day Tape)")),
+        U.el("h3", {}, "System & Semantic Versioning"),
+        ...Settings.field("Semantic Version", U.el("span", { style: "color:var(--up);font-family:var(--mono);font-weight:700" }, `v${ver} [Major: ${sem.major}, Minor: ${sem.minor}, Patch: ${sem.patch}]`), "Strictly conforms to SemVer 2.0.0 (MAJOR.MINOR.PATCH)"),
+        ...Settings.field("Platform Engine", U.el("span", { style: "color:var(--text);font-family:var(--mono);font-size:12px" }, "Python 3.10+ · Native pywebview · Cross-Platform Audio")),
+        ...Settings.field("Data Storage", U.el("span", { style: "color:var(--text);font-family:var(--mono);font-size:12px" }, "%APPDATA%\\NewsAlerts\\ or OS Application Support")),
         ...Settings.field("TradingView Feeds", U.el("span", { style: "color:var(--up);font-weight:600" }, c.tv?.sessionid ? "Connected (Real-Time)" : "Unauthenticated (15m Delay)")),
         ...Settings.field("Borrow Locates", U.el("span", { style: "color:var(--text)" }, "Alpaca API + Live TradingView Feeds")),
         ...Settings.field("Push Notifications", U.el("span", { style: "color:var(--text)" }, "Telegram Asynchronous Queue Worker"))

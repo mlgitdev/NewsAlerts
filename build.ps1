@@ -101,11 +101,19 @@ function Verify-Secrets {
 }
 
 function Build-Executable {
-    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    $VersionPy = Join-Path $ScriptDir "app\version.py"
+    $appVer = "2.4.0"
+    if (Test-Path $VersionPy) {
+        $match = Select-String -Path $VersionPy -Pattern '__version__\s*=\s*["'']([^"'']+)["'']'
+        if ($match) {
+            $appVer = $match.Matches[0].Groups[1].Value
+        }
+    }
+
     Write-Host ""
     Write-Host "=======================================================" -ForegroundColor Cyan
-    Write-Host " Building Portable Executable: NewsAlerts.exe" -ForegroundColor Cyan
-    Write-Host " Target OS: Windows x64 | Output: dist\NewsAlerts.exe" -ForegroundColor Cyan
+    Write-Host " Building Portable Executable: NewsAlerts.exe (v$appVer)" -ForegroundColor Cyan
+    Write-Host " Target OS: Windows x64 | SemVer 2.0.0: v$appVer" -ForegroundColor Cyan
     Write-Host " Secrets: Excluded (configured via AppData / Settings UI)" -ForegroundColor Cyan
     Write-Host "=======================================================" -ForegroundColor Cyan
     Write-Host ""

@@ -18,6 +18,7 @@ try:
     from .tape import TapeWorker
     from .telegram import TelegramService
     from .tv_client import TVClient
+    from .version import get_version
 except ImportError:
     from app.api import Api, Bus
     from app.borrow import BorrowService
@@ -29,6 +30,7 @@ except ImportError:
     from app.tape import TapeWorker
     from app.telegram import TelegramService
     from app.tv_client import TVClient
+    from app.version import get_version
 
 if getattr(sys, "frozen", False):
     BASE_DIR = Path(getattr(sys, "_MEIPASS", Path(sys.executable).resolve().parent))
@@ -93,7 +95,7 @@ class App:
     def run(self) -> None:
         c = self.cfg.get()
         self.main_window = webview.create_window(
-            "NewsAlerts — Momentum Screener",
+            f"NewsAlerts v{get_version()} — Momentum Screener",
             f"{self.server_url}/index.html",
             width=1600, height=950, min_size=(1000, 600), background_color="#0b0e14",
             on_top=bool(c["ui"]["always_on_top"])

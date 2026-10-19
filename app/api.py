@@ -7,6 +7,7 @@ import webbrowser
 from . import sessions as S
 from .news import NewsService
 from .sounds import list_sounds
+from .version import get_version, get_version_info
 
 log = logging.getLogger(__name__)
 
@@ -58,6 +59,8 @@ class Api:
         kid = a.borrow.key_id
         tv_auth = a.client.get_auth_status() if hasattr(a.client, "get_auth_status") else {}
         return {
+            "version": get_version(),
+            "semver": get_version_info(),
             "config": a.cfg.get(),
             "sounds": list_sounds(),
             "status": a.screener.status_payload(),
@@ -72,6 +75,10 @@ class Api:
             "tv_pro_plan": tv_auth.get("pro_plan", ""),
             "tv_error": tv_auth.get("error", ""),
         }
+
+    def get_version(self) -> dict:
+        """Return Semantic Version metadata to frontend callers."""
+        return get_version_info()
 
     def poll_events(self, after_id: int = 0):
         return self._app.bus.poll(int(after_id))

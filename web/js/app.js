@@ -10,7 +10,10 @@
     App.sounds = state.sounds;
     App.alpaca_active = state.alpaca_active;
     App.alpaca_key_masked = state.alpaca_key_masked;
+    App.version = state.version || "2.4.0";
+    App.semver = state.semver || { major: 2, minor: 4, patch: 0 };
 
+    renderVersionBadges(App.version);
     Settings.applyUi();
 
     // Mount core panels
@@ -354,6 +357,19 @@
       window.addEventListener("mousemove", onMove);
       window.addEventListener("mouseup", onUp);
     });
+  }
+
+  function renderVersionBadges(ver) {
+    const formatted = ver.startsWith("v") ? ver : `v${ver}`;
+    const cornerEl = U.$("#corner-version-text");
+    if (cornerEl) cornerEl.textContent = formatted;
+    const brandEl = U.$("#brand-version");
+    if (brandEl) brandEl.textContent = formatted;
+    const cornerBadge = U.$("#corner-version-badge");
+    if (cornerBadge) {
+      cornerBadge.onclick = () => Settings.open("about");
+      cornerBadge.title = `NewsAlerts ${formatted} (SemVer 2.0.0) — Click for Details`;
+    }
   }
 
   window.addEventListener("DOMContentLoaded", init);
