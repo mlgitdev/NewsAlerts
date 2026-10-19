@@ -52,3 +52,29 @@ The Tape monitors the entire small-cap universe (e.g. Price $1–$50, Min Change
 - **Squeeze Alert – Up 10% in 10min**: 10% gain in 10 minutes (up-only within active window).
 
 Each strategy can be individually toggled on/off in the **Tape Strategies** settings tab.
+
+---
+
+## 5. Keyboard Shortcuts & Hotkeys Configuration
+
+NewsAlerts includes a dedicated **Hotkeys** tab in Settings to customize keyboard shortcuts to user preferences:
+- **Interactive Rebinding**: Click any shortcut input in the Hotkeys tab and press the desired key to rebind it immediately.
+- **Restore Defaults**: Click **↺ Reset Defaults** to restore institutional trading defaults anytime.
+- **Configuration Schema (`config.json`)**:
+  ```json
+  "hotkeys": {
+    "mute": "m",
+    "popout_tape": "t",
+    "pause_tape": "Space",
+    "settings": "s",
+    "refresh": "r",
+    "close_modal": "Escape",
+    "focus_story": "Enter",
+    "preset_1": "1",
+    "preset_2": "2",
+    "preset_3": "3",
+    "preset_4": "4",
+    "preset_5": "5"
+  }
+  ```
+- **Focus Protection**: Shortcuts automatically yield when typing inside text boxes or search inputs to prevent accidental triggers.

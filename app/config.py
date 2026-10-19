@@ -120,6 +120,21 @@ DEFAULT_STRATEGIES = [
      "up_pct": 5, "window_min": 5},
 ]
 
+DEFAULT_HOTKEYS = {
+    "mute": "m",
+    "popout_tape": "t",
+    "pause_tape": "Space",
+    "settings": "s",
+    "refresh": "r",
+    "close_modal": "Escape",
+    "focus_story": "Enter",
+    "preset_1": "1",
+    "preset_2": "2",
+    "preset_3": "3",
+    "preset_4": "4",
+    "preset_5": "5",
+}
+
 DEFAULT_CONFIG = {
     "tv": {"sessionid": "", "sessionid_sign": ""},
     "borrow": {"alpaca_key_id": "", "alpaca_secret_key": "", "mode": "auto"},
@@ -166,6 +181,7 @@ DEFAULT_CONFIG = {
         "enabled": [s["name"] for s in DEFAULT_STRATEGIES],
         "strategies": DEFAULT_STRATEGIES,
     },
+    "hotkeys": copy.deepcopy(DEFAULT_HOTKEYS),
     "ui": {"always_on_top": False, "font_size": 13, "news_width": 420, "tape_height": 300},
 }
 

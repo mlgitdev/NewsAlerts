@@ -75,7 +75,10 @@
         document.addEventListener("keydown", (e) => {
           if (e.ctrlKey || e.altKey || e.metaKey) return;
           if (/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName) || document.activeElement?.isContentEditable) return;
-          if (e.key === " ") {
+          const hk = App.config?.hotkeys || {};
+          const pauseKey = (hk.pause_tape || "Space").toLowerCase();
+          const normKey = (e.key === " " ? "Space" : e.key).toLowerCase();
+          if (normKey === pauseKey || e.key === " ") {
             e.preventDefault();
             Tape.setPaused(!Tape.paused);
           }

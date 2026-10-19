@@ -37,6 +37,7 @@ All official releases are produced deterministically through GitHub Actions:
 
 ## Release History
 
+- [v2.5.0 Release Notes](releases/v2.5.0.md) — Customizable Keyboard Shortcuts & Hotkey Configuration tab in Settings with interactive key capture, institutional defaults, and multi-OS config persistence.
 - [v2.4.5 Release Notes](releases/v2.4.5.md) — Single Source of Truth (SSOT) architecture via root `VERSION` file, dynamic runtime propagation, and complete decoupling of static version strings.
 - [v2.4.4 Release Notes](releases/v2.4.4.md) — Fix and activate terminal-wide keyboard shortcuts and hotkeys (M, T, Space, S, R, Esc, 1-5, Enter), toast feedback, and input guards.
 - [v2.4.3 Release Notes](releases/v2.4.3.md) — Multi-OS data directory resolution, $HOME/.newsalerts and env overrides, auto-provisioning, and test coverage.
