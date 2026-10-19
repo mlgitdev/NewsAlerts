@@ -91,6 +91,13 @@ function Build-Executable {
 
     Ensure-Environment
 
+    $running = Get-Process NewsAlerts -ErrorAction SilentlyContinue
+    if ($running) {
+        Write-Host "[-] Closing running NewsAlerts instance before build..." -ForegroundColor Yellow
+        $running | Stop-Process -Force -ErrorAction SilentlyContinue
+        Start-Sleep -Milliseconds 800
+    }
+
     Write-Host "[1/3] Verifying dependencies and web assets..." -ForegroundColor Yellow
     $webIndex = Join-Path $ScriptDir "web\index.html"
     if (-not (Test-Path $webIndex)) {

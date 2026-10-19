@@ -1,5 +1,9 @@
 # NewsAlerts — Momentum Screener, Tape & News (Windows desktop)
 
+<p align="center">
+  <img src="../assets/hero.jpg" alt="NewsAlerts Hero Banner" width="100%" style="border-radius:10px; border:1px solid #2a3347; box-shadow:0 10px 30px rgba(0,0,0,0.5);" />
+</p>
+
 ## 1. Goal
 A lightweight Windows desktop app that replicates the TradingView stock screener workflow
 (small-float momentum), and adds what TradingView lacks:

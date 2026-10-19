@@ -45,7 +45,15 @@
 
     renderEmpty() {
       News.head.replaceChildren(U.el("div", { class: "pane-title" }, "📰 News"));
-      News.list.replaceChildren(U.el("div", { class: "empty" }, U.el("div", { class: "big" }, "📰"), "Click a symbol to see its latest news."));
+      News.list.replaceChildren(
+        U.el("div", { class: "news-empty-hero" },
+          U.el("img", { src: "img/hero.jpg", class: "news-hero-img", alt: "NewsAlerts Hero" }),
+          U.el("div", { class: "news-hero-caption" },
+            U.el("div", { class: "news-hero-title" }, "Real-Time Momentum Intelligence"),
+            U.el("div", { class: "news-hero-sub" }, "Click any symbol from the Screener or Tape to inspect live news headlines and short borrow locates.")
+          )
+        )
+      );
     },
 
     async select(ticker, info) {
