@@ -13,7 +13,7 @@
     <div id="tape-host"></div>
     <div class="version-corner" id="corner-version-badge" title="NewsAlerts (SemVer 2.0.0)">
       <span class="ver-dot"></span>
-      <span class="ver-text" id="corner-version-text">v2.4.1</span>
+      <span class="ver-text" id="corner-version-text">v2.4.2</span>
     </div>
   </div>
 
@@ -25,7 +25,7 @@
       const state = await App.api().get_state();
       App.config = state.config;
       App.sounds = state.sounds;
-      App.version = state.version || "2.4.1";
+      App.version = state.version || "2.4.2";
       const verEl = document.getElementById("corner-version-text");
       if (verEl && App.version) verEl.textContent = `v${App.version}`;
       if (App.config.ui && App.config.ui.font_size) {

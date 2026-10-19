@@ -10,8 +10,8 @@
     App.sounds = state.sounds;
     App.alpaca_active = state.alpaca_active;
     App.alpaca_key_masked = state.alpaca_key_masked;
-    App.version = state.version || "2.4.1";
-    App.semver = state.semver || { major: 2, minor: 4, patch: 1 };
+    App.version = state.version || "2.4.2";
+    App.semver = state.semver || { major: 2, minor: 4, patch: 2 };
 
     renderVersionBadges(App.version);
     Settings.applyUi();
