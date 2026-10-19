@@ -17,6 +17,7 @@ webview_submodules = collect_submodules('webview')
 
 datas = [
     ('web', 'web'),
+    ('VERSION', '.'),
 ] + tzdata_datas + bottle_datas + webview_datas
 
 # Hidden imports that dynamic loaders or reflection might miss

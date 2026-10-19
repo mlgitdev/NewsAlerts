@@ -9,17 +9,16 @@ NewsAlerts adheres strictly to [Semantic Versioning (SemVer 2.0.0)](https://semv
 
 ---
 
-## Single Source of Truth (`app/version.py`)
+## Single Source of Truth (`VERSION`)
 
-Application version metadata is centrally registered in [`app/version.py`](../app/version.py):
-- `__version__ = "2.4.4"`
-- `VERSION_INFO = (2, 4, 4)`
-- **`SemVer` Dataclass**: Validates, parses, bumps, and compares version strings adhering strictly to SemVer 2.0.0.
-- **Dynamic Corner Display**: The active version is dynamically queried via `App.api().get_state()` and rendered in:
-  1. The **bottom-right corner** of the terminal window (`#corner-version-badge`). Clicking this badge opens the system and release dialog.
-  2. The **topbar brand header** (`#brand-version`).
+Application version metadata is centrally registered in the root [`VERSION`](../VERSION) plain-text file:
+- **Root `VERSION` File**: Contains the plain SemVer string (e.g., `2.4.5`).
+- **Automatic Runtime Propagation**: [`app/version.py`](../app/version.py) dynamically reads `VERSION` at launch (and inside frozen PyInstaller executables via `sys._MEIPASS`), automatically calculating `__version__`, `VERSION_INFO = (major, minor, patch)`, and git tag representation.
+- **Dynamic Frontend Display**: The frontend terminal queries `App.api().get_state()` and dynamically renders version badges without requiring hardcoded strings in HTML or JavaScript:
+  1. The **topbar brand header** (`#brand-version`).
+  2. The **bottom-right corner badge** of the terminal window (`#corner-version-badge`). Clicking this badge opens the system and release dialog.
   3. The **popout tape window corner** (`web/tape.html`).
-  4. The **Settings -> About tab**, showing detailed SemVer component breakdown (`Major`, `Minor`, `Patch`).
+  4. The **Settings -> About tab**, dynamically detailing SemVer component breakdown (`Major`, `Minor`, `Patch`).
 
 ---
 
@@ -28,7 +27,7 @@ Application version metadata is centrally registered in [`app/version.py`](../ap
 All official releases are produced deterministically through GitHub Actions:
 1. Every release tag (`v*.*.*`) or merged release PR triggers `.github/workflows/release.yml`.
 2. Clean virtual environments build multi-platform release artifacts:
-   - **Windows x64**: PyInstaller standalone single-file `.exe` with embedded Win32 standard DIB icon.
+   - **Windows x64**: PyInstaller standalone single-file `.exe` with embedded Win32 standard DIB icon and bundled `VERSION` file.
    - **macOS arm64**: Standalone Apple Silicon app bundle and launcher with native `.icns`.
    - **Linux x64**: Standalone binary, `.desktop` launcher, and `install.sh`.
 3. An automated security audit verifies that `keys.toml`, `.env`, and secret directories are 100% absent from all bundles.
@@ -38,6 +37,7 @@ All official releases are produced deterministically through GitHub Actions:
 
 ## Release History
 
+- [v2.4.5 Release Notes](releases/v2.4.5.md) — Single Source of Truth (SSOT) architecture via root `VERSION` file, dynamic runtime propagation, and complete decoupling of static version strings.
 - [v2.4.4 Release Notes](releases/v2.4.4.md) — Fix and activate terminal-wide keyboard shortcuts and hotkeys (M, T, Space, S, R, Esc, 1-5, Enter), toast feedback, and input guards.
 - [v2.4.3 Release Notes](releases/v2.4.3.md) — Multi-OS data directory resolution, $HOME/.newsalerts and env overrides, auto-provisioning, and test coverage.
 - [v2.4.2 Release Notes](releases/v2.4.2.md) — About pane GitHub & Wiki links, README social preview hero, TradingView chart popout docs, and comprehensive Wiki suite.

@@ -1,4 +1,4 @@
-"""Unit tests for Semantic Versioning implementation (app/version.py)."""
+from pathlib import Path
 import unittest
 
 from app.version import SemVer, get_version, get_version_info, validate_semver, __version__
@@ -8,12 +8,19 @@ class TestSemanticVersioning(unittest.TestCase):
     def test_current_version_valid(self):
         self.assertTrue(validate_semver(__version__))
         info = get_version_info()
-        self.assertEqual(info["version"], "2.4.4")
-        self.assertEqual(info["major"], 2)
-        self.assertEqual(info["minor"], 4)
-        self.assertEqual(info["patch"], 4)
-        self.assertEqual(info["tag"], "v2.4.4")
+        self.assertEqual(info["version"], __version__)
+        parsed = SemVer.parse(__version__)
+        self.assertEqual(info["major"], parsed.major)
+        self.assertEqual(info["minor"], parsed.minor)
+        self.assertEqual(info["patch"], parsed.patch)
+        self.assertEqual(info["tag"], f"v{__version__}")
         self.assertFalse(info["is_prerelease"])
+
+    def test_version_reads_from_root_file(self):
+        root_v = Path(__file__).resolve().parent.parent / "VERSION"
+        if root_v.is_file():
+            expected = root_v.read_text(encoding="utf-8").strip()
+            self.assertEqual(__version__, expected)
 
     def test_parse_valid_semver(self):
         cases = [
