@@ -13,11 +13,27 @@
 <p align="center">
   <a href="https://github.com/mlgitdev/NewsAlerts/actions/workflows/ci.yml"><img src="https://github.com/mlgitdev/NewsAlerts/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
   <a href="https://github.com/mlgitdev/NewsAlerts/actions/workflows/secret-scan.yml"><img src="https://github.com/mlgitdev/NewsAlerts/actions/workflows/secret-scan.yml/badge.svg" alt="Secret Scanning" /></a>
-  <a href="https://github.com/mlgitdev/NewsAlerts/releases"><img src="https://img.shields.io/github/v/release/mlgitdev/NewsAlerts?color=10b981&label=Release" alt="Latest Release" /></a>
-  <img src="https://img.shields.io/badge/SemVer-2.0.0-emerald?logo=semver" alt="SemVer 2.0.0" />
+  <a href="https://github.com/mlgitdev/NewsAlerts/releases"><img src="https://img.shields.io/github/v/release/mlgitdev/NewsAlerts?color=10b981&label=SemVer%20Release&logo=semver" alt="Latest SemVer Release" /></a>
   <img src="https://img.shields.io/badge/Platform-Windows%20x64%20%7C%20macOS%20arm64%20%7C%20Linux-blue" alt="Supported Platforms" />
   <img src="https://img.shields.io/badge/Package%20Gate-Verified-purple" alt="Package Verification Gate" />
 </p>
+
+---
+
+## 🎯 The Problem & Why NewsAlerts
+
+Active momentum day trading requires spotting low-float runners the split second volume arrives. Existing platforms make this harder than it should be:
+
+- **Interactive Brokers (TWS & IBKR Desktop)**: Notoriously bloated, complex, and cumbersome to configure for fast intraday momentum screening.
+- **TradingView**: Offers powerful scanning data but completely lacks native real-time audio bells and instant alert dispatching when new symbols break into momentum criteria.
+
+**NewsAlerts bridges this gap with a focused, zero-bloat institutional trading terminal designed for pure execution speed:**
+
+- ⚡ **Zero-Latency Inbound Alerts**: Plays an instant audio chime (with interactive volume control & one-click pause) and sends Telegram push notifications the exact second a ticker breaches your screening criteria.
+- 🌊 **Running Momentum Tape**: Warrior-Trading style High of Day (HOD) and Squeeze Breakout prints with 4-day local disk persistence for weekend and off-hours trade review.
+- 📰 **Instant Catalyst Confirmation**: Integrated Benzinga-first news wire showing headlines from the last 1 hour to 7 days, allowing immediate verification of what catalyst is driving the move.
+- 🩳 **Real-Time Borrow Locates**: Live `HTB` (Hard to Borrow), `ETB` (Easy to Borrow), and `NO BORROW` badges right on the tape and screener to identify short squeeze potential instantly.
+- 🪶 **Zero Electron / Node.js Overhead**: Native Edge WebView2 execution compiled to a lightweight ~14 MB standalone binary with sub-second launch times.
 
 ---
 
