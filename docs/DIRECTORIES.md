@@ -4,17 +4,37 @@ NewsAlerts is engineered to be **100% portable and isolated**. The executable bi
 
 ---
 
-## 1. Operating System Application Directories
+## 1. Operating System Application Directories & Resolution Priority
 
-| Operating System | Application Data Root (`APP_DIR`) |
-|:---|:---|
-| **Windows** | `%APPDATA%\NewsAlerts\` (e.g. `C:\Users\<User>\AppData\Roaming\NewsAlerts\`) |
-| **macOS** | `~/Library/Application Support/NewsAlerts/` |
-| **Linux** | `~/.config/NewsAlerts/` (or `$XDG_CONFIG_HOME/NewsAlerts/`) |
+NewsAlerts automatically resolves, creates, and provisions the data root across all platforms following this priority order:
+
+1. **Explicit Environment Variable Override**:
+   If `NEWSALERTS_DIR` or `NEWSALERTS_HOME` is set (e.g. `export NEWSALERTS_DIR=$HOME/.newsalerts`), the application expands the path, creates the folder automatically, and stores all user data there.
+2. **Dotfolder Precedence**:
+   If `$HOME/.newsalerts` exists on the system, NewsAlerts seamlessly uses it across Windows, macOS, and Linux.
+3. **Platform Standards**:
+
+| Operating System | Default Application Data Root (`APP_DIR`) | Fallback Location |
+|:---|:---|:---|
+| **Windows** | `%APPDATA%\NewsAlerts\` (e.g. `C:\Users\<User>\AppData\Roaming\NewsAlerts\`) | `$HOME/.newsalerts\` |
+| **macOS** | `~/Library/Application Support/NewsAlerts/` | `$HOME/.newsalerts/` |
+| **Linux / BSD** | `$XDG_CONFIG_HOME/NewsAlerts/` (default `~/.config/NewsAlerts/`) | `$HOME/.newsalerts/` |
 
 ---
 
-## 2. File Organization within `APP_DIR`
+## 2. Automated Directory & File Provisioning
+
+NewsAlerts features self-healing automated provisioning:
+- **Zero Manual Folder Creation**: On first launch, `get_app_dir()` automatically invokes `mkdir(parents=True, exist_ok=True)` to create the directory hierarchy.
+- **Initial File Provisioning**:
+  - `config.json` is automatically generated on first launch populated with complete default screening criteria, strategy definitions, and polling intervals if no configuration file exists.
+  - `tape_history.json` is initialized and maintained as a rolling 4-day buffer.
+  - `app.log` is initialized for structured diagnostic logging.
+- **Fail-Safe Fallback**: If system directory creation fails (e.g., restricted container or permission constraints), NewsAlerts automatically falls back to creating `$HOME/.newsalerts/`.
+
+---
+
+## 3. File Organization within `APP_DIR`
 
 ```
 <APP_DIR>/

@@ -9,13 +9,58 @@ import threading
 from pathlib import Path
 
 def get_app_dir() -> Path:
+    """Resolve and ensure the application data directory exists across all operating systems.
+
+    Resolution Priority:
+    1. NEWSALERTS_DIR or NEWSALERTS_HOME environment variable (explicit override).
+    2. $HOME/.newsalerts (if it already exists or is configured).
+    3. OS Standard Defaults:
+       - Windows: %APPDATA%\\NewsAlerts (fallback: ~/.newsalerts)
+       - macOS: ~/Library/Application Support/NewsAlerts (fallback: ~/.newsalerts)
+       - Linux / Unix: $XDG_CONFIG_HOME/NewsAlerts or ~/.config/NewsAlerts (fallback: ~/.newsalerts)
+
+    Automatically creates the target directory with mkdir(parents=True, exist_ok=True).
+    """
+    # 1. Explicit environment override
+    env_dir = os.environ.get("NEWSALERTS_DIR") or os.environ.get("NEWSALERTS_HOME")
+    if env_dir:
+        target = Path(os.path.expandvars(env_dir)).expanduser().resolve()
+        try:
+            target.mkdir(parents=True, exist_ok=True)
+            return target
+        except Exception:
+            pass
+
+    # 2. Check if dotfolder ~/.newsalerts already exists
+    dot_dir = Path.home() / ".newsalerts"
+    if dot_dir.is_dir():
+        return dot_dir
+
+    # 3. Standard OS-specific locations
     if sys.platform == "win32":
-        base = Path(os.environ.get("APPDATA", Path.home()))
+        base = Path(os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming"))
+        target = base / "NewsAlerts"
     elif sys.platform == "darwin":
         base = Path.home() / "Library" / "Application Support"
+        target = base / "NewsAlerts"
     else:
-        base = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
-    return base / "NewsAlerts"
+        xdg = os.environ.get("XDG_CONFIG_HOME")
+        if xdg:
+            target = Path(os.path.expandvars(xdg)).expanduser() / "NewsAlerts"
+        else:
+            target = Path.home() / ".config" / "NewsAlerts"
+
+    # Automatically create the directory, falling back to ~/.newsalerts if system path fails
+    try:
+        target.mkdir(parents=True, exist_ok=True)
+        return target
+    except Exception:
+        try:
+            dot_dir.mkdir(parents=True, exist_ok=True)
+            return dot_dir
+        except Exception:
+            return target
+
 
 APP_DIR = get_app_dir()
 CONFIG_PATH = APP_DIR / "config.json"
@@ -145,14 +190,34 @@ class Config:
             with open(CONFIG_PATH, "r", encoding="utf-8") as f:
                 return _merge(DEFAULT_CONFIG, json.load(f))
         except FileNotFoundError:
-            return copy.deepcopy(DEFAULT_CONFIG)
+            # First launch: persist initial default config.json immediately
+            cfg = copy.deepcopy(DEFAULT_CONFIG)
+            try:
+                APP_DIR.mkdir(parents=True, exist_ok=True)
+                tmp = CONFIG_PATH.with_suffix(".tmp")
+                with open(tmp, "w", encoding="utf-8") as f:
+                    json.dump(cfg, f, indent=2)
+                tmp.replace(CONFIG_PATH)
+            except Exception:
+                pass
+            return cfg
         except Exception:
-            # Corrupt file: keep a backup, start fresh
+            # Corrupt file: keep a backup, start fresh with defaults
             try:
                 CONFIG_PATH.replace(CONFIG_PATH.with_suffix(".bad.json"))
             except Exception:
                 pass
-            return copy.deepcopy(DEFAULT_CONFIG)
+            cfg = copy.deepcopy(DEFAULT_CONFIG)
+            try:
+                APP_DIR.mkdir(parents=True, exist_ok=True)
+                tmp = CONFIG_PATH.with_suffix(".tmp")
+                with open(tmp, "w", encoding="utf-8") as f:
+                    json.dump(cfg, f, indent=2)
+                tmp.replace(CONFIG_PATH)
+            except Exception:
+                pass
+            return cfg
+
 
     def save(self) -> None:
         with self._lock:
@@ -174,3 +239,18 @@ class Config:
     def __getitem__(self, key):
         with self._lock:
             return self.data[key]
+
+
+def ensure_app_dir_initialized() -> Path:
+    """Ensure APP_DIR exists and initial configuration files are provisioned."""
+    d = get_app_dir()
+    d.mkdir(parents=True, exist_ok=True)
+    if not CONFIG_PATH.is_file():
+        try:
+            tmp = CONFIG_PATH.with_suffix(".tmp")
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(DEFAULT_CONFIG, f, indent=2)
+            tmp.replace(CONFIG_PATH)
+        except Exception:
+            pass
+    return d
