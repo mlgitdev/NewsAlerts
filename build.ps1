@@ -102,12 +102,17 @@ function Verify-Secrets {
 }
 
 function Build-Executable {
-    $VersionPy = Join-Path $ScriptDir "app\version.py"
-    $appVer = "2.4.1"
-    if (Test-Path $VersionPy) {
-        $match = Select-String -Path $VersionPy -Pattern '__version__\s*=\s*["'']([^"'']+)["'']'
-        if ($match) {
-            $appVer = $match.Matches[0].Groups[1].Value
+    $VersionFile = Join-Path $ScriptDir "VERSION"
+    $appVer = "2.4.5"
+    if (Test-Path $VersionFile) {
+        $appVer = (Get-Content $VersionFile -Raw).Trim()
+    } else {
+        $VersionPy = Join-Path $ScriptDir "app\version.py"
+        if (Test-Path $VersionPy) {
+            $match = Select-String -Path $VersionPy -Pattern '__version__\s*=\s*["'']([^"'']+)["'']'
+            if ($match) {
+                $appVer = $match.Matches[0].Groups[1].Value
+            }
         }
     }
 

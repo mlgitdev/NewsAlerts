@@ -124,7 +124,7 @@ Any bug fix, feature addition, or asset correction affecting runtime code or ass
 - **MINOR** (`x.Y.0`): New user-facing features, new trading strategies, audio browser integrations, new platform support.
 - **MAJOR** (`X.0.0`): Breaking architecture changes, breaking configuration format revisions, major terminal overhauls.
 
-Pure documentation changes (e.g., `README.md`, `docs/`, `AGENTS.md`) or standalone CI workflow edits that do not alter the compiled binary do NOT require a version bump. When a rebuild is required, all version references (`app/version.py`, `build.ps1`, HTML badges, test assertions, and release notes) must be updated simultaneously.
+Pure documentation changes (e.g., `README.md`, `docs/`, `AGENTS.md`) or standalone CI workflow edits that do not alter the compiled binary do NOT require a version bump. Application versioning is centrally governed by the root `VERSION` file as the Single Source of Truth (SSOT). When a rebuild is required, update `VERSION` (which automatically propagates across `app/version.py`, `build.ps1`, `NewsAlerts.spec`, runtime UI badges, and test suites) and document the changes in `docs/releases/vX.Y.Z.md` and `docs/RELEASES.md`.
 
 ---
 

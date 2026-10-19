@@ -6,13 +6,12 @@ Format: MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD]
 """
 from __future__ import annotations
 
+import os
 import re
+import sys
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Optional, Tuple
-
-# Current application version (Single Source of Truth)
-__version__ = "2.4.4"
-VERSION_INFO = (2, 4, 4)
 
 # Official SemVer 2.0.0 regex pattern
 SEMVER_REGEX = re.compile(
@@ -130,6 +129,37 @@ class SemVer:
         if not isinstance(other, SemVer):
             return NotImplemented
         return self._sort_key() >= other._sort_key()
+
+
+def _load_version() -> str:
+    """Read SemVer string from root VERSION file or PyInstaller bundle."""
+    # 1. PyInstaller frozen executable
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        v_file = Path(sys._MEIPASS) / "VERSION"
+        if v_file.is_file():
+            try:
+                v = v_file.read_text(encoding="utf-8").strip()
+                if v:
+                    return v
+            except Exception:
+                pass
+    # 2. Source checkout / repository root
+    root_v = Path(__file__).resolve().parent.parent / "VERSION"
+    if root_v.is_file():
+        try:
+            v = root_v.read_text(encoding="utf-8").strip()
+            if v:
+                return v
+        except Exception:
+            pass
+    # 3. Safe institutional fallback
+    return "2.4.5"
+
+
+# Current application version (Single Source of Truth from root VERSION file)
+__version__ = _load_version()
+_parsed_version = SemVer.parse(__version__)
+VERSION_INFO: Tuple[int, int, int] = (_parsed_version.major, _parsed_version.minor, _parsed_version.patch)
 
 
 def get_version() -> str:
