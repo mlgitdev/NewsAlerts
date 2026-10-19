@@ -66,7 +66,7 @@ def create_social_preview(output_path: Path):
     draw.text((126, 48), "NewsAlerts", font=font_bold_42, fill=(255, 255, 255))
     
     # Version Badge
-    ver_text = "v2.4.0"
+    ver_text = "v2.4.1"
     v_bbox = draw.textbbox((0, 0), ver_text, font=font_mono_13)
     vw = v_bbox[2] - v_bbox[0] + 16
     vx = 126 + 236

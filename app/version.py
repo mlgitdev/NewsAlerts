@@ -11,8 +11,8 @@ from dataclasses import dataclass
 from typing import Any, Optional, Tuple
 
 # Current application version (Single Source of Truth)
-__version__ = "2.4.0"
-VERSION_INFO = (2, 4, 0)
+__version__ = "2.4.1"
+VERSION_INFO = (2, 4, 1)
 
 # Official SemVer 2.0.0 regex pattern
 SEMVER_REGEX = re.compile(
