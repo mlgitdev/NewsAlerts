@@ -49,6 +49,28 @@ def make_app(api, web_dir: Path) -> Bottle:
     def js(filepath):
         return static_file(filepath, root=str(web_dir / "js"))
 
+    @app.route("/img/<filepath:path>")
+    def img(filepath):
+        if (web_dir / "img" / filepath).exists():
+            return static_file(filepath, root=str(web_dir / "img"))
+        if (web_dir.parent / "assets" / filepath).exists():
+            return static_file(filepath, root=str(web_dir.parent / "assets"))
+        return static_file(filepath, root=str(web_dir / "img"))
+
+    @app.route("/assets/<filepath:path>")
+    def assets(filepath):
+        if (web_dir.parent / "assets" / filepath).exists():
+            return static_file(filepath, root=str(web_dir.parent / "assets"))
+        return static_file(filepath, root=str(web_dir / "img"))
+
+    @app.route("/favicon.ico")
+    def favicon():
+        return static_file("favicon.ico", root=str(web_dir))
+
+    @app.route("/icon.png")
+    def icon():
+        return static_file("icon.png", root=str(web_dir))
+
     # ---------------------------------------------------------------- API Routes
     @app.route("/api/state", method=["GET"])
     def get_state():
