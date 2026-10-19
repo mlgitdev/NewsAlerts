@@ -9,7 +9,7 @@ A lightweight Windows desktop app that replicates the TradingView stock screener
 (small-float momentum), and adds what TradingView lacks:
 
 1. **A bell** when a new symbol enters the screener table.
-2. **A news pane** (Benzinga-first) showing *very recent* news for the clicked symbol.
+2. **Zero-lag news wire** (Benzinga-first) showing *immediate* breaking headlines (eliminating the typical 5–15 minute delay seen on standard charting platforms).
 3. **A running tape** (Warrior-Trading style "Small Cap – High of Day Momentum") driven by
    predefined, toggleable strategies.
 
