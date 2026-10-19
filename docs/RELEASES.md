@@ -12,8 +12,8 @@ NewsAlerts adheres strictly to [Semantic Versioning (SemVer 2.0.0)](https://semv
 ## Single Source of Truth (`app/version.py`)
 
 Application version metadata is centrally registered in [`app/version.py`](../app/version.py):
-- `__version__ = "2.4.3"`
-- `VERSION_INFO = (2, 4, 3)`
+- `__version__ = "2.4.4"`
+- `VERSION_INFO = (2, 4, 4)`
 - **`SemVer` Dataclass**: Validates, parses, bumps, and compares version strings adhering strictly to SemVer 2.0.0.
 - **Dynamic Corner Display**: The active version is dynamically queried via `App.api().get_state()` and rendered in:
   1. The **bottom-right corner** of the terminal window (`#corner-version-badge`). Clicking this badge opens the system and release dialog.
@@ -38,6 +38,7 @@ All official releases are produced deterministically through GitHub Actions:
 
 ## Release History
 
+- [v2.4.4 Release Notes](releases/v2.4.4.md) — Fix and activate terminal-wide keyboard shortcuts and hotkeys (M, T, Space, S, R, Esc, 1-5, Enter), toast feedback, and input guards.
 - [v2.4.3 Release Notes](releases/v2.4.3.md) — Multi-OS data directory resolution, $HOME/.newsalerts and env overrides, auto-provisioning, and test coverage.
 - [v2.4.2 Release Notes](releases/v2.4.2.md) — About pane GitHub & Wiki links, README social preview hero, TradingView chart popout docs, and comprehensive Wiki suite.
 - [v2.4.1 Release Notes](releases/v2.4.1.md) — Runtime asset routing, Settings grid alignment fix, brand navigation, and social preview card.

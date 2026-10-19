@@ -80,6 +80,34 @@ class TestServerStaticRoutes(unittest.TestCase):
         if hasattr(res, "close"):
             res.close()
 
+    def test_refresh_route(self):
+        self.api.refresh.return_value = True
+        status_line = []
+        headers_list = []
+
+        def start_response(status, headers, exc_info=None):
+            status_line.append(status)
+            headers_list.extend(headers)
+
+        environ = {
+            "REQUEST_METHOD": "POST",
+            "PATH_INFO": "/api/refresh",
+            "wsgi.input": io.BytesIO(),
+            "wsgi.errors": io.StringIO(),
+            "wsgi.version": (1, 0),
+            "wsgi.multithread": False,
+            "wsgi.multiprocess": False,
+            "wsgi.run_once": False,
+            "wsgi.url_scheme": "http",
+            "SERVER_NAME": "localhost",
+            "SERVER_PORT": "8080",
+        }
+        res = self.app(environ, start_response)
+        self.assertTrue(status_line and status_line[0].startswith("200"))
+        self.api.refresh.assert_called_once()
+        if hasattr(res, "close"):
+            res.close()
+
 
 if __name__ == "__main__":
     unittest.main()

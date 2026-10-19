@@ -78,15 +78,30 @@
     },
 
     keys(e) {
-      if (/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return;
+      if (e.ctrlKey || e.altKey || e.metaKey) return;
+      if (/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName) || document.activeElement?.isContentEditable) return;
       if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
       const rows = U.$$("tr[data-t]", Screener.tbody);
       if (!rows.length) return;
       let i = rows.findIndex((r) => r.dataset.t === Screener.selected);
-      i = e.key === "ArrowDown" ? Math.min(rows.length - 1, i + 1) : Math.max(0, i - 1);
+      if (i === -1) {
+        i = 0;
+      } else {
+        i = e.key === "ArrowDown" ? Math.min(rows.length - 1, i + 1) : Math.max(0, i - 1);
+      }
       Screener.select(rows[i].dataset.t);
       rows[i].scrollIntoView({ block: "nearest" });
       e.preventDefault();
+    },
+
+    switchTab(screenId) {
+      if (App.config.active_screen === screenId) return;
+      App.config.active_screen = screenId;
+      Screener.changed();
+      const s = App.config.screens.find((x) => x.id === screenId);
+      if (s) {
+        U.toast("info", `Preset: ${s.name}`, `Switched to ${s.name} filter preset`, null, 2000);
+      }
     },
 
     changed() { Screener.data = null; Screener.renderBar(); Screener.renderTable(); App.saveConfig(true); },
@@ -111,10 +126,7 @@
         const name = U.el("span", {}, s.name);
         const cnt = U.el("span", { class: "count", id: "tab-count-" + s.id });
         const tab = U.el("div", { class: "tab" + (s.id === App.config.active_screen ? " active" : ""), id: "tab-" + s.id }, bell, name, cnt);
-        tab.onclick = () => {
-          if (App.config.active_screen === s.id) return;
-          App.config.active_screen = s.id; Screener.changed();
-        };
+        tab.onclick = () => Screener.switchTab(s.id);
         tab.ondblclick = () => Screener.rename(s, name);
         tab.oncontextmenu = (e) => { e.preventDefault(); Screener.tabMenu(s, tab, name); };
         t.append(tab);

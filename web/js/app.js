@@ -10,8 +10,8 @@
     App.sounds = state.sounds;
     App.alpaca_active = state.alpaca_active;
     App.alpaca_key_masked = state.alpaca_key_masked;
-    App.version = state.version || "2.4.3";
-    App.semver = state.semver || { major: 2, minor: 4, patch: 3 };
+    App.version = state.version || "2.4.4";
+    App.semver = state.semver || { major: 2, minor: 4, patch: 4 };
 
     renderVersionBadges(App.version);
     Settings.applyUi();
@@ -57,6 +57,9 @@
         }
       };
     }
+
+    // Keyboard Shortcuts & Hotkeys Coordinator
+    initHotkeys();
 
     // Event subscriptions from Python
     App.sub("status", (st) => {
@@ -367,6 +370,123 @@
       };
       window.addEventListener("mousemove", onMove);
       window.addEventListener("mouseup", onUp);
+    });
+  }
+
+  function initHotkeys() {
+    document.addEventListener("keydown", (e) => {
+      // Do not intercept if modifier keys like Ctrl / Alt / Meta are held
+      if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+      const tag = document.activeElement ? document.activeElement.tagName : "";
+      const isEditable = /INPUT|SELECT|TEXTAREA/.test(tag) || (document.activeElement && document.activeElement.isContentEditable);
+
+      // ESCAPE key: always allow Esc to close modal/drawer/story or unfocus active input
+      if (e.key === "Escape") {
+        if (isEditable) {
+          document.activeElement.blur();
+          e.preventDefault();
+          return;
+        }
+        let handled = false;
+        if (window.Settings && Settings.isOpen && Settings.isOpen()) {
+          Settings.close();
+          handled = true;
+        }
+        const drawer = U.$("#alerts-drawer");
+        if (drawer && drawer.classList.contains("show")) {
+          drawer.classList.remove("show");
+          handled = true;
+        }
+        if (window.News && News.closeAllStories && News.open && News.open.size > 0) {
+          News.closeAllStories();
+          handled = true;
+        }
+        if (handled) e.preventDefault();
+        return;
+      }
+
+      // If user is actively typing in an input/select/textarea, ignore terminal hotkeys
+      if (isEditable) return;
+
+      const k = e.key;
+
+      // 1 – 5: Switch screener tab presets
+      if (k >= "1" && k <= "5") {
+        const idx = parseInt(k, 10) - 1;
+        if (App.config?.screens && App.config.screens[idx]) {
+          e.preventDefault();
+          Screener.switchTab(App.config.screens[idx].id);
+        }
+        return;
+      }
+
+      // M / m: Master Mute
+      if (k === "m" || k === "M") {
+        e.preventDefault();
+        toggleMute();
+        const isMuted = !!App.config?.alerts?.mute;
+        U.toast(
+          "info",
+          isMuted ? "🔔 Alerts Muted" : "🔔 Alerts Active",
+          isMuted ? "Audio chimes & Telegram alerts paused" : "Audio chimes & Telegram alerts active",
+          null,
+          2500
+        );
+        return;
+      }
+
+      // T / t: Pop-Out Tape
+      if (k === "t" || k === "T") {
+        e.preventDefault();
+        App.api().pop_tape();
+        U.toast("info", "⚡ Pop-Out Tape", "Opening detached floating tape window", null, 2500);
+        return;
+      }
+
+      // Space: Pause / Resume tape stream
+      if (k === " ") {
+        e.preventDefault();
+        Tape.setPaused(!Tape.paused);
+        U.toast(
+          "info",
+          Tape.paused ? "⏸ Tape Stream Paused" : "▶ Tape Stream Resumed",
+          Tape.paused ? "Incoming tape momentum events held in buffer" : "Tape momentum stream running",
+          null,
+          2500
+        );
+        return;
+      }
+
+      // S / s: Open / Toggle Settings Modal
+      if (k === "s" || k === "S") {
+        e.preventDefault();
+        if (window.Settings && Settings.isOpen && Settings.isOpen()) {
+          Settings.close();
+        } else if (window.Settings && Settings.open) {
+          Settings.open();
+        }
+        return;
+      }
+
+      // R / r: Force Refresh
+      if (k === "r" || k === "R") {
+        e.preventDefault();
+        if (App.api().refresh) App.api().refresh();
+        if (window.News && News.ticker) {
+          News.load(true);
+        }
+        U.toast("info", "🔄 Force Refresh", "Re-scanning screener and refreshing news headlines", null, 2500);
+        return;
+      }
+
+      // Enter: Focus / expand first catalyst story
+      if (k === "Enter") {
+        if (window.News && News.openFirstStory && News.openFirstStory()) {
+          e.preventDefault();
+        }
+        return;
+      }
     });
   }
 

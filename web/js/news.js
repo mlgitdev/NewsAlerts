@@ -179,6 +179,28 @@
         U.el("div", { class: "story", html: (s && s.html) || "<i>No story text available — open the article.</i>" }),
         U.el("div", { class: "story-actions" }, U.el("button", { class: "btn sm", "data-act": "open" }, "Open article ↗")));
     },
+
+    closeAllStories() {
+      News.open.clear();
+      if (News.list) {
+        U.$$(".news-item.open", News.list).forEach((item) => {
+          item.classList.remove("open");
+          const s = item.querySelector(".story-wrap");
+          if (s) s.remove();
+        });
+      }
+    },
+
+    openFirstStory() {
+      if (!News.list) return false;
+      const firstItem = News.list.querySelector(".news-item");
+      if (firstItem) {
+        firstItem.click();
+        firstItem.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        return true;
+      }
+      return false;
+    },
   };
   window.News = News;
 })();

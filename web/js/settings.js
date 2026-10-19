@@ -27,8 +27,18 @@
         App.config = c; App.saveConfig(true); Settings.applyUi(); bg.classList.remove("show");
         Screener.renderBar(); Screener.renderTable(); Tape.renderAll(); News.syncTools();
       };
-      U.$("#settings-cancel").onclick = () => bg.classList.remove("show");
-      U.$("#settings-close").onclick = () => bg.classList.remove("show");
+      U.$("#settings-cancel").onclick = () => Settings.close();
+      U.$("#settings-close").onclick = () => Settings.close();
+    },
+
+    close() {
+      const bg = U.$("#settings");
+      if (bg) bg.classList.remove("show");
+    },
+
+    isOpen() {
+      const bg = U.$("#settings");
+      return !!(bg && bg.classList.contains("show"));
     },
 
     applyUi() {
@@ -239,8 +249,8 @@
 
     tab_about(c) {
       const wrap = U.el("div", { class: "about-pane" });
-      const ver = App.version || "2.4.3";
-      const sem = App.semver || { major: 2, minor: 4, patch: 3 };
+      const ver = App.version || "2.4.4";
+      const sem = App.semver || { major: 2, minor: 4, patch: 4 };
       const hero = U.el("div", { class: "about-hero-wrap" },
         U.el("img", { src: "img/hero.jpg", class: "about-hero-img", alt: "NewsAlerts Hero Banner" }),
         U.el("div", { class: "about-hero-overlay" },

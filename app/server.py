@@ -226,6 +226,14 @@ def make_app(api, web_dir: Path) -> Bottle:
             log.exception("Error in /api/pop_tape: %s", e)
             return json_resp({"ok": False})
 
+    @app.route("/api/refresh", method=["POST"])
+    def refresh():
+        try:
+            return json_resp({"ok": api.refresh()})
+        except Exception as e:
+            log.exception("Error in /api/refresh: %s", e)
+            return json_resp({"ok": False})
+
     @app.route("/api/clear_tape", method=["POST"])
     def clear_tape():
         try:

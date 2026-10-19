@@ -70,6 +70,17 @@
       App.sub("tape", (evs) => Tape.add(evs));
       App.sub("tape_cleared", () => { Tape.events = []; Tape.renderAll(); });
       App.sub("config", () => Tape.renderAll());
+
+      if (opts.popout) {
+        document.addEventListener("keydown", (e) => {
+          if (e.ctrlKey || e.altKey || e.metaKey) return;
+          if (/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName) || document.activeElement?.isContentEditable) return;
+          if (e.key === " ") {
+            e.preventDefault();
+            Tape.setPaused(!Tape.paused);
+          }
+        });
+      }
     },
 
     enabled() { return new Set(App.config.tape.enabled); },
