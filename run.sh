@@ -14,11 +14,15 @@ else
     exit 1
 fi
 
-if [ ! -d ".venv" ]; then
+VENV_DIR="$SCRIPT_DIR/.venv"
+if [ ! -d "$VENV_DIR" ] && [ -d "$SCRIPT_DIR/../../.venv" ]; then
+    echo "[+] Inherited shared virtual environment from repository root..."
+    VENV_DIR="$SCRIPT_DIR/../../.venv"
+elif [ ! -d "$VENV_DIR" ]; then
     echo "[+] Creating local virtual environment (.venv)..."
-    "$PYTHON" -m venv .venv
-    .venv/bin/pip install --upgrade pip
-    .venv/bin/pip install -r requirements.txt
+    "$PYTHON" -m venv "$VENV_DIR"
+    "$VENV_DIR/bin/pip" install --upgrade pip
+    "$VENV_DIR/bin/pip" install -r requirements.txt
 fi
 
-exec .venv/bin/python run_app.py "$@"
+exec "$VENV_DIR/bin/python" run_app.py "$@"

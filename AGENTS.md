@@ -48,13 +48,54 @@ When writing or modifying code, adhere strictly to cross-platform compatibility:
 
 ---
 
-## 4. Branch & Pull Request Protocol
+## 4. Git Worktree Protocol & Task Isolation (Mandatory)
+
+The repository root checkout on `main` is considered **immutable and read-only for active development**. Agents must strictly adhere to the following task isolation workflow:
+
+### 1. Mandatory Worktree for New Work
+- Never edit or dirty the root checkout on `main`.
+- Always spawn a dedicated git worktree under `.worktrees/`:
+  ```powershell
+  # Windows
+  .\build.ps1 -Task worktree-new -Branch feat/<descriptor> -Base main
+  ```
+  ```bash
+  # Linux / macOS
+  ./scripts/worktree.sh new feat/<descriptor> main
+  ```
+  *(Or native git: `git worktree add -b feat/<descriptor> .worktrees/<sanitized-name> main`)*
+
+### 2. Sub-Task Worktrees & Merge-Back Protocol
+- For multi-phase features or parallel experiments, branch sub-worktrees from the parent `feat/` branch:
+  ```powershell
+  .\build.ps1 -Task worktree-new -Branch sub/<feature>/<subtask> -Base feat/<feature>
+  ```
+- Once validated, merge the sub-task back into the primary feature branch before PR creation:
+  ```powershell
+  .\build.ps1 -Task worktree-merge -Branch sub/<feature>/<subtask> -Base feat/<feature>
+  ```
+- Safely remove the sub-task worktree:
+  ```powershell
+  .\build.ps1 -Task worktree-remove -Branch sub/<feature>/<subtask>
+  ```
+
+### 3. Cleanup After PR Merge
+- Once the Pull Request is reviewed, approved, and merged into `main` by `@mlgitdev`, the worktree must be removed:
+  ```powershell
+  .\build.ps1 -Task worktree-remove -Branch feat/<descriptor>
+  ```
+
+---
+
+## 5. Branch & Pull Request Protocol
 
 ### 1. Branch Naming Conventions
 - Features: `feat/<short-descriptor>` (e.g. `feat/vwap-filter`)
+- Major Epics: `major/<short-descriptor>` (e.g. `major/v3-architecture`)
 - Bug Fixes: `fix/<short-descriptor>` (e.g. `fix/tape-timestamp`)
 - Documentation: `docs/<short-descriptor>`
 - Performance: `perf/<short-descriptor>`
+- Sub-tasks: `sub/<feature>/<task>`
 
 ### 2. Conventional Commits
 All commit messages must follow Conventional Commits format:
@@ -78,28 +119,44 @@ When an Agent creates a PR:
 
 ---
 
-## 5. Local Verification Gate Before PR Creation
+## 6. Local Verification Gate Before PR Creation
 
 Agents MUST execute the following verification steps prior to opening a PR:
 
-1. **Python Syntax & Type Cleanliness**:
+1. **Python Syntax Compilation**:
    ```powershell
-   .venv\Scripts\python.exe -m py_compile app/*.py run_app.py
+   .venv\Scripts\python.exe -m compileall app run_app.py
    ```
-2. **Execute Unit Tests**:
-   Run all test scripts in `scratch/` or `tests/`:
+2. **Execute Full Unit Test Suite**:
    ```powershell
-   .venv\Scripts\python.exe -c "import sys; sys.path.insert(0, '.'); import app.main; print('Import check passed')"
+   .venv\Scripts\python.exe -m unittest discover -s tests -p "test_*.py"
    ```
 3. **Audit Executable Build (if packaging changes made)**:
    ```powershell
    .\build.ps1 -Task build
    ```
    Verify that `dist\NewsAlerts.exe` passes the automated secret audit.
+4. **Package Verification Gate**:
+   ```powershell
+   .\build.ps1 -Task verify-packages
+   ```
+   Verify standalone binary integrity, PE magic headers, and absence of secret files.
 
 ---
 
-## 6. Frontend Coding Standards
+## 7. Package Verification & Automated Fail-Safe Rollback
+
+All build and release pipelines enforce the **Deterministic Package Verification Gate**:
+- **In-PR Gate**: If package verification fails, the PR check turns RED and merge is strictly blocked (PR is aborted).
+- **Post-PR Release Gate**: If verification fails post-merge on `main`:
+  1. The release artifact is NOT published.
+  2. The remote git tag is deleted.
+  3. The `main` branch is automatically reverted to the last known good commit.
+  4. A critical incident GitHub issue is automatically opened and assigned to `@mlgitdev`.
+
+---
+
+## 8. Frontend Coding Standards
 
 - **Core**: Vanilla HTML5 and Vanilla modern ES6+ JavaScript. **No React, Vue, or Angular**.
 - **CSS**: Pure Vanilla CSS using design system tokens defined in [`web/css/app.css`](file:///web/css/app.css). Avoid ad-hoc styling.

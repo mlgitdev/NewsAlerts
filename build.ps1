@@ -2,8 +2,12 @@
 # Usage: .\build.ps1 [-Task <build|clean|run|check|help>]
 
 param(
-    [ValidateSet("build", "clean", "run", "check", "help")]
-    [string]$Task = "build"
+    [ValidateSet("build", "clean", "run", "check", "verify-packages", "worktree-new", "worktree-list", "worktree-remove", "worktree-merge", "worktree-prune", "help")]
+    [string]$Task = "build",
+
+    [string]$Branch = "",
+    [string]$Base = "main",
+    [switch]$Force
 )
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -13,18 +17,36 @@ $VenvPython = Join-Path $ScriptDir ".venv\Scripts\python.exe"
 $VenvPyInstaller = Join-Path $ScriptDir ".venv\Scripts\pyinstaller.exe"
 $DistExe = Join-Path $ScriptDir "dist\NewsAlerts.exe"
 
+# If running inside a .worktrees subdirectory, inherit parent .venv
+if (-not (Test-Path $VenvPython)) {
+    $ParentVenv = Join-Path $ScriptDir "..\..\.venv\Scripts\python.exe"
+    if (Test-Path $ParentVenv) {
+        $VenvPython = (Resolve-Path $ParentVenv).Path
+        $VenvPyInstaller = (Resolve-Path (Join-Path $ScriptDir "..\..\.venv\Scripts\pyinstaller.exe")).Path
+        Write-Host "[+] Inherited shared virtual environment from repository root: $VenvPython" -ForegroundColor DarkGray
+    }
+}
+
 function Show-Help {
     Write-Host ""
-    Write-Host "NewsAlerts Build Automation" -ForegroundColor Cyan
-    Write-Host "===========================" -ForegroundColor Cyan
-    Write-Host "Usage: .\build.ps1 [-Task <Task>]"
+    Write-Host "NewsAlerts Build & Worktree Automation" -ForegroundColor Cyan
+    Write-Host "=====================================" -ForegroundColor Cyan
+    Write-Host "Usage: .\build.ps1 [-Task <Task>] [-Branch <branch>] [-Base <base>]"
     Write-Host ""
-    Write-Host "Available Tasks:"
-    Write-Host "  build   (default) Build portable NewsAlerts.exe standalone executable" -ForegroundColor Yellow
-    Write-Host "  clean             Remove build/ and dist/ artifacts and caches" -ForegroundColor Yellow
-    Write-Host "  run               Launch the built dist\NewsAlerts.exe" -ForegroundColor Yellow
-    Write-Host "  check             Verify that secrets/ are excluded from the bundle" -ForegroundColor Yellow
-    Write-Host "  help              Show this help message" -ForegroundColor Yellow
+    Write-Host "Build Tasks:"
+    Write-Host "  build             (default) Build portable NewsAlerts.exe standalone executable" -ForegroundColor Yellow
+    Write-Host "  clean                       Remove build/ and dist/ artifacts and caches" -ForegroundColor Yellow
+    Write-Host "  run                         Launch the built dist\NewsAlerts.exe" -ForegroundColor Yellow
+    Write-Host "  check                       Verify that secrets/ are excluded from the bundle" -ForegroundColor Yellow
+    Write-Host "  verify-packages             Audit and verify standalone executable & release archives" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "Git Worktree Tasks:"
+    Write-Host "  worktree-new    -Branch <b-name> [-Base <base>]   Create a new isolated worktree under .worktrees/" -ForegroundColor Yellow
+    Write-Host "  worktree-list                                     List all active worktrees" -ForegroundColor Yellow
+    Write-Host "  worktree-remove -Branch <b-name> [-Force]         Remove a worktree and prune metadata" -ForegroundColor Yellow
+    Write-Host "  worktree-merge  -Branch <src> -Base <target>      Merge sub-branch back into target feat/ branch" -ForegroundColor Yellow
+    Write-Host "  worktree-prune                                    Prune stale worktree references" -ForegroundColor Yellow
+    Write-Host "  help                                              Show this help message" -ForegroundColor Yellow
     Write-Host ""
 }
 
@@ -80,11 +102,19 @@ function Verify-Secrets {
 }
 
 function Build-Executable {
-    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    $VersionPy = Join-Path $ScriptDir "app\version.py"
+    $appVer = "2.4.0"
+    if (Test-Path $VersionPy) {
+        $match = Select-String -Path $VersionPy -Pattern '__version__\s*=\s*["'']([^"'']+)["'']'
+        if ($match) {
+            $appVer = $match.Matches[0].Groups[1].Value
+        }
+    }
+
     Write-Host ""
     Write-Host "=======================================================" -ForegroundColor Cyan
-    Write-Host " Building Portable Executable: NewsAlerts.exe" -ForegroundColor Cyan
-    Write-Host " Target OS: Windows x64 | Output: dist\NewsAlerts.exe" -ForegroundColor Cyan
+    Write-Host " Building Portable Executable: NewsAlerts.exe (v$appVer)" -ForegroundColor Cyan
+    Write-Host " Target OS: Windows x64 | SemVer 2.0.0: v$appVer" -ForegroundColor Cyan
     Write-Host " Secrets: Excluded (configured via AppData / Settings UI)" -ForegroundColor Cyan
     Write-Host "=======================================================" -ForegroundColor Cyan
     Write-Host ""
@@ -144,6 +174,12 @@ function Run-Executable {
     Start-Process -FilePath $DistExe
 }
 
+$WorktreeScript = Join-Path $ScriptDir "scripts\worktree.ps1"
+if (-not (Test-Path $WorktreeScript)) {
+    # If in worktree, check repo root
+    $WorktreeScript = Join-Path $ScriptDir "..\..\scripts\worktree.ps1"
+}
+
 if ($Task -eq "build") {
     Build-Executable
 } elseif ($Task -eq "clean") {
@@ -152,6 +188,33 @@ if ($Task -eq "build") {
     Run-Executable
 } elseif ($Task -eq "check") {
     Verify-Secrets
+} elseif ($Task -eq "verify-packages") {
+    $VerifyScript = Join-Path $ScriptDir "scripts\verify-packages.py"
+    if (-not (Test-Path $VerifyScript)) {
+        $VerifyScript = Join-Path $ScriptDir "..\..\scripts\verify-packages.py"
+    }
+    $targetExe = $DistExe
+    if (-not (Test-Path $targetExe)) {
+        $parentExe = Join-Path $ScriptDir "..\..\dist\NewsAlerts.exe"
+        if (Test-Path $parentExe) {
+            $targetExe = $parentExe
+        }
+    }
+    & $VenvPython $VerifyScript --exe $targetExe
+} elseif ($Task -eq "worktree-new") {
+    & $WorktreeScript new $Branch $Base
+} elseif ($Task -eq "worktree-list") {
+    & $WorktreeScript list
+} elseif ($Task -eq "worktree-remove") {
+    if ($Force) {
+        & $WorktreeScript remove $Branch -Force
+    } else {
+        & $WorktreeScript remove $Branch
+    }
+} elseif ($Task -eq "worktree-merge") {
+    & $WorktreeScript merge-back $Branch $Base
+} elseif ($Task -eq "worktree-prune") {
+    & $WorktreeScript prune
 } elseif ($Task -eq "help") {
     Show-Help
 } else {

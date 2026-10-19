@@ -6,7 +6,6 @@ import threading
 import time
 from pathlib import Path
 
-try:
 import shutil
 import subprocess
 import sys

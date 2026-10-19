@@ -66,3 +66,24 @@ Rotated execution logs capturing scanner events, network reconnection attempts, 
 
 ## 3. Temporary & Scratch Files
 Temporary files and build caches (`build/`, `dist/`, `__pycache__`) are kept exclusively in the build working directory and are never pushed to Git or packaged into release distributions.
+
+---
+
+## 4. Git Worktrees Directory (`.worktrees/`)
+
+To preserve the clean state of the primary repository root on `main` and support concurrent feature development, development worktrees reside in `.worktrees/` at the repository root:
+
+```
+<REPO_ROOT>/
+├── .worktrees/
+│   ├── feat-vwap-filter/      # Isolated worktree for feat/vwap-filter
+│   ├── fix-tape-timestamp/    # Isolated worktree for fix/tape-timestamp
+│   └── sub-vwap-tests/        # Isolated sub-task worktree
+├── app/                       # Pristine main branch codebase
+├── assets/
+└── web/
+```
+
+- **Strictly Git-Ignored**: `.worktrees/` is permanently excluded via `.gitignore` so worktrees never leak into git commits or release bundles.
+- **Shared Python Environment**: Worktrees automatically inherit the shared `.venv` from the repository root with zero setup time.
+- **Isolated Lifecycle**: Worktrees can be safely created, merged, and removed via `.\build.ps1 -Task worktree-new` / `worktree-remove` without dirtying or switching branches on `main`.
