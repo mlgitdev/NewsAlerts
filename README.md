@@ -10,6 +10,26 @@
   <b>Institutional-grade, real-time US small-cap momentum screener, high-of-day tape, and news intelligence terminal.</b>
 </p>
 
+<p align="center">
+  <a href="https://github.com/mlgitdev/NewsAlerts/actions/workflows/ci.yml"><img src="https://github.com/mlgitdev/NewsAlerts/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
+  <a href="https://github.com/mlgitdev/NewsAlerts/actions/workflows/secret-scan.yml"><img src="https://github.com/mlgitdev/NewsAlerts/actions/workflows/secret-scan.yml/badge.svg" alt="Secret Scanning" /></a>
+  <a href="https://github.com/mlgitdev/NewsAlerts/releases"><img src="https://img.shields.io/github/v/release/mlgitdev/NewsAlerts?color=10b981&label=Release" alt="Latest Release" /></a>
+  <img src="https://img.shields.io/badge/Platform-Windows%20x64%20%7C%20macOS%20arm64%20%7C%20Linux-blue" alt="Supported Platforms" />
+</p>
+
+---
+
+## Documentation
+
+| Guide | Description |
+|---|---|
+| [🚀 Installation Guide](docs/INSTALLATION.md) | Setup and launch instructions for Windows, macOS, and Linux |
+| [⚙️ Configuration Guide](docs/CONFIGURATION.md) | API keys, session cookies, and runtime settings |
+| [📂 Directory Layouts](docs/DIRECTORIES.md) | Platform data storage paths and AppData directories |
+| [📦 Release History](docs/RELEASES.md) | Release notes, asset downloads, and version history |
+| [🤝 Contributing Guide](CONTRIBUTING.md) | Pull request guidelines, conventional commits, and CI rules |
+| [🤖 AI Agent Instructions](AGENTS.md) | Authoritative operating manual for AI coding agents |
+
 ---
 
 ## Key Features
