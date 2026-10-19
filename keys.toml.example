@@ -1,0 +1,15 @@
+# NewsAlerts Credentials Template
+# Copy this file to %APPDATA%\NewsAlerts\keys.toml or secrets/keys.toml and fill in your values.
+
+[tradingview]
+sessionid = ""
+sessionid_sign = ""
+
+[alpaca]
+key_id = ""
+secret_key = ""
+mode = "auto" # "auto", "alpaca", or "heuristics"
+
+[telegram]
+bot_token = ""
+admin_chat_id = ""

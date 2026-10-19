@@ -7,19 +7,33 @@ import time
 from pathlib import Path
 
 try:
+import shutil
+import subprocess
+import sys
+
+try:
     import winsound
-except ImportError:  # non-Windows dev box
+except ImportError:  # non-Windows (macOS, Linux)
     winsound = None
 
-MEDIA_DIR = Path(os.environ.get("WINDIR", r"C:\Windows")) / "Media"
+if sys.platform == "win32":
+    MEDIA_DIR = Path(os.environ.get("WINDIR", r"C:\Windows")) / "Media"
+    SOUND_EXTS = ("*.wav",)
+elif sys.platform == "darwin":
+    MEDIA_DIR = Path("/System/Library/Sounds")
+    SOUND_EXTS = ("*.aiff", "*.wav", "*.caf")
+else:
+    MEDIA_DIR = Path("/usr/share/sounds")
+    SOUND_EXTS = ("*.wav", "*.ogg")
 
 
 def list_sounds() -> list[dict]:
     out = []
     if MEDIA_DIR.exists():
-        for p in sorted(MEDIA_DIR.rglob("*.wav")):
-            rel = p.relative_to(MEDIA_DIR)
-            out.append({"name": str(rel.with_suffix("")), "path": str(p)})
+        for pat in SOUND_EXTS:
+            for p in sorted(MEDIA_DIR.rglob(pat)):
+                rel = p.relative_to(MEDIA_DIR)
+                out.append({"name": str(rel.with_suffix("")), "path": str(p)})
     return out
 
 
@@ -35,17 +49,18 @@ class SoundPlayer:
 
     def set_volume(self, volume: int) -> None:
         self.volume = max(0, min(100, int(volume)))
-        try:
-            import ctypes
-            v = int((self.volume / 100.0) * 0xFFFF)
-            dw_volume = (v & 0xFFFF) | ((v & 0xFFFF) << 16)
-            ctypes.windll.winmm.waveOutSetVolume(0, dw_volume)
-            ctypes.windll.winmm.waveOutSetVolume(-1, dw_volume)
-        except Exception:
-            pass
+        if sys.platform == "win32":
+            try:
+                import ctypes
+                v = int((self.volume / 100.0) * 0xFFFF)
+                dw_volume = (v & 0xFFFF) | ((v & 0xFFFF) << 16)
+                ctypes.windll.winmm.waveOutSetVolume(0, dw_volume)
+                ctypes.windll.winmm.waveOutSetVolume(-1, dw_volume)
+            except Exception:
+                pass
 
     def play(self, path: str, force: bool = False) -> bool:
-        if winsound is None or not path:
+        if not path:
             return False
         with self._lock:
             if not force:
@@ -56,11 +71,27 @@ class SoundPlayer:
                     return False
                 self._last = now
         try:
-            if os.path.isfile(path):
-                winsound.PlaySound(path, winsound.SND_FILENAME | winsound.SND_ASYNC
-                                   | winsound.SND_NODEFAULT)
-            else:
-                winsound.MessageBeep()
+            if sys.platform == "win32" and winsound is not None:
+                if os.path.isfile(path):
+                    winsound.PlaySound(path, winsound.SND_FILENAME | winsound.SND_ASYNC
+                                       | winsound.SND_NODEFAULT)
+                else:
+                    winsound.MessageBeep()
+                return True
+            elif sys.platform == "darwin":
+                if os.path.isfile(path) and shutil.which("afplay"):
+                    subprocess.Popen(["afplay", "-v", str(self.volume / 100.0), path],
+                                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    return True
+            elif sys.platform.startswith("linux"):
+                player = shutil.which("paplay") or shutil.which("aplay") or shutil.which("canberra-gtk-play")
+                if os.path.isfile(path) and player:
+                    cmd = [player, path] if "canberra" not in player else [player, "-f", path]
+                    subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    return True
+            # Fallback beep
+            sys.stdout.write("\a")
+            sys.stdout.flush()
             return True
         except Exception:
             return False

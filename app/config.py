@@ -8,9 +8,24 @@ import sys
 import threading
 from pathlib import Path
 
-APP_DIR = Path(os.environ.get("APPDATA", Path.home())) / "NewsAlerts"
+def get_app_dir() -> Path:
+    if sys.platform == "win32":
+        base = Path(os.environ.get("APPDATA", Path.home()))
+    elif sys.platform == "darwin":
+        base = Path.home() / "Library" / "Application Support"
+    else:
+        base = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
+    return base / "NewsAlerts"
+
+APP_DIR = get_app_dir()
 CONFIG_PATH = APP_DIR / "config.json"
-MEDIA = r"C:\Windows\Media"
+MEDIA = (
+    r"C:\Windows\Media"
+    if sys.platform == "win32"
+    else "/System/Library/Sounds"
+    if sys.platform == "darwin"
+    else "/usr/share/sounds"
+)
 
 
 def find_secrets_file() -> Path | None:

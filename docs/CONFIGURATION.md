@@ -1,0 +1,54 @@
+# Configuration Guide
+
+NewsAlerts provides extensive customization options via the **In-App Settings Modal** or via `%APPDATA%\NewsAlerts\keys.toml`.
+
+---
+
+## 1. TradingView Real-Time Data
+
+By default, TradingView provides 15-minute delayed market data. Subscribers of TradingView Pro / Premium can enable real-time data by supplying their session cookie:
+
+1. Open [TradingView](https://www.tradingview.com) in Chrome, Edge, or Brave.
+2. Press `F12` to open Developer Tools → Navigate to **Application** → **Cookies** → `https://www.tradingview.com`.
+3. Copy the value of the `sessionid` cookie (and optionally `sessionid_sign`).
+4. In NewsAlerts, click the **TradingView Status Pill** in the top-right corner (or open Settings → **General & TV Login**).
+5. Paste your `sessionid` and click **Save Settings**.
+6. The status pill will immediately switch to 🟢 `[▲ TradingView — Connected]`.
+
+---
+
+## 2. Short Borrow Locates (Alpaca Integration)
+
+To see real-time short borrow indicators (`ETB`, `HTB`, `NO BORROW`):
+1. In Settings, open the **Short Borrow** tab.
+2. Enter your Alpaca **API Key ID** and **Secret Key** (Paper or Live account keys).
+3. Select Locate Mode:
+   - `Auto (Alpaca + Fallback Heuristics)` — queries Alpaca with fallback to float/exchange thresholds.
+   - `Alpaca Only` — strict API lookup.
+   - `Heuristics Only` — estimate based on market float (<15M = HTB, <5M = NO BORROW).
+4. Click **▶ Test Alpaca Connection** to verify your account status.
+
+---
+
+## 3. Telegram Bot Push Alerts
+
+Receive instant push notifications on your phone or desktop when a runner pops up:
+1. Talk to `@BotFather` on Telegram to create a bot and get your **Bot Token**.
+2. Start your bot and message `@userinfobot` to get your numerical **Chat ID**.
+3. In NewsAlerts, open Settings → **Sound Alerts**.
+4. Enter your Bot Token and Chat ID.
+5. Click **✈️ Send Test Message** to verify delivery.
+6. Toggle **Tape Momentum Alerts** and customize the per-symbol cooldown (default: 60s).
+
+---
+
+## 4. Tape Strategies
+
+The Tape monitors the entire small-cap universe (e.g. Price $1–$50, Min Change 3%) and evaluates real-time momentum strategies:
+- **Low Float – Former Momo Stock**: Float < 20M, RelVol ≥ 1.5, 52w high ratio ≥ 2.0.
+- **Low Float – High Rel Vol**: Float < 20M, RelVol ≥ 5.0.
+- **Squeeze Alert – 52wk Breakout**: New 52-week high breakout.
+- **Squeeze Alert – Up 5% in 5min**: 5% gain in 5 minutes (up-only within active window).
+- **Squeeze Alert – Up 10% in 10min**: 10% gain in 10 minutes (up-only within active window).
+
+Each strategy can be individually toggled on/off in the **Tape Strategies** settings tab.

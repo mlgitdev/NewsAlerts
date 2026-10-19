@@ -1,0 +1,151 @@
+name: Release Automation & Multi-OS Packaging
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version tag (e.g. v2.4.0)"
+        required: true
+        default: "v2.4.0"
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    name: Package Windows Release (x64)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pillow
+
+      - name: Build Standalone Windows Executable
+        run: |
+          powershell -File .\build.ps1 -Task build
+
+      - name: Create Windows Release Archive
+        run: |
+          mkdir release-win
+          Copy-Item "dist\NewsAlerts.exe" -Destination "release-win\"
+          Copy-Item "README.md" -Destination "release-win\"
+          Copy-Item "assets\hero.jpg" -Destination "release-win\"
+          Compress-Archive -Path "release-win\*" -DestinationPath "NewsAlerts-Windows-x64.zip"
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-release
+          path: NewsAlerts-Windows-x64.zip
+
+  build-macos:
+    name: Package macOS Release (arm64)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Create macOS Release Archive
+        run: |
+          mkdir -p release-macos/NewsAlerts
+          cp -r app web assets run.sh install.sh requirements.txt run_app.py README.md release-macos/NewsAlerts/
+          chmod +x release-macos/NewsAlerts/*.sh
+          tar -czvf NewsAlerts-macOS-arm64.tar.gz -C release-macos NewsAlerts
+
+      - name: Upload macOS Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-release
+          path: NewsAlerts-macOS-arm64.tar.gz
+
+  build-linux:
+    name: Package Linux Release (x64)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create Linux Release Archive
+        run: |
+          mkdir -p release-linux/NewsAlerts
+          cp -r app web assets run.sh install.sh requirements.txt run_app.py README.md release-linux/NewsAlerts/
+          chmod +x release-linux/NewsAlerts/*.sh
+          tar -czvf NewsAlerts-Linux-x64.tar.gz -C release-linux NewsAlerts
+
+      - name: Upload Linux Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-release
+          path: NewsAlerts-Linux-x64.tar.gz
+
+  publish-github-release:
+    name: Publish GitHub Release
+    needs: [build-windows, build-macos, build-linux]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Determine Release Version & Body
+        id: release-info
+        run: |
+          TAG="${{ github.ref_name }}"
+          if [[ -z "$TAG" || "$TAG" == "main" ]]; then
+            TAG="${{ github.event.inputs.version || 'v2.4.0' }}"
+          fi
+          echo "VERSION_TAG=$TAG" >> $GITHUB_ENV
+
+          # Look for matching release notes file
+          NOTES_FILE="docs/releases/${TAG}.md"
+          if [ -f "$NOTES_FILE" ]; then
+            echo "Found release notes at $NOTES_FILE"
+            echo "NOTES_PATH=$NOTES_FILE" >> $GITHUB_ENV
+          elif [ -f "docs/releases/v2.4.0.md" ]; then
+            echo "Using docs/releases/v2.4.0.md as fallback notes"
+            echo "NOTES_PATH=docs/releases/v2.4.0.md" >> $GITHUB_ENV
+          else
+            echo "NOTES_PATH=" >> $GITHUB_ENV
+          fi
+
+      - name: Flatten Artifacts
+        run: |
+          mkdir -p dist-release
+          find release-artifacts/ -type f \( -name "*.zip" -o -name "*.tar.gz" \) -exec cp {} dist-release/ \;
+          if [ -n "$NOTES_PATH" ]; then
+            cp "$NOTES_PATH" "dist-release/ReleaseNotes-${VERSION_TAG}.md"
+          fi
+          ls -la dist-release/
+
+      - name: Publish Official GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.VERSION_TAG }}
+          name: "NewsAlerts ${{ env.VERSION_TAG }}"
+          body_path: ${{ env.NOTES_PATH }}
+          files: dist-release/*
+          draft: false
+          prerelease: false

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=NewsAlerts
+GenericName=Momentum Stock Screener
+Comment=Real-Time Small-Cap Momentum Stock Screener & Tape Terminal
+Exec=newsalerts
+Icon=newsalerts
+Terminal=false
+Categories=Office;Finance;Network;
+Keywords=finance;stocks;momentum;screener;trading;tradingview;
+StartupNotify=true

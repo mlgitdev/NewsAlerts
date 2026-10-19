@@ -1,9 +1,16 @@
 .venv/
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
 *.log
 secrets/
+keys.toml
+secrets.toml
+.env
 build/
 dist/
 *.exe
+*.bak
+.DS_Store
+
 
