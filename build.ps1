@@ -2,7 +2,7 @@
 # Usage: .\build.ps1 [-Task <build|clean|run|check|help>]
 
 param(
-    [ValidateSet("build", "clean", "run", "check", "worktree-new", "worktree-list", "worktree-remove", "worktree-merge", "worktree-prune", "help")]
+    [ValidateSet("build", "clean", "run", "check", "verify-packages", "worktree-new", "worktree-list", "worktree-remove", "worktree-merge", "worktree-prune", "help")]
     [string]$Task = "build",
 
     [string]$Branch = "",
@@ -34,10 +34,11 @@ function Show-Help {
     Write-Host "Usage: .\build.ps1 [-Task <Task>] [-Branch <branch>] [-Base <base>]"
     Write-Host ""
     Write-Host "Build Tasks:"
-    Write-Host "  build           (default) Build portable NewsAlerts.exe standalone executable" -ForegroundColor Yellow
-    Write-Host "  clean                     Remove build/ and dist/ artifacts and caches" -ForegroundColor Yellow
-    Write-Host "  run                       Launch the built dist\NewsAlerts.exe" -ForegroundColor Yellow
-    Write-Host "  check                     Verify that secrets/ are excluded from the bundle" -ForegroundColor Yellow
+    Write-Host "  build             (default) Build portable NewsAlerts.exe standalone executable" -ForegroundColor Yellow
+    Write-Host "  clean                       Remove build/ and dist/ artifacts and caches" -ForegroundColor Yellow
+    Write-Host "  run                         Launch the built dist\NewsAlerts.exe" -ForegroundColor Yellow
+    Write-Host "  check                       Verify that secrets/ are excluded from the bundle" -ForegroundColor Yellow
+    Write-Host "  verify-packages             Audit and verify standalone executable & release archives" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "Git Worktree Tasks:"
     Write-Host "  worktree-new    -Branch <b-name> [-Base <base>]   Create a new isolated worktree under .worktrees/" -ForegroundColor Yellow
@@ -101,11 +102,19 @@ function Verify-Secrets {
 }
 
 function Build-Executable {
-    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    $VersionPy = Join-Path $ScriptDir "app\version.py"
+    $appVer = "2.4.0"
+    if (Test-Path $VersionPy) {
+        $match = Select-String -Path $VersionPy -Pattern '__version__\s*=\s*["'']([^"'']+)["'']'
+        if ($match) {
+            $appVer = $match.Matches[0].Groups[1].Value
+        }
+    }
+
     Write-Host ""
     Write-Host "=======================================================" -ForegroundColor Cyan
-    Write-Host " Building Portable Executable: NewsAlerts.exe" -ForegroundColor Cyan
-    Write-Host " Target OS: Windows x64 | Output: dist\NewsAlerts.exe" -ForegroundColor Cyan
+    Write-Host " Building Portable Executable: NewsAlerts.exe (v$appVer)" -ForegroundColor Cyan
+    Write-Host " Target OS: Windows x64 | SemVer 2.0.0: v$appVer" -ForegroundColor Cyan
     Write-Host " Secrets: Excluded (configured via AppData / Settings UI)" -ForegroundColor Cyan
     Write-Host "=======================================================" -ForegroundColor Cyan
     Write-Host ""
@@ -179,6 +188,19 @@ if ($Task -eq "build") {
     Run-Executable
 } elseif ($Task -eq "check") {
     Verify-Secrets
+} elseif ($Task -eq "verify-packages") {
+    $VerifyScript = Join-Path $ScriptDir "scripts\verify-packages.py"
+    if (-not (Test-Path $VerifyScript)) {
+        $VerifyScript = Join-Path $ScriptDir "..\..\scripts\verify-packages.py"
+    }
+    $targetExe = $DistExe
+    if (-not (Test-Path $targetExe)) {
+        $parentExe = Join-Path $ScriptDir "..\..\dist\NewsAlerts.exe"
+        if (Test-Path $parentExe) {
+            $targetExe = $parentExe
+        }
+    }
+    & $VenvPython $VerifyScript --exe $targetExe
 } elseif ($Task -eq "worktree-new") {
     & $WorktreeScript new $Branch $Base
 } elseif ($Task -eq "worktree-list") {

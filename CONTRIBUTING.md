@@ -62,11 +62,15 @@ When complete, merge back into your parent feature branch:
 # Windows
 .\build.ps1 -Task build
 .\build.ps1 -Task check
+.\build.ps1 -Task verify-packages
 ```
 ```bash
 # Linux / macOS
 ./run.sh
+python3 -m unittest discover -s tests -p "test_*.py"
 ```
+
+> **Important**: All PRs must pass the Package Verification Gate. If verification fails, the PR cannot be merged. In production, any failed package verification on `main` triggers automated tag deletion, branch rollback, and an incident issue.
 
 ### Step 6: Push your branch and open a Pull Request
 ```bash
