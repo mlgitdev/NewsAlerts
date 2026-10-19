@@ -8,11 +8,11 @@ class TestSemanticVersioning(unittest.TestCase):
     def test_current_version_valid(self):
         self.assertTrue(validate_semver(__version__))
         info = get_version_info()
-        self.assertEqual(info["version"], "2.4.3")
+        self.assertEqual(info["version"], "2.4.4")
         self.assertEqual(info["major"], 2)
         self.assertEqual(info["minor"], 4)
-        self.assertEqual(info["patch"], 3)
-        self.assertEqual(info["tag"], "v2.4.3")
+        self.assertEqual(info["patch"], 4)
+        self.assertEqual(info["tag"], "v2.4.4")
         self.assertFalse(info["is_prerelease"])
 
     def test_parse_valid_semver(self):

@@ -205,6 +205,11 @@ class Api:
         self._app.open_tape_window()
         return True
 
+    def refresh(self):
+        """Trigger an immediate screener re-scan."""
+        self._app.screener.poke()
+        return True
+
     def select_symbol(self, ticker: str):
         self._app.bus.emit("select", ticker)
         return True

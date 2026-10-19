@@ -45,6 +45,7 @@
       body: JSON.stringify({ ticker }),
     }).then((r) => r.json()),
     pop_tape: () => fetch("/api/pop_tape", { method: "POST" }).then((r) => r.json()),
+    refresh: () => fetch("/api/refresh", { method: "POST" }).then((r) => r.json()).catch(() => {}),
     select_symbol: (ticker) => fetch("/api/select_symbol", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

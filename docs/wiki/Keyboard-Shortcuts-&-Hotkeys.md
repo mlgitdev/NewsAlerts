@@ -13,3 +13,7 @@ NewsAlerts is built for rapid keyboard-driven workflow. Use these hotkeys to nav
 | **`1` – `5`** | **Filter Presets** | Quickly switches between predefined momentum screener presets. |
 | **`Up` / `Down`** | **Row Selection** | Move active selection up or down across screener rows. |
 | **`Enter`** | **Focus Story** | Loads the latest catalyst story for the selected ticker. |
+
+> [!NOTE]
+> All hotkeys automatically bypass execution when your cursor is focused inside an input, select, or search field to avoid interfering with typing. Press `Esc` at any time to blur active input focus or dismiss open dialogs.
+
