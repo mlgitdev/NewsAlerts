@@ -21,14 +21,41 @@
 
 ---
 
+## ⚡ Quick Start & Universal Makefile Workflow
+
+NewsAlerts includes a **Universal Cross-Platform `Makefile`** providing identical developer and build commands across **Windows, macOS, and Linux**:
+
+```bash
+make run                             # Launch desktop application
+make build                           # Build standalone executable (Windows) or install dependencies (Unix)
+make test                            # Run full automated unit test suite
+make verify                          # Run Deterministic Package Verification Gate
+make check                           # Audit for credential leaks
+make clean                           # Remove build artifacts and caches
+make worktree-list                   # List active git worktrees
+make worktree-new BRANCH=feat/<name> # Create new isolated git worktree
+make help                            # Display usage guide and detected platform
+```
+
+### Windows Prerequisite for `make`:
+Windows does not include GNU `make` by default. Install it in seconds:
+```powershell
+winget install ezwinports.make
+# Or via Chocolatey: choco install make -y
+```
+> *Zero-install alternative: You can also run `.\make.bat <target>` or `.\build.ps1 -Task <target>` in Windows PowerShell / CMD without installing any extra software.*
+
+---
+
 ## 📖 Operational Procedures & Documentation Index
 
 All technical procedures are documented in detail within the [`docs/`](docs/) directory. Below is an executive summary of each procedure with direct links:
 
 ### 🚀 1. Installation & Launch Procedure &mdash; [docs/INSTALLATION.md](docs/INSTALLATION.md)
-*Step-by-step setup and launch instructions across all supported platforms:*
-- **Windows x64**: Zero-install portable standalone executable (`dist\NewsAlerts.exe`) with bundled custom icon, or source launch via `.\build.ps1 -Task run`.
-- **macOS (Apple Silicon arm64)**: Native Cocoa/WebKit window via `./run.sh` or automated system-wide installer `./install.sh`.
+*Universal `make` workflow, standalone binaries, and OS-specific setup:*
+- **Universal Developer CLI (`make`)**: Primary cross-platform interface for building, testing, verifying, and running NewsAlerts.
+- **Windows x64**: Zero-install portable standalone executable (`dist\NewsAlerts.exe`) with bundled custom icon, or source launch via `make run` / `.\build.ps1 -Task run`.
+- **macOS (Apple Silicon arm64)**: Native Cocoa/WebKit window via `make run` / `./run.sh` or automated system-wide installer `./install.sh`.
 - **Linux x86_64**: WebKit2GTK runtime setup, automated `./install.sh`, and desktop application launcher (`assets/NewsAlerts.desktop`).
 &rarr; *Read the complete [Installation Guide](docs/INSTALLATION.md)*
 
@@ -57,7 +84,7 @@ All technical procedures are documented in detail within the [`docs/`](docs/) di
 
 ### 🤝 5. Development & Git Worktree Workflow &mdash; [CONTRIBUTING.md](CONTRIBUTING.md)
 *Guidelines for human developers and open source contributions:*
-- **Isolated Worktree Model**: Never dirty `main`. Spawn dedicated feature worktrees via `.\build.ps1 -Task worktree-new -Branch feat/<name>`.
+- **Isolated Worktree Model**: Never dirty `main`. Spawn dedicated feature worktrees via `make worktree-new BRANCH=feat/<name>`.
 - **Conventional Commits**: Enforced commit structure: `type(scope): description`.
 - **Pull Request & Code Ownership**: Mandatory PR template with automated bot validation and explicit code ownership via [`.github/CODEOWNERS`](.github/CODEOWNERS).
 &rarr; *Read the complete [Contributing Guide](CONTRIBUTING.md)*
@@ -82,11 +109,11 @@ NewsAlerts enforces a **deterministic Package Verification Gate** to ensure that
             ▼                                     ▼
      [ PASS (Code 0) ]                    [ FAIL (Code 1) ]
             │                                     │
-   • PR Check Green                       • PR Aborted & Blocked
-   • Publish GitHub Release               • DO NOT Publish Release
-   • Distribute Multi-OS Bundles          • Delete Remote Git Tag
-                                          • Revert 'main' to Last Good Commit
-                                          • Auto-Open Critical GitHub Issue
+    • PR Check Green                       • PR Aborted & Blocked
+    • Publish GitHub Release               • DO NOT Publish Release
+    • Distribute Multi-OS Bundles          • Delete Remote Git Tag
+                                           • Revert 'main' to Last Good Commit
+                                           • Auto-Open Critical GitHub Issue
 ```
 
 ### 1. In-PR Verification Gate
@@ -113,33 +140,6 @@ If package verification fails during a release run on `main`:
 - 📰 **Recent News Intelligence**: Direct Benzinga and financial wire headlines with configurable recency windows (1h, 2h, 4h, 8h, 12h, 24h, 3d, 7d).
 - 🏷️ **Interactive Corner Version Badge**: Live SemVer 2.0.0 version indicator docked in the bottom-right corner of the terminal with click-to-open system diagnostic details.
 - 📦 **100% Portable Executable**: Standalone single `.exe` (~14 MB) embedding the custom icon and running without external Python or Node.js runtimes.
-
----
-
-## ⚡ Quick Reference Commands
-
-### Universal Makefile (Windows, macOS, Linux)
-```bash
-make run                             # Launch desktop application
-make build                           # Build executable (Windows) or install dependencies (Unix)
-make test                            # Run full unit test suite
-make verify                          # Run package verification gate
-make check                           # Audit for credential leaks
-make clean                           # Remove build artifacts and caches
-make worktree-list                   # List active git worktrees
-make worktree-new BRANCH=feat/<name> # Create new isolated git worktree
-```
-> *On Windows, install GNU Make via `winget install ezwinports.make` or `choco install make -y`. Alternatively, `.\make.bat <target>` or `.\build.ps1 -Task <target>` works out of the box.*
-
-### Direct PowerShell Commands (Windows)
-```powershell
-.\build.ps1 -Task run               # Run application
-.\build.ps1 -Task build             # Build portable executable
-.\build.ps1 -Task verify-packages   # Audit and verify packages
-.\build.ps1 -Task worktree-new -Branch feat/my-feature # Create worktree
-.\build.ps1 -Task worktree-list     # List active worktrees
-.\build.ps1 -Task worktree-remove -Branch feat/my-feature # Remove worktree
-```
 
 ---
 

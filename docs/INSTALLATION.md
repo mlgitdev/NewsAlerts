@@ -1,16 +1,49 @@
 # Installation & Setup Guide
 
-NewsAlerts is available as a **pre-compiled standalone portable executable** or can be run directly from source across Windows, macOS, and Linux.
+NewsAlerts is an institutional-grade financial momentum terminal. It can be run immediately via our **Universal `make` Developer CLI**, as a **pre-compiled portable executable** (Windows), or installed natively across macOS and Linux.
 
 ---
 
-## 1. Windows x64
+## 1. Universal Developer Workflow (`make`) &mdash; Recommended
 
-### Option A: Portable Standalone Executable (Recommended)
+NewsAlerts includes a unified, cross-platform `Makefile` providing identical developer commands across Windows, macOS, and Linux:
+
+| Target | Description | Windows Execution | Unix Execution (macOS / Linux) |
+|:---|:---|:---|:---|
+| `make run` | Launch the desktop terminal application | `powershell -File ./build.ps1 -Task run` | `./run.sh` |
+| `make build` | Build standalone binary or install deps | `powershell -File ./build.ps1 -Task build` | `python3 -m pip install -r requirements.txt` |
+| `make test` | Run full automated unit test suite | `.venv\Scripts\python.exe -m unittest discover` | `python3 -m unittest discover` |
+| `make verify` | Run Package Verification Gate | `powershell -File ./build.ps1 -Task verify-packages` | `python3 scripts/verify-packages.py` |
+| `make check` | Scan local/staged files for leaked secrets | `powershell -File ./build.ps1 -Task check` | `git diff --staged` secret scan |
+| `make clean` | Remove `build/`, `dist/`, `.venv/`, caches | `powershell -File ./build.ps1 -Task clean` | `rm -rf build/ dist/ .venv/` |
+| `make worktree-list` | List active git worktrees | `powershell -File ./build.ps1 -Task worktree-list` | `./scripts/worktree.sh list` |
+| `make worktree-new BRANCH=feat/<name>` | Create a new isolated git worktree | `powershell -File ./build.ps1 -Task worktree-new` | `./scripts/worktree.sh new` |
+| `make help` | Display targets & detected platform | Formatted CLI help table | Formatted CLI help table |
+
+### Windows Prerequisite for `make`:
+Windows does not include GNU `make` by default. Install it in seconds using either package manager:
+
+**Option A: Windows Package Manager (`winget`)**
+```powershell
+winget install ezwinports.make
+```
+
+**Option B: Chocolatey**
+```powershell
+choco install make -y
+```
+
+> **Tip**: If `make` is not recognized immediately after running `winget`, copy `make.exe` to your `PATH` (e.g. `copy "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\ezwinports.make*\bin\make.exe" "$HOME\bin\"`) or simply use the zero-install `.\make.bat <target>` wrapper included in the repository.
+
+---
+
+## 2. Windows x64 Step-by-Step
+
+### Option A: Portable Standalone Executable (For Traders & Non-Developers)
 1. Download `NewsAlerts-Windows-x64.zip` from the latest [GitHub Release](https://github.com/mlgitdev/NewsAlerts/releases).
-2. Extract the archive to any folder on your computer (e.g. `C:\Tools\NewsAlerts` or Desktop).
+2. Extract the archive to any folder (e.g. `C:\Tools\NewsAlerts` or Desktop).
 3. Double-click `NewsAlerts.exe` to run.
-4. *No installation, Python, or administrator rights required.*
+4. *No installation, Python runtime, or administrator rights required.*
 
 ### Option B: Run from Source
 ```powershell
@@ -18,35 +51,41 @@ NewsAlerts is available as a **pre-compiled standalone portable executable** or 
 git clone https://github.com/mlgitdev/NewsAlerts.git
 cd NewsAlerts
 
-# Run using the automated PowerShell runner
-.\build.ps1 -Task run
+# Run using the Universal Makefile
+make run
 
-# Or recompile the standalone executable yourself
-.\build.ps1 -Task build
+# (Or using native PowerShell directly)
+.\build.ps1 -Task run
+```
+
+### Option C: Recompile Standalone Executable
+```powershell
+make build
+# (Or: .\build.ps1 -Task build)
 ```
 
 ---
 
-## 2. macOS (Apple Silicon arm64 / Intel)
+## 3. macOS (Apple Silicon arm64 / Intel) Step-by-Step
 
-### Option A: One-Line Shell Installer
+### Option A: Universal Makefile / Quick Launcher
 ```bash
 git clone https://github.com/mlgitdev/NewsAlerts.git
 cd NewsAlerts
+make run
+# (Or: ./run.sh)
+```
+
+### Option B: System-Wide Installer
+```bash
 chmod +x install.sh
 ./install.sh
 ```
-This sets up a local virtual environment and installs a `newsalerts` command in `~/.local/bin/`.
-
-### Option B: Quick Launcher
-```bash
-chmod +x run.sh
-./run.sh
-```
+This configures a dedicated virtual environment and installs a `newsalerts` command in `~/.local/bin/`.
 
 ---
 
-## 3. Linux (Ubuntu, Debian, Fedora, Arch)
+## 4. Linux (Ubuntu, Debian, Fedora, Arch) Step-by-Step
 
 ### Prerequisites
 NewsAlerts uses `pywebview`, which interfaces with the system's WebKit2GTK engine.
@@ -67,47 +106,17 @@ sudo dnf install python3 python3-pip webkit2gtk4.1
 sudo pacman -S python webkit2gtk-4.1
 ```
 
-### Installation
+### Running & Installation
 ```bash
 git clone https://github.com/mlgitdev/NewsAlerts.git
 cd NewsAlerts
-chmod +x install.sh
+
+# Launch immediately
+make run
+
+# Or install system desktop launcher and application icon
 ./install.sh
 ```
-The installer automatically registers the `NewsAlerts.desktop` launcher and application icon in your desktop application menu!
-
----
-
-## 4. Universal Makefile & Developer CLI (Windows, macOS, Linux)
-
-NewsAlerts provides a unified, cross-platform `Makefile` enabling identical developer commands across Windows, macOS, and Linux:
-
-| Target | Description |
-|:---|:---|
-| `make run` | Launch the desktop terminal application |
-| `make build` | Build standalone executable (`NewsAlerts.exe` on Windows) or install dependencies (Unix) |
-| `make test` | Run full automated unit test suite (`tests/test_*.py`) |
-| `make verify` | Execute the Deterministic Package Verification Gate |
-| `make check` | Scan local/staged files for leaked API keys or credentials |
-| `make clean` | Remove `build/`, `dist/`, `.venv/`, and Python caches |
-| `make worktree-list` | List active git worktrees under `.worktrees/` |
-| `make worktree-new BRANCH=feat/<name>` | Create a new isolated git worktree |
-| `make help` | Display available targets and detected platform |
-
-### Windows Prerequisite for `make`:
-Windows does not include GNU `make` by default. You can install it with a single command:
-
-**Option 1: Windows Package Manager (`winget`)**
-```powershell
-winget install ezwinports.make
-```
-
-**Option 2: Chocolatey**
-```powershell
-choco install make -y
-```
-
-*Note: Restart your terminal or reload environment variables after installation. Alternatively, you can use the zero-install `.\make.bat <target>` wrapper or `.\build.ps1 -Task <target>` without installing third-party tools.*
 
 ---
 
@@ -119,4 +128,3 @@ Once launched, verify your configuration:
 3. (Optional) In **Short Borrow**, enter your Alpaca API credentials.
 4. (Optional) In **Sound Alerts**, configure Telegram Bot Token and Chat ID.
 5. Click **Save Settings**.
-

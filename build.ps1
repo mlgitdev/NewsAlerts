@@ -121,6 +121,8 @@ function Build-Executable {
 
     Ensure-Environment
 
+    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+
     $running = Get-Process NewsAlerts -ErrorAction SilentlyContinue
     if ($running) {
         Write-Host "[-] Closing running NewsAlerts instance before build..." -ForegroundColor Yellow
