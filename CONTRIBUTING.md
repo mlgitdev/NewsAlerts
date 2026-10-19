@@ -7,8 +7,8 @@ Thank you for your interest in contributing to NewsAlerts! We welcome bug fixes,
 ## 1. Governance & Permissions
 
 - **Branch Protection**: The `main` branch is protected. Direct pushes to `main` are strictly prohibited.
-- **Code Reviews**: All contributions must be submitted as Pull Requests (PRs).
-- **Approval Gate**: Only the repository owner (`@mlgitdev`) can approve and merge PRs into `main`.
+- **Code Reviews & Ownership**: All contributions must be submitted as Pull Requests (PRs). Explicit code ownership across all components is governed by [`.github/CODEOWNERS`](.github/CODEOWNERS).
+- **Approval Gate**: Only the designated code owner and repository maintainer (`@mlgitdev`) can approve and merge PRs into `main`.
 - **Status Checks**: All automated checks (Secret Scanning, PR Validator, Multi-OS CI) must pass before a PR can be merged.
 
 ---

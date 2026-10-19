@@ -116,6 +116,7 @@ When an Agent creates a PR:
   - `## Verification & Testing`
   - `## Checklist`
 - **Never bypass checks**: Do not attempt to merge directly to `main`. Only the repository owner (`@mlgitdev`) can approve and merge.
+- **Code Ownership**: Component modifications are subject to [`.github/CODEOWNERS`](.github/CODEOWNERS). Review requests are automatically routed to designated code owner `@mlgitdev`.
 
 ---
 

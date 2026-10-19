@@ -1,0 +1,40 @@
+# NewsAlerts Repository Code Ownership Policy
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Rules are evaluated from top to bottom; the last matching pattern takes precedence.
+# The designated code owner, maintainer, and reviewer for NewsAlerts is @mlgitdev.
+
+# Global default: @mlgitdev owns all repository files
+* @mlgitdev
+
+# Core Python momentum engine, alerts, sound & application logic
+/app/ @mlgitdev
+run_app.py @mlgitdev
+requirements.txt @mlgitdev
+
+# Web trading terminal frontend (HTML, CSS, JS, branding)
+/web/ @mlgitdev
+/assets/ @mlgitdev
+
+# GitHub CI/CD Workflows, security scanners, PR bots & templates
+/.github/ @mlgitdev
+/.github/workflows/ @mlgitdev
+/.github/ISSUE_TEMPLATE/ @mlgitdev
+/.github/pull_request_template.md @mlgitdev
+/.github/CODEOWNERS @mlgitdev
+
+# Cross-platform packaging, verification gates, build and worktree automation
+/scripts/ @mlgitdev
+build.ps1 @mlgitdev
+build.bat @mlgitdev
+run.sh @mlgitdev
+run.bat @mlgitdev
+install.sh @mlgitdev
+Makefile @mlgitdev
+NewsAlerts.spec @mlgitdev
+
+# Documentation, operating guidelines, and contribution policies
+/docs/ @mlgitdev
+README.md @mlgitdev
+CONTRIBUTING.md @mlgitdev
+AGENTS.md @mlgitdev
