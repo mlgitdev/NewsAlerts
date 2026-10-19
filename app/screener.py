@@ -198,10 +198,12 @@ class ScreenerWorker(threading.Thread):
             payload = {"screen_id": screen["id"], "screen_name": screen["name"], "ts": now,
                        "symbols": [by_t[t] for t in new_syms]}
             self.emit("new_symbols", payload)
-            self.sounds.play(c["alerts"]["sound_new_symbol"])
+            is_paused = bool(c["alerts"].get("mute", False))
+            if not is_paused:
+                self.sounds.play(c["alerts"]["sound_new_symbol"])
             for t in new_syms:
                 row_data = by_t[t]
-                if self.telegram and c["alerts"].get("telegram_enabled", True):
+                if self.telegram and c["alerts"].get("telegram_enabled", True) and not is_paused:
                     cached = self.news.cached(t)
                     fresh = NewsService.recent(cached, c["news"]["recency_hours"]) if cached else []
                     latest_title = fresh[0]["title"] if fresh else ""
@@ -214,7 +216,7 @@ class ScreenerWorker(threading.Thread):
         if fresh:
             self.emit("symbol_news", {"ticker": ticker, "count": len(fresh),
                                       "latest": fresh[0]})
-            if c["alerts"]["news_sound_enabled"]:
+            if c["alerts"]["news_sound_enabled"] and not c["alerts"].get("mute", False):
                 self.sounds.play(c["alerts"]["sound_news"])
 
     def _row(self, r: dict, session: str, st: _ScreenState, c: dict, now: float) -> dict:

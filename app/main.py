@@ -57,13 +57,15 @@ class App:
         self.alp_news = AlpacaNews(self.borrow.key_id, self.borrow.secret_key)
         self.news = NewsService(CombinedNews([self.alp_news, tv_news]))
         ac = c.get("alerts", {})
+        is_paused = bool(ac.get("mute", False))
         self.telegram = TelegramService(
             bot_token=ac.get("telegram_bot_token", ""),
             chat_id=ac.get("telegram_chat_id", ""),
-            enabled=bool(ac.get("telegram_enabled", True))
+            enabled=bool(ac.get("telegram_enabled", True)),
+            paused=is_paused
         )
-        self.sounds = SoundPlayer()
-        self.sounds.muted = bool(c["alerts"]["mute"])
+        self.sounds = SoundPlayer(volume=int(ac.get("volume", 80)))
+        self.sounds.muted = is_paused
         self.screener = ScreenerWorker(self.cfg, self.client, self.news, self.sounds, self.bus.emit, self.borrow, self.telegram)
         self.tape = TapeWorker(self.cfg, self.client, self.sounds, self.bus.emit, self.borrow, self.telegram)
         self.api = Api(self)

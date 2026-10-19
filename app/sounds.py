@@ -24,19 +24,32 @@ def list_sounds() -> list[dict]:
 
 
 class SoundPlayer:
-    def __init__(self, min_gap: float = 1.5) -> None:
+    def __init__(self, min_gap: float = 1.5, volume: int = 80) -> None:
         self.min_gap = min_gap
         self._last = 0.0
         self._lock = threading.Lock()
         self.muted = False
         self.suppressed = False  # e.g. window focused + quiet_when_focused
+        self.volume = 80
+        self.set_volume(volume)
+
+    def set_volume(self, volume: int) -> None:
+        self.volume = max(0, min(100, int(volume)))
+        try:
+            import ctypes
+            v = int((self.volume / 100.0) * 0xFFFF)
+            dw_volume = (v & 0xFFFF) | ((v & 0xFFFF) << 16)
+            ctypes.windll.winmm.waveOutSetVolume(0, dw_volume)
+            ctypes.windll.winmm.waveOutSetVolume(-1, dw_volume)
+        except Exception:
+            pass
 
     def play(self, path: str, force: bool = False) -> bool:
         if winsound is None or not path:
             return False
         with self._lock:
             if not force:
-                if self.muted or self.suppressed:
+                if self.muted or self.suppressed or self.volume <= 0:
                     return False
                 now = time.time()
                 if now - self._last < self.min_gap:

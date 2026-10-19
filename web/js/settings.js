@@ -90,9 +90,11 @@
       const g = U.el("div", { class: "form-grid" });
       g.append(U.el("h3", {}, "New symbol in screener (the bell)"),
         ...Settings.field("Sound", Settings.sound(a, "sound_new_symbol")),
+        ...Settings.field("Volume (%)", Settings.num(a, "volume"), "Alert chime volume (0% to 100%)."),
         ...Settings.field("Re-entry window (min)", Settings.num(a, "reentry_min"),
           "A symbol that drops out and comes back within this window will not ring again."),
-        ...Settings.field("Mute all sounds", Settings.check(a, "mute")),
+        ...Settings.field("Pause alerts (mute & stop sending)", Settings.check(a, "mute"),
+          "When active, sound chimes are muted and Telegram notifications are suppressed."),
         ...Settings.field("Quiet while app focused", Settings.check(a, "quiet_when_focused")),
         U.el("h3", {}, "News"),
         ...Settings.field("Play news sound", Settings.check(a, "news_sound_enabled", "New symbol has fresh news / new headline for selected symbol")),

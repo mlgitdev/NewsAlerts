@@ -45,8 +45,31 @@
         <span id="status-text" class="num">Connecting…</span>
       </div>
 
-      <!-- ACTIONS -->
-      <button class="icon-btn" id="btn-mute" title="Sound alerts">
+      <!-- VOLUME WIDGET -->
+      <div class="vol-widget" id="vol-widget" title="Alert Chime Volume">
+        <button class="vol-btn" id="btn-vol" title="Volume: Click to toggle mute">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        </button>
+        <div class="vol-bar-track" id="vol-bar-track" title="Click or drag to adjust volume">
+          <svg class="vol-triangle-svg" viewBox="0 0 64 16" preserveAspectRatio="none">
+            <defs>
+              <clipPath id="vol-clip-path">
+                <rect id="vol-clip-rect" x="0" y="0" width="51.2" height="16" />
+              </clipPath>
+              <linearGradient id="vol-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#22c993" />
+                <stop offset="100%" stop-color="#00e676" />
+              </linearGradient>
+            </defs>
+            <polygon points="1,15 63,1 63,15" class="vol-tri-bg" />
+            <polygon points="1,15 63,1 63,15" class="vol-tri-fill" clip-path="url(#vol-clip-path)" />
+          </svg>
+        </div>
+        <span class="vol-label num" id="vol-label">80%</span>
+      </div>
+
+      <!-- PAUSE / RESUME ALERTS (BELL) -->
+      <button class="icon-btn" id="btn-mute" title="Alerts Active — Click to Pause">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
       </button>
 

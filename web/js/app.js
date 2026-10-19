@@ -39,6 +39,7 @@
     setTapePopped(state.tape_popped);
 
     // Topbar wiring
+    initVolumeControl();
     U.$("#btn-mute").onclick = toggleMute;
     U.$("#btn-alerts").onclick = toggleDrawer;
     U.$("#btn-settings").onclick = () => Settings.open();
@@ -117,6 +118,98 @@
     txt.textContent = `${rt} · ${sess} · ${st.et || ""}`;
   }
 
+  let _lastNonZeroVol = 80;
+  let _volDebounceTimer = null;
+
+  function renderVolume(vol) {
+    vol = Math.max(0, Math.min(100, Math.round(vol)));
+    const clipRect = U.$("#vol-clip-rect");
+    const label = U.$("#vol-label");
+    const btn = U.$("#btn-vol");
+    if (clipRect) {
+      clipRect.setAttribute("width", ((vol / 100) * 64).toFixed(1));
+    }
+    if (label) {
+      label.textContent = `${vol}%`;
+    }
+    if (btn) {
+      if (vol === 0) {
+        btn.innerHTML = U.icons.volMute;
+        btn.title = "Volume: 0% (Muted) — Click to restore";
+      } else if (vol <= 50) {
+        btn.innerHTML = U.icons.volLow;
+        btn.title = `Volume: ${vol}% — Click to mute`;
+      } else {
+        btn.innerHTML = U.icons.volHigh;
+        btn.title = `Volume: ${vol}% — Click to mute`;
+      }
+    }
+  }
+
+  function setVolume(vol, save = false) {
+    vol = Math.max(0, Math.min(100, Math.round(vol)));
+    if (!App.config) App.config = {};
+    if (!App.config.alerts) App.config.alerts = {};
+    if (vol > 0) _lastNonZeroVol = vol;
+    App.config.alerts.volume = vol;
+    renderVolume(vol);
+
+    clearTimeout(_volDebounceTimer);
+    if (save) {
+      App.api().set_volume(vol).catch(() => {});
+      App.saveConfig(true);
+    } else {
+      _volDebounceTimer = setTimeout(() => {
+        App.api().set_volume(vol).catch(() => {});
+      }, 40);
+    }
+  }
+
+  function initVolumeControl() {
+    const track = U.$("#vol-bar-track");
+    const btnVol = U.$("#btn-vol");
+    const initialVol = App.config?.alerts?.volume !== undefined ? App.config.alerts.volume : 80;
+    if (initialVol > 0) _lastNonZeroVol = initialVol;
+    renderVolume(initialVol);
+
+    if (btnVol) {
+      btnVol.onclick = () => {
+        const cur = App.config?.alerts?.volume !== undefined ? App.config.alerts.volume : 80;
+        if (cur > 0) {
+          _lastNonZeroVol = cur;
+          setVolume(0, true);
+        } else {
+          setVolume(_lastNonZeroVol || 80, true);
+        }
+      };
+    }
+
+    if (track) {
+      function getVolFromEvent(e) {
+        const r = track.getBoundingClientRect();
+        const x = Math.max(0, Math.min(r.width, e.clientX - r.left));
+        return Math.round((x / r.width) * 100);
+      }
+
+      track.onmousedown = (e) => {
+        e.preventDefault();
+        const vol = getVolFromEvent(e);
+        setVolume(vol, false);
+
+        const onMove = (moveEv) => {
+          setVolume(getVolFromEvent(moveEv), false);
+        };
+        const onUp = (upEv) => {
+          window.removeEventListener("mousemove", onMove);
+          window.removeEventListener("mouseup", onUp);
+          setVolume(getVolFromEvent(upEv), true);
+        };
+        window.addEventListener("mousemove", onMove);
+        window.addEventListener("mouseup", onUp);
+      };
+    }
+  }
+
   function toggleMute() {
     App.config.alerts.mute = !App.config.alerts.mute;
     updateMuteBtn();
@@ -125,15 +218,22 @@
 
   function updateMuteBtn() {
     const btn = U.$("#btn-mute");
-    const m = App.config.alerts.mute;
-    btn.innerHTML = m ? U.icons.bellOff : U.icons.bell;
-    btn.classList.toggle("active", m);
-    btn.title = m ? "Muted (click to unmute)" : "Sound on (click to mute)";
+    if (!btn) return;
+    const isPaused = !!App.config?.alerts?.mute;
+    btn.innerHTML = isPaused ? U.icons.bellOff : U.icons.bell;
+    btn.classList.toggle("paused", isPaused);
+    btn.classList.toggle("active", isPaused);
+    btn.title = isPaused
+      ? "Alerts PAUSED (Sound & Telegram suppressed) — Click to resume"
+      : "Alerts ACTIVE (Sound & Telegram enabled) — Click to pause";
   }
 
   function onConfig(c) {
     App.config = c;
     updateMuteBtn();
+    if (c.alerts?.volume !== undefined) {
+      renderVolume(c.alerts.volume);
+    }
     Settings.applyUi();
   }
 

@@ -184,13 +184,22 @@ Optional tape sound (default off — the tape is noisy).
 - **Rich Message Format**: Includes Symbol, Strategy name, Session, Price, Change %, Volume, Float, Relative Volume (daily + 5m%), Short Borrow Status (`HTB` / `ETB` / `NO BORROW` / `N/A`), 52w range position, and a direct TradingView chart link.
 - **Per-Symbol Cooldown**: A per-ticker cooldown (default 60s, configurable in Settings) prevents rapid duplicate push notifications when a runner repeatedly prints new HODs in seconds.
 
-## 9. Sounds
-- Settings lists all `.wav` in `C:\Windows\Media` (Windows Notify, Ding, chimes, Alarm01–10, …).
-- Separate pickers: **New screener symbol**, **New news**, **Tape event**; ▶ test button each.
-- Played async via `winsound.PlaySound(path, SND_FILENAME | SND_ASYNC)`; throttled to 1 per 1.5 s.
+## 9. Sounds & Alert Controls
+- **System Sounds**: Lists all `.wav` files in `C:\Windows\Media` (Windows Notify, Ding, chimes, Alarm01–10, etc.).
+- **Separate Sound Pickers**: **New screener symbol**, **New news**, **Tape event**; ▶ test button each.
+- **Async Throttled Playback**: Played async via `winsound.PlaySound(path, SND_FILENAME | SND_ASYNC)`; throttled to 1 per 1.5 s.
+- **Alert Sound Volume Control**:
+  - Interactive topbar widget featuring a speaker icon (high / low / mute), an interactive **visual rising triangle bar** filled from left to right with vibrant green (`#00e676`) representing current volume, and a percentage label (0% - 100%).
+  - Clicking or dragging across the triangle instantly adjusts the volume.
+  - Per-process waveform audio volume synchronized seamlessly via Windows WinMM `waveOutSetVolume` without external dependencies.
+  - Clicking the speaker icon quickly toggles mute / restores prior volume level.
+- **Unified Alert Pause (The Bell Button)**:
+  - Single master toggle for active alerts vs. paused alerts.
+  - Clicking the bell button **both mutes audio chimes AND suspends sending push notifications to Telegram** (for both Screener new symbols and Tape momentum alerts).
+  - Visual status feedback: when active, shows normal green-tinted bell; when paused, shows slashed bell (`bellOff`) with pulsing red warning indicator.
 
 ## 10. Settings & Integrations
-TradingView `sessionid`/`sessionid_sign` & real-time connection status · poll intervals · re-entry window · news recency & provider · sounds · tape universe & strategy thresholds · Alpaca keys for short borrow locates · Telegram Bot Token, Chat ID, and independent toggles for Screener alerts and Tape momentum alerts (with per-symbol cooldown) · always-on-top · font size.
+TradingView `sessionid`/`sessionid_sign` & real-time connection status · poll intervals · re-entry window · alert volume (0%–100%) · unified pause alerts toggle · news recency & provider · sounds · tape universe & strategy thresholds · Alpaca keys for short borrow locates · Telegram Bot Token, Chat ID, and independent toggles for Screener alerts and Tape momentum alerts (with per-symbol cooldown) · always-on-top · font size.
 
 ## 11. Architecture
 ```

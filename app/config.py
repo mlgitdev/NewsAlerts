@@ -67,6 +67,7 @@ DEFAULT_CONFIG = {
     "alerts": {
         "reentry_min": 15,
         "mute": False,
+        "volume": 80,
         "quiet_when_focused": False,
         "sound_new_symbol": MEDIA + r"\Windows Notify System Generic.wav",
         "news_sound_enabled": True,

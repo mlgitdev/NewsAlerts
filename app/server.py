@@ -97,6 +97,16 @@ def make_app(api, web_dir: Path) -> Bottle:
             log.exception("Error in /api/test_alpaca: %s", e)
             return json_resp({"ok": False, "message": str(e)})
 
+    @app.route("/api/set_volume", method=["POST"])
+    def set_volume():
+        try:
+            data = request.json or {}
+            vol = int(data.get("volume", 80))
+            return json_resp(api.set_volume(vol))
+        except Exception as e:
+            log.exception("Error in /api/set_volume: %s", e)
+            return json_resp({"ok": False, "error": str(e)})
+
     @app.route("/api/set_focused", method=["POST"])
     def set_focused():
         try:

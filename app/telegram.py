@@ -60,29 +60,36 @@ def load_secrets() -> dict:
 
 
 class TelegramService:
-    def __init__(self, bot_token: str = "", chat_id: str = "", enabled: bool = True) -> None:
+    def __init__(self, bot_token: str = "", chat_id: str = "", enabled: bool = True, paused: bool = False) -> None:
         self._lock = threading.Lock()
         secrets = load_secrets()
         self.bot_token = (bot_token or secrets.get("bot_token") or "").strip()
         self.chat_id = str(chat_id or secrets.get("admin_chat_id") or "").strip()
         self.enabled = enabled and bool(self.bot_token and self.chat_id)
+        self.paused = bool(paused)
         self._queue: "queue.Queue[str]" = queue.Queue()
         self._thread = threading.Thread(target=self._worker, daemon=True, name="tg-alerts")
         self._thread.start()
 
-    def update(self, bot_token: str = "", chat_id: str = "", enabled: bool = True) -> None:
+    def update(self, bot_token: str = "", chat_id: str = "", enabled: bool = True, paused: bool | None = None) -> None:
         with self._lock:
             secrets = load_secrets()
             self.bot_token = (bot_token or secrets.get("bot_token") or "").strip()
             self.chat_id = str(chat_id or secrets.get("admin_chat_id") or "").strip()
             self.enabled = enabled and bool(self.bot_token and self.chat_id)
+            if paused is not None:
+                self.paused = bool(paused)
+
+    def set_paused(self, paused: bool) -> None:
+        with self._lock:
+            self.paused = bool(paused)
 
     def is_configured(self) -> bool:
         with self._lock:
             return bool(self.bot_token and self.chat_id)
 
     def send_raw(self, text: str) -> None:
-        if not self.enabled:
+        if not self.enabled or self.paused:
             return
         self._queue.put(text)
 
@@ -111,7 +118,7 @@ class TelegramService:
             return False, f"Request failed: {e}"
 
     def send_new_symbol_alert(self, screen_name: str, session: str, row: dict, latest_news: str = "") -> None:
-        if not self.enabled:
+        if not self.enabled or self.paused:
             return
 
         sym = html.escape(str(row.get("symbol") or row.get("ticker", "")))
@@ -168,7 +175,7 @@ class TelegramService:
         self.send_raw("\n".join(lines))
 
     def send_tape_alert(self, event: dict, session: str = "") -> None:
-        if not self.enabled:
+        if not self.enabled or self.paused:
             return
 
         sym = html.escape(str(event.get("symbol") or event.get("ticker", "")))

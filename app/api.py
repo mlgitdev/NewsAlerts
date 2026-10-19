@@ -86,15 +86,29 @@ class Api:
         if hasattr(a, "alp_news"):
             a.alp_news.update_credentials(a.borrow.key_id, a.borrow.secret_key)
         ac = c.get("alerts", {})
+        is_paused = bool(ac.get("mute", False))
         a.telegram.update(
             bot_token=ac.get("telegram_bot_token", ""),
             chat_id=ac.get("telegram_chat_id", ""),
-            enabled=bool(ac.get("telegram_enabled", True))
+            enabled=bool(ac.get("telegram_enabled", True)),
+            paused=is_paused
         )
-        a.sounds.muted = bool(ac.get("mute", False))
+        a.sounds.muted = is_paused
+        if "volume" in ac:
+            a.sounds.set_volume(int(ac["volume"]))
         a.screener.poke()
         a.bus.emit("config", c)
         return True
+
+    def set_volume(self, volume: int):
+        a = self._app
+        vol = max(0, min(100, int(volume)))
+        a.sounds.set_volume(vol)
+        cfg = a.cfg.get()
+        cfg.setdefault("alerts", {})["volume"] = vol
+        a.cfg.update(cfg)
+        a.bus.emit("config", cfg)
+        return {"ok": True, "volume": vol}
 
     def send_telegram_test(self):
         ok, msg = self._app.telegram.send_test_message()
