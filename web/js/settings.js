@@ -239,8 +239,8 @@
 
     tab_about(c) {
       const wrap = U.el("div", { class: "about-pane" });
-      const ver = App.version || "2.4.1";
-      const sem = App.semver || { major: 2, minor: 4, patch: 1 };
+      const ver = App.version || "2.4.2";
+      const sem = App.semver || { major: 2, minor: 4, patch: 2 };
       const hero = U.el("div", { class: "about-hero-wrap" },
         U.el("img", { src: "img/hero.jpg", class: "about-hero-img", alt: "NewsAlerts Hero Banner" }),
         U.el("div", { class: "about-hero-overlay" },
@@ -249,8 +249,23 @@
         )
       );
 
+      const linkGh = U.el("a", {
+        href: "https://github.com/mlgitdev/NewsAlerts",
+        target: "_blank",
+        style: "color:var(--accent);text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px;"
+      }, "github.com/mlgitdev/NewsAlerts ↗");
+
+      const linkWiki = U.el("a", {
+        href: "https://github.com/mlgitdev/NewsAlerts/wiki",
+        target: "_blank",
+        style: "color:var(--accent);text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px;"
+      }, "Project Documentation Wiki ↗");
+
       const grid = U.el("div", { class: "form-grid", style: "margin-top:12px" });
       grid.append(
+        U.el("h3", {}, "Project & Documentation"),
+        ...Settings.field("GitHub Repository", linkGh, "Source code, release downloads, and issue tracker"),
+        ...Settings.field("Documentation Wiki", linkWiki, "Terminal manual, rules engine, and strategy guides"),
         U.el("h3", {}, "System & Semantic Versioning"),
         ...Settings.field("Semantic Version", U.el("span", { style: "color:var(--up);font-family:var(--mono);font-weight:700" }, `v${ver} [Major: ${sem.major}, Minor: ${sem.minor}, Patch: ${sem.patch}]`), "Strictly conforms to SemVer 2.0.0 (MAJOR.MINOR.PATCH)"),
         ...Settings.field("Platform Engine", U.el("span", { style: "color:var(--text);font-family:var(--mono);font-size:12px" }, "Python 3.10+ · Native pywebview · Cross-Platform Audio")),

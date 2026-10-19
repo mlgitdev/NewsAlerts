@@ -1,7 +1,7 @@
 # NewsAlerts — Momentum Screener, Tape & News Terminal
 
 <p align="center">
-  <img src="assets/hero.jpg" alt="NewsAlerts Hero Banner" width="100%" style="border-radius:12px; border:1px solid #2a3347; box-shadow:0 12px 36px rgba(0,0,0,0.55);" />
+  <img src="assets/social_preview.png" alt="NewsAlerts Institutional Trading Terminal Banner" width="100%" style="border-radius:12px; border:1px solid #2a3347; box-shadow:0 12px 36px rgba(0,0,0,0.55);" />
 </p>
 
 <p align="center">
@@ -14,6 +14,7 @@
   <a href="https://github.com/mlgitdev/NewsAlerts/actions/workflows/ci.yml"><img src="https://github.com/mlgitdev/NewsAlerts/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
   <a href="https://github.com/mlgitdev/NewsAlerts/actions/workflows/secret-scan.yml"><img src="https://github.com/mlgitdev/NewsAlerts/actions/workflows/secret-scan.yml/badge.svg" alt="Secret Scanning" /></a>
   <a href="https://github.com/mlgitdev/NewsAlerts/releases"><img src="https://img.shields.io/github/v/release/mlgitdev/NewsAlerts?color=10b981&label=SemVer%20Release&logo=semver" alt="Latest SemVer Release" /></a>
+  <a href="https://github.com/mlgitdev/NewsAlerts/wiki"><img src="https://img.shields.io/badge/GitHub-Wiki%20Docs-blue?logo=gitbook" alt="GitHub Wiki Documentation" /></a>
   <img src="https://img.shields.io/badge/Platform-Windows%20x64%20%7C%20macOS%20arm64%20%7C%20Linux-blue" alt="Supported Platforms" />
   <img src="https://img.shields.io/badge/Package%20Gate-Verified-purple" alt="Package Verification Gate" />
 </p>
@@ -32,6 +33,7 @@ Active momentum day trading requires spotting low-float runners the split second
 - ⚡ **Zero-Latency Inbound Alerts**: Plays an instant audio chime (with interactive volume control & one-click pause) and sends Telegram push notifications the exact second a ticker breaches your screening criteria.
 - 🌊 **Running Momentum Tape**: Warrior-Trading style High of Day (HOD) and Squeeze Breakout prints with 4-day local disk persistence for weekend and off-hours trade review.
 - 📰 **Zero-Lag Catalyst Confirmation (Beat the 15-Min Delay)**: Unlike retail charting platforms where news lags by 5 to 15 minutes, NewsAlerts pulls fresh headlines the second they cross the wire (Benzinga, GlobeNewswire, PR Newswire), enabling immediate verification of whether a runner is moving on real PR or sym-play noise.
+- 📈 **One-Click TradingView Chart Launching**: Dedicated chart icon button docked directly in the news headline banner header (`#news-chart`). Clicking it instantly opens the live interactive TradingView chart for the active ticker in your default browser—eliminating manual symbol typing during high-velocity breakouts.
 - 🩳 **Real-Time Borrow Locates**: Live `HTB` (Hard to Borrow), `ETB` (Easy to Borrow), and `NO BORROW` badges right on the tape and screener to identify short squeeze potential instantly.
 - 🪶 **Zero Electron / Node.js Overhead**: Native Edge WebView2 execution compiled to a lightweight ~14 MB standalone binary with sub-second launch times.
 
@@ -52,7 +54,7 @@ Active momentum day trading requires spotting low-float runners the split second
 | <div align="center"><br><h3><b>⚡ Real-Time Momentum Screener</b></h3><b>Sub-second low-float scanner built for intraday velocity</b><br><br>• <b>Live Inbound Symbol Badges</b>: Instant visual <code>NEW</code> badge the exact second a ticker enters criteria.<br>• <b>Dynamic Momentum Filtering</b>: Real-time scan criteria on Float, Price, % Change, and Relative Volume.<br>• <b>Live Shortability Indicators</b>: Broker-grade <code>NO BORROW</code>, <code>HTB</code>, and <code>ETB</code> badges on every row.<br><br></div> | <a href="docs/img/screener.png"><img src="docs/img/screener.png" alt="Momentum Screener" width="460" /></a> |
 | <div align="center"><br><h3><b>🌊 High-of-Day (HOD) & Squeeze Tape</b></h3><b>Warrior-Trading style real-time momentum prints</b><br><br>• <b>High-Velocity Prints</b>: Real-time prints streaming new high-of-day momentum triggers and velocity surges.<br>• <b>Relative Volume Velocity</b>: Live 5-minute relative volume surges (e.g. +4000%) alongside daily rates.<br>• <b>4-Day Local Persistence</b>: Automatic local disk caching for off-hours and weekend trade reviews.<br><br></div> | <a href="docs/img/tape.png"><img src="docs/img/tape.png" alt="Running Momentum Tape" width="460" /></a> |
 | <div align="center"><br><h3><b>🎯 Multi-Strategy Rules Engine</b></h3><b>Granular breakout strategy selection and instant audio chimes</b><br><br>• <b>Selectable In-App Strategies</b>: Low Float Momo, Squeeze 52wk Breakout, and 5% / 10% velocity surges.<br>• <b>Audio Bells & Volume Control</b>: Instant auditory alert upon new symbol entry with one-click quick pause.<br>• <b>Color-Coded Visual Triggers</b>: Distinct color highlights per strategy directly on the tape.<br><br></div> | <a href="docs/img/strategies.png"><img src="docs/img/strategies.png" alt="Strategy Rules Selection" width="460" /></a> |
-| <div align="center"><br><h3><b>📰 Instant Catalyst Confirmation</b></h3><b>Zero-lag Benzinga & PR news wire for split-second fundamental validation</b><br><br>• <b>Eliminate the 15-Minute Lag</b>: Retail charts lag by 5–15 min; NewsAlerts surfaces wire PRs the moment they cross.<br>• <b>Real-Time Catalyst Wire</b>: Live streaming headlines from Benzinga, GlobeNewswire, and TradingView.<br>• <b>Immediate Verification</b>: Full story view to confirm whether a low-float runner is moving on fresh PR or sym-play momentum.<br>• <b>Custom Time Horizon</b>: Filter news stories from the last 1 hour to 7 days with a single click.<br><br></div> | <a href="docs/img/news.png"><img src="docs/img/news.png" alt="Catalyst News Wire" width="460" /></a> |
+| <div align="center"><br><h3><b>📰 Instant Catalyst Confirmation</b></h3><b>Zero-lag Benzinga & PR news wire for split-second fundamental validation</b><br><br>• <b>Eliminate the 15-Minute Lag</b>: Retail charts lag by 5–15 min; NewsAlerts surfaces wire PRs the moment they cross.<br>• <b>Real-Time Catalyst Wire</b>: Live streaming headlines from Benzinga, GlobeNewswire, and TradingView.<br>• <b>Immediate Verification</b>: Full story view to confirm whether a low-float runner is moving on fresh PR or sym-play momentum.<br>• <b>One-Click Chart Popout</b>: Dedicated chart icon button in the news header pane instantly opens the live TradingView chart for the active ticker in your browser.<br>• <b>Custom Time Horizon</b>: Filter news stories from the last 1 hour to 7 days with a single click.<br><br></div> | <a href="docs/img/news.png"><img src="docs/img/news.png" alt="Catalyst News Wire" width="460" /></a> |
 | <div align="center"><br><h3><b>🩳 Institutional Short Borrow Locates</b></h3><b>Real-time broker-grade locate availability and short squeeze detection</b><br><br>• <b>Alpaca Market Integration</b>: Direct broker locate feeds for real-time borrow availability.<br>• <b>Color-Coded Status</b>: Instant <code>ETB</code> (Easy), <code>HTB</code> (Hard), and <code>NO BORROW</code> badges.<br>• <b>Short Squeeze Edge</b>: Identify short-squeeze candidates instantly before volume cascades.<br><br></div> | <a href="docs/img/borrow.png"><img src="docs/img/borrow.png" alt="Short Borrow Settings" width="460" /></a> |
 | <div align="center"><br><h3><b>📲 Instant Telegram Push Alerts</b></h3><b>Sub-second mobile & desktop DM delivery when momentum triggers fire</b><br><br>• <b>Live Push Alerts</b>: Instant Telegram direct notifications with strategy triggers and volume surges.<br>• <b>Comprehensive Ticker Stats</b>: Symbol, Price, % Change, Volume, Float, and Borrow status in every alert.<br>• <b>One-Click Chart Linking</b>: Instant direct link to TradingView chart for rapid execution.<br><br></div> | <a href="docs/img/telegram_alerts.png"><img src="docs/img/telegram_alerts.png" alt="Telegram Push Notifications" width="460" /></a> |
 
@@ -132,6 +134,13 @@ All technical procedures are documented in detail within the [`docs/`](docs/) di
 - **Git Worktree Mandatory Rule**: Root checkout on `main` is immutable; all modifications must occur in `.worktrees/`.
 - **Local Verification Gate**: Mandatory Python syntax compilation, unit tests, and build check before submitting PRs.
 &rarr; *Read the complete [AI Agent Operating Guidelines](AGENTS.md)*
+
+### 📚 7. Interactive GitHub Wiki & Documentation &mdash; [GitHub Wiki](https://github.com/mlgitdev/NewsAlerts/wiki)
+*Official deep-dive manuals, strategy guides, and system architecture:*
+- **Terminal Manual & Navigation**: Screener filtering, running tape persistence, and one-click TradingView chart popout.
+- **Multi-Strategy Rules Engine**: Strategy parameters for Low Float Momo, Squeeze 52wk Breakout, and 5%/10% surges.
+- **Short Locates & Broker Integration**: Real-time Alpaca API locate mappings and short squeeze analytics.
+&rarr; *Explore the complete [NewsAlerts GitHub Wiki](https://github.com/mlgitdev/NewsAlerts/wiki)*
 
 ---
 

@@ -12,8 +12,8 @@ NewsAlerts adheres strictly to [Semantic Versioning (SemVer 2.0.0)](https://semv
 ## Single Source of Truth (`app/version.py`)
 
 Application version metadata is centrally registered in [`app/version.py`](../app/version.py):
-- `__version__ = "2.4.1"`
-- `VERSION_INFO = (2, 4, 1)`
+- `__version__ = "2.4.2"`
+- `VERSION_INFO = (2, 4, 2)`
 - **`SemVer` Dataclass**: Validates, parses, bumps, and compares version strings adhering strictly to SemVer 2.0.0.
 - **Dynamic Corner Display**: The active version is dynamically queried via `App.api().get_state()` and rendered in:
   1. The **bottom-right corner** of the terminal window (`#corner-version-badge`). Clicking this badge opens the system and release dialog.
@@ -38,5 +38,6 @@ All official releases are produced deterministically through GitHub Actions:
 
 ## Release History
 
+- [v2.4.2 Release Notes](releases/v2.4.2.md) — About pane GitHub & Wiki links, README social preview hero, TradingView chart popout docs, and comprehensive Wiki suite.
 - [v2.4.1 Release Notes](releases/v2.4.1.md) — Runtime asset routing, Settings grid alignment fix, brand navigation, and social preview card.
 - [v2.4.0 Release Notes](releases/v2.4.0.md) — Unified alert pause, triangle volume control, brand identity, multi-OS support, and GitHub CI/CD automation.
