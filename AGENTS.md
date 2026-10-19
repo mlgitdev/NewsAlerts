@@ -48,13 +48,54 @@ When writing or modifying code, adhere strictly to cross-platform compatibility:
 
 ---
 
-## 4. Branch & Pull Request Protocol
+## 4. Git Worktree Protocol & Task Isolation (Mandatory)
+
+The repository root checkout on `main` is considered **immutable and read-only for active development**. Agents must strictly adhere to the following task isolation workflow:
+
+### 1. Mandatory Worktree for New Work
+- Never edit or dirty the root checkout on `main`.
+- Always spawn a dedicated git worktree under `.worktrees/`:
+  ```powershell
+  # Windows
+  .\build.ps1 -Task worktree-new -Branch feat/<descriptor> -Base main
+  ```
+  ```bash
+  # Linux / macOS
+  ./scripts/worktree.sh new feat/<descriptor> main
+  ```
+  *(Or native git: `git worktree add -b feat/<descriptor> .worktrees/<sanitized-name> main`)*
+
+### 2. Sub-Task Worktrees & Merge-Back Protocol
+- For multi-phase features or parallel experiments, branch sub-worktrees from the parent `feat/` branch:
+  ```powershell
+  .\build.ps1 -Task worktree-new -Branch sub/<feature>/<subtask> -Base feat/<feature>
+  ```
+- Once validated, merge the sub-task back into the primary feature branch before PR creation:
+  ```powershell
+  .\build.ps1 -Task worktree-merge -Branch sub/<feature>/<subtask> -Base feat/<feature>
+  ```
+- Safely remove the sub-task worktree:
+  ```powershell
+  .\build.ps1 -Task worktree-remove -Branch sub/<feature>/<subtask>
+  ```
+
+### 3. Cleanup After PR Merge
+- Once the Pull Request is reviewed, approved, and merged into `main` by `@mlgitdev`, the worktree must be removed:
+  ```powershell
+  .\build.ps1 -Task worktree-remove -Branch feat/<descriptor>
+  ```
+
+---
+
+## 5. Branch & Pull Request Protocol
 
 ### 1. Branch Naming Conventions
 - Features: `feat/<short-descriptor>` (e.g. `feat/vwap-filter`)
+- Major Epics: `major/<short-descriptor>` (e.g. `major/v3-architecture`)
 - Bug Fixes: `fix/<short-descriptor>` (e.g. `fix/tape-timestamp`)
 - Documentation: `docs/<short-descriptor>`
 - Performance: `perf/<short-descriptor>`
+- Sub-tasks: `sub/<feature>/<task>`
 
 ### 2. Conventional Commits
 All commit messages must follow Conventional Commits format:
@@ -78,7 +119,7 @@ When an Agent creates a PR:
 
 ---
 
-## 5. Local Verification Gate Before PR Creation
+## 6. Local Verification Gate Before PR Creation
 
 Agents MUST execute the following verification steps prior to opening a PR:
 
@@ -99,7 +140,7 @@ Agents MUST execute the following verification steps prior to opening a PR:
 
 ---
 
-## 6. Frontend Coding Standards
+## 7. Frontend Coding Standards
 
 - **Core**: Vanilla HTML5 and Vanilla modern ES6+ JavaScript. **No React, Vue, or Angular**.
 - **CSS**: Pure Vanilla CSS using design system tokens defined in [`web/css/app.css`](file:///web/css/app.css). Avoid ad-hoc styling.

@@ -13,29 +13,71 @@ Thank you for your interest in contributing to NewsAlerts! We welcome bug fixes,
 
 ---
 
-## 2. Development Workflow
+## 2. Development Workflow (Git Worktrees)
 
-1. Fork or clone the repository:
-   ```bash
-   git clone https://github.com/mlgitdev/NewsAlerts.git
-   cd NewsAlerts
-   ```
-2. Create a dedicated feature branch from `main`:
-   ```bash
-   git checkout -b feat/your-feature-name
-   # or
-   git checkout -b fix/your-bug-fix
-   ```
-3. Set up your local environment:
-   ```powershell
-   # Windows
-   .\build.ps1 -Task run
-   ```
-   ```bash
-   # Linux / macOS
-   chmod +x run.sh
-   ./run.sh
-   ```
+To preserve the integrity of the root `main` branch and support clean parallel feature development, **all development work must take place inside an isolated Git Worktree**.
+
+### Step 1: Clone the repository
+```bash
+git clone https://github.com/mlgitdev/NewsAlerts.git
+cd NewsAlerts
+```
+
+### Step 2: Spawn a dedicated Worktree for your feature or fix
+All worktrees are created under the ignored `.worktrees/` directory:
+
+```powershell
+# Windows PowerShell
+.\build.ps1 -Task worktree-new -Branch feat/your-feature-name -Base main
+# Or using the direct helper:
+.\scripts\worktree.ps1 new feat/your-feature-name main
+```
+
+```bash
+# Linux / macOS Bash
+./scripts/worktree.sh new feat/your-feature-name main
+```
+
+*(Native git alternative: `git worktree add -b feat/your-feature-name .worktrees/feat-your-feature-name main`)*
+
+### Step 3: Enter your worktree and develop
+```bash
+cd .worktrees/feat-your-feature-name
+```
+Worktrees automatically inherit the shared repository virtual environment (`.venv`) from the root directory.
+
+### Step 4: Sub-Tasks & Parallel Worktrees (Optional)
+If working on multi-phase tasks or parallel sub-features, branch from your feature branch:
+```powershell
+.\build.ps1 -Task worktree-new -Branch sub/feature/tests -Base feat/your-feature-name
+```
+When complete, merge back into your parent feature branch:
+```powershell
+.\build.ps1 -Task worktree-merge -Branch sub/feature/tests -Base feat/your-feature-name
+.\build.ps1 -Task worktree-remove -Branch sub/feature/tests
+```
+
+### Step 5: Verify your changes
+```powershell
+# Windows
+.\build.ps1 -Task build
+.\build.ps1 -Task check
+```
+```bash
+# Linux / macOS
+./run.sh
+```
+
+### Step 6: Push your branch and open a Pull Request
+```bash
+git push -u origin feat/your-feature-name
+gh pr create
+```
+
+### Step 7: Clean up your worktree after PR merge
+```powershell
+.\build.ps1 -Task worktree-remove -Branch feat/your-feature-name
+```
 
 ---
 
