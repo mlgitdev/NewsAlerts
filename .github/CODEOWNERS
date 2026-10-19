@@ -31,6 +31,7 @@ run.sh @mlgitdev
 run.bat @mlgitdev
 install.sh @mlgitdev
 Makefile @mlgitdev
+make.bat @mlgitdev
 NewsAlerts.spec @mlgitdev
 
 # Documentation, operating guidelines, and contribution policies

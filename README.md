@@ -118,31 +118,27 @@ If package verification fails during a release run on `main`:
 
 ## ⚡ Quick Reference Commands
 
-### Running Locally (Windows)
-```powershell
-.\build.ps1 -Task run
+### Universal Makefile (Windows, macOS, Linux)
+```bash
+make run                             # Launch desktop application
+make build                           # Build executable (Windows) or install dependencies (Unix)
+make test                            # Run full unit test suite
+make verify                          # Run package verification gate
+make check                           # Audit for credential leaks
+make clean                           # Remove build artifacts and caches
+make worktree-list                   # List active git worktrees
+make worktree-new BRANCH=feat/<name> # Create new isolated git worktree
 ```
+> *On Windows, install GNU Make via `winget install ezwinports.make` or `choco install make -y`. Alternatively, `.\make.bat <target>` or `.\build.ps1 -Task <target>` works out of the box.*
 
-### Building Portable Executable (Windows)
+### Direct PowerShell Commands (Windows)
 ```powershell
-.\build.ps1 -Task build
-```
-
-### Auditing & Verifying Packages
-```powershell
-.\build.ps1 -Task verify-packages
-```
-
-### Managing Git Worktrees
-```powershell
-# Create new isolated worktree
-.\build.ps1 -Task worktree-new -Branch feat/my-new-feature -Base main
-
-# List active worktrees
-.\build.ps1 -Task worktree-list
-
-# Remove worktree after PR merge
-.\build.ps1 -Task worktree-remove -Branch feat/my-new-feature
+.\build.ps1 -Task run               # Run application
+.\build.ps1 -Task build             # Build portable executable
+.\build.ps1 -Task verify-packages   # Audit and verify packages
+.\build.ps1 -Task worktree-new -Branch feat/my-feature # Create worktree
+.\build.ps1 -Task worktree-list     # List active worktrees
+.\build.ps1 -Task worktree-remove -Branch feat/my-feature # Remove worktree
 ```
 
 ---

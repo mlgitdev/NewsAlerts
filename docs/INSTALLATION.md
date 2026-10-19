@@ -78,7 +78,40 @@ The installer automatically registers the `NewsAlerts.desktop` launcher and appl
 
 ---
 
-## 4. Verification & First Run
+## 4. Universal Makefile & Developer CLI (Windows, macOS, Linux)
+
+NewsAlerts provides a unified, cross-platform `Makefile` enabling identical developer commands across Windows, macOS, and Linux:
+
+| Target | Description |
+|:---|:---|
+| `make run` | Launch the desktop terminal application |
+| `make build` | Build standalone executable (`NewsAlerts.exe` on Windows) or install dependencies (Unix) |
+| `make test` | Run full automated unit test suite (`tests/test_*.py`) |
+| `make verify` | Execute the Deterministic Package Verification Gate |
+| `make check` | Scan local/staged files for leaked API keys or credentials |
+| `make clean` | Remove `build/`, `dist/`, `.venv/`, and Python caches |
+| `make worktree-list` | List active git worktrees under `.worktrees/` |
+| `make worktree-new BRANCH=feat/<name>` | Create a new isolated git worktree |
+| `make help` | Display available targets and detected platform |
+
+### Windows Prerequisite for `make`:
+Windows does not include GNU `make` by default. You can install it with a single command:
+
+**Option 1: Windows Package Manager (`winget`)**
+```powershell
+winget install ezwinports.make
+```
+
+**Option 2: Chocolatey**
+```powershell
+choco install make -y
+```
+
+*Note: Restart your terminal or reload environment variables after installation. Alternatively, you can use the zero-install `.\make.bat <target>` wrapper or `.\build.ps1 -Task <target>` without installing third-party tools.*
+
+---
+
+## 5. Verification & First Run
 
 Once launched, verify your configuration:
 1. Open **Settings** (gear icon in the top right).
@@ -86,3 +119,4 @@ Once launched, verify your configuration:
 3. (Optional) In **Short Borrow**, enter your Alpaca API credentials.
 4. (Optional) In **Sound Alerts**, configure Telegram Bot Token and Chat ID.
 5. Click **Save Settings**.
+
