@@ -46,6 +46,17 @@
     U.$("#btn-mute").onclick = toggleMute;
     U.$("#btn-alerts").onclick = toggleDrawer;
     U.$("#btn-settings").onclick = () => Settings.open();
+    const brand = U.$("#btn-brand-about") || U.$(".brand");
+    if (brand) {
+      const openAbout = () => Settings.open("about");
+      brand.onclick = openAbout;
+      brand.onkeydown = (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openAbout();
+        }
+      };
+    }
 
     // Event subscriptions from Python
     App.sub("status", (st) => {
@@ -369,6 +380,10 @@
     if (cornerBadge) {
       cornerBadge.onclick = () => Settings.open("about");
       cornerBadge.title = `NewsAlerts ${formatted} (SemVer 2.0.0) — Click for Details`;
+    }
+    const brand = U.$("#btn-brand-about") || U.$(".brand");
+    if (brand) {
+      brand.title = `NewsAlerts ${formatted} (SemVer 2.0.0) — Click to view About & System Info`;
     }
   }
 
