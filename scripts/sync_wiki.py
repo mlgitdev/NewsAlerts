@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Sync documentation from docs/wiki/ to the GitHub Wiki repository (NewsAlerts.wiki.git)."""
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -38,12 +39,41 @@ def get_gh_token() -> str:
     return ""
 
 
+def get_current_version(repo_root: Path) -> str:
+    """Read the Single Source of Truth version from root VERSION file."""
+    v_file = repo_root / "VERSION"
+    if v_file.is_file():
+        return v_file.read_text(encoding="utf-8").strip()
+    # Fallback to app.version
+    try:
+        from app.version import __version__
+        return __version__
+    except Exception:
+        return "2.5.0"
+
+
+def ensure_footer_version(wiki_src: Path, version: str) -> None:
+    """Ensure docs/wiki/_Footer.md reflects the active application version."""
+    footer_path = wiki_src / "_Footer.md"
+    if not footer_path.is_file():
+        return
+    content = footer_path.read_text(encoding="utf-8")
+    expected_tag = f"NewsAlerts v{version}"
+    updated = re.sub(r"NewsAlerts\s+v[0-9]+\.[0-9]+\.[0-9]+", expected_tag, content)
+    if updated != content:
+        footer_path.write_text(updated, encoding="utf-8")
+        print(f"[+] Updated {footer_path.name} version badge to '{expected_tag}'")
+
+
 def main():
     repo_root = Path(__file__).resolve().parent.parent
     wiki_src = repo_root / "docs" / "wiki"
     if not wiki_src.exists():
         print(f"[!] Error: Wiki source directory does not exist: {wiki_src}", file=sys.stderr)
         sys.exit(1)
+
+    version = get_current_version(repo_root)
+    ensure_footer_version(wiki_src, version)
 
     token = get_gh_token()
     if not token:
@@ -90,21 +120,22 @@ def main():
         )
 
         if not status_res.stdout.strip():
-            print("[+] All wiki documentation is already up to date!")
+            print(f"[+] All wiki documentation is already up to date for v{version}!")
             return
 
-        print(f"[+] Committing {synced_count} wiki pages...")
+        print(f"[+] Committing {synced_count} wiki pages (v{version})...")
         subprocess.run(["git", "-C", str(clone_path), "config", "user.name", "mlgitdev"], check=True)
         subprocess.run(["git", "-C", str(clone_path), "config", "user.email", "mlgitdev@users.noreply.github.com"], check=True)
         subprocess.run(["git", "-C", str(clone_path), "add", "."], check=True)
         subprocess.run(
-            ["git", "-C", str(clone_path), "commit", "-m", "docs(wiki): update multi-OS data resolution and auto-provisioning guide"],
+            ["git", "-C", str(clone_path), "commit", "-m", f"docs(wiki): synchronize documentation for v{version}"],
             check=True
         )
         print("[+] Pushing updates to GitHub Wiki...")
         subprocess.run(["git", "-C", str(clone_path), "push", "origin", "HEAD"], check=True)
-        print("[OK] Successfully synchronized GitHub Wiki!")
+        print(f"[OK] Successfully synchronized GitHub Wiki for v{version}!")
 
 
 if __name__ == "__main__":
     main()
+

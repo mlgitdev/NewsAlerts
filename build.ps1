@@ -2,7 +2,7 @@
 # Usage: .\build.ps1 [-Task <build|clean|run|check|help>]
 
 param(
-    [ValidateSet("build", "clean", "run", "check", "verify-packages", "worktree-new", "worktree-list", "worktree-remove", "worktree-merge", "worktree-prune", "help")]
+    [ValidateSet("build", "clean", "run", "check", "verify-packages", "wiki-sync", "worktree-new", "worktree-list", "worktree-remove", "worktree-merge", "worktree-prune", "help")]
     [string]$Task = "build",
 
     [string]$Branch = "",
@@ -39,6 +39,7 @@ function Show-Help {
     Write-Host "  run                         Launch the built dist\NewsAlerts.exe" -ForegroundColor Yellow
     Write-Host "  check                       Verify that secrets/ are excluded from the bundle" -ForegroundColor Yellow
     Write-Host "  verify-packages             Audit and verify standalone executable & release archives" -ForegroundColor Yellow
+    Write-Host "  wiki-sync                   Synchronize docs/wiki/ documentation with GitHub Wiki" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "Git Worktree Tasks:"
     Write-Host "  worktree-new    -Branch <b-name> [-Base <base>]   Create a new isolated worktree under .worktrees/" -ForegroundColor Yellow
@@ -208,6 +209,12 @@ if ($Task -eq "build") {
         }
     }
     & $VenvPython $VerifyScript --exe $targetExe
+} elseif ($Task -eq "wiki-sync") {
+    $SyncScript = Join-Path $ScriptDir "scripts\sync_wiki.py"
+    if (-not (Test-Path $SyncScript)) {
+        $SyncScript = Join-Path $ScriptDir "..\..\scripts\sync_wiki.py"
+    }
+    & $VenvPython $SyncScript
 } elseif ($Task -eq "worktree-new") {
     & $WorktreeScript new $Branch $Base
 } elseif ($Task -eq "worktree-list") {
