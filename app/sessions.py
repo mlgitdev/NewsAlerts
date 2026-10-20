@@ -58,6 +58,7 @@ COLUMNS = [
     "postmarket_high", "postmarket_low",
     "float_shares_outstanding", "market_cap_basic",
     "relative_volume_10d_calc", "relative_volume_intraday|5",
+    "change|5", "change|15",
     "average_volume_10d_calc", "price_52_week_high", "price_52_week_low", "ATR",
     "update_mode",
 ]

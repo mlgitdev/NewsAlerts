@@ -44,12 +44,20 @@ Receive instant push notifications on your phone or desktop when a runner pops u
 
 ## 4. Tape Strategies
 
-The Tape monitors the entire small-cap universe (e.g. Price $1–$50, Min Change 3%) and evaluates real-time momentum strategies:
+The Tape monitors the momentum universe (configurable: Price $1–$500, Min Change 1%, up to 400 symbols) and evaluates real-time momentum strategies:
 - **Low Float – Former Momo Stock**: Float < 20M, RelVol ≥ 1.5, 52w high ratio ≥ 2.0.
 - **Low Float – High Rel Vol**: Float < 20M, RelVol ≥ 5.0.
+- **Low Float – High Rel Vol – Price $20+**: Float < 20M, RelVol ≥ 5.0, Price ≥ $20.
+- **Low Float – Med Rel Vol**: Float < 20M, 2.0 ≤ RelVol < 5.0.
+- **Medium Float – High Rel Vol – Price $20+**: 20M ≤ Float < 100M, RelVol ≥ 5.0, Price ≥ $20.
+- **Medium Float – High Rel Vol – Price under $20**: 20M ≤ Float < 100M, RelVol ≥ 5.0, Price < $20.
+- **Medium Float – Med Rel Vol – Price $20+**: 20M ≤ Float < 100M, 2.0 ≤ RelVol < 5.0, Price ≥ $20.
+- **Large Cap / High Float – Momentum Squeeze**: Float ≥ 100M, 5% gain in 5 minutes (monitors runners like SMCI, NVDA, TSLA).
+- **Large Cap / High Float – High Rel Vol – Price $20+**: Float ≥ 100M, RelVol ≥ 2.0, Price ≥ $20.
 - **Squeeze Alert – 52wk Breakout**: New 52-week high breakout.
-- **Squeeze Alert – Up 5% in 5min**: 5% gain in 5 minutes (up-only within active window).
+- **Squeeze Alert – Up 10% in 5min**: 10% gain in 5 minutes (high-velocity breakout).
 - **Squeeze Alert – Up 10% in 10min**: 10% gain in 10 minutes (up-only within active window).
+- **Squeeze Alert – Up 5% in 5min**: 5% gain in 5 minutes (up-only within active window).
 
 Each strategy can be individually toggled on/off in the **Tape Strategies** settings tab.
 

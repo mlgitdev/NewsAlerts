@@ -152,12 +152,18 @@ class TapeWorker(threading.Thread):
         if S.market_state() == "closed":
             return
         f = lambda k: S.tv_field(k, session)  # noqa: E731
-        filters = [
-            {"left": f("price"), "operation": "in_range", "right": [u["price_min"], u["price_max"]]},
-            {"left": f("chg"), "operation": "egreater", "right": u["chg_min"]},
-            {"left": f("vol"), "operation": "egreater", "right": u["vol_min"]},
-        ]
-        rows = self.client.scan(filters, f("chg"), True, limit=int(u["limit"]))
+        p_min = u.get("price_min", 1)
+        p_max = u.get("price_max")
+        filters = []
+        if p_max:
+            filters.append({"left": f("price"), "operation": "in_range", "right": [p_min, p_max]})
+        else:
+            filters.append({"left": f("price"), "operation": "egreater", "right": p_min})
+        if u.get("chg_min") is not None:
+            filters.append({"left": f("chg"), "operation": "egreater", "right": u["chg_min"]})
+        if u.get("vol_min") is not None:
+            filters.append({"left": f("vol"), "operation": "egreater", "right": u["vol_min"]})
+        rows = self.client.scan(filters, f("chg"), True, limit=int(u.get("limit", 400)))
         now = time.time()
         enabled = set(tc["enabled"])
         cooldown = float(tc["cooldown_sec"])
@@ -231,23 +237,43 @@ class TapeWorker(threading.Thread):
             fired = False
             if trig in ("hod", "52w"):
                 fired = trig in triggers and _match(strat, v)
-            elif trig == "squeeze" and st.hist:
+            elif trig == "squeeze":
                 window_sec = float(strat.get("window_min", 5)) * 60
-                win = now - window_sec
-                lows = [h[1] for h in st.hist if h[0] >= win and h[1]]
-                if lows and now - st.hist[0][0] >= 30:
-                    up_pct = float(strat.get("up_pct", 5))
-                    if price >= min(lows) * (1 + up_pct / 100) and _match(strat, v):
-                        last_t = st.last_fire.get(name, 0)
-                        last_p = st.last_fire_price.get(name)
-                        # During the active time window, only trigger if price is strictly higher
-                        # than the previous alert price for this strategy (never on price drops/flat).
-                        if (now - last_t < window_sec) and last_p is not None:
-                            if price > last_p:
-                                fired = True
-                        else:
-                            # Time window has reset (or first alert for this strategy)
+                up_pct = float(strat.get("up_pct", 5))
+                chg5 = r.get("change|5")
+                chg15 = r.get("change|15")
+
+                surge = False
+                # 1. Historical rolling window check (if symbol has been tracked in memory)
+                if st.hist:
+                    win = now - window_sec
+                    lows = [h[1] for h in st.hist if h[0] >= win and h[1]]
+                    if lows and (now - st.hist[0][0] >= 30 or len(st.hist) >= 3):
+                        if price >= min(lows) * (1 + up_pct / 100):
+                            surge = True
+
+                # 2. Server-side velocity: TradingView 5-min/15-min change if available
+                if not surge:
+                    server_chg = chg5 if window_sec <= 300 else (chg15 or chg5)
+                    if server_chg is not None and server_chg >= up_pct:
+                        surge = True
+
+                # 3. New entry velocity: if symbol just entered universe with session/postmarket surge
+                if not surge and not st.hist:
+                    session_chg = lg.get("chg")
+                    if session_chg is not None and session_chg >= up_pct:
+                        surge = True
+
+                if surge and _match(strat, v):
+                    last_t = st.last_fire.get(name, 0)
+                    last_p = st.last_fire_price.get(name)
+                    # During active time window, only trigger if price is strictly higher
+                    # than the previous alert price for this strategy (never on price drops/flat).
+                    if (now - last_t < window_sec) and last_p is not None:
+                        if price > last_p:
                             fired = True
+                    else:
+                        fired = True
 
             if fired and now - st.last_fire.get(name, 0) >= cooldown:
                 st.last_fire[name] = now

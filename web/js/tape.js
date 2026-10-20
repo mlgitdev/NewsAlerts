@@ -196,7 +196,7 @@
         Tape.renderAll(); App.saveConfig();
       };
       box.append(U.el("label", { class: "check" }, all, U.el("b", {}, "Select / Unselect All")), U.el("div", { class: "sep" }));
-      const fam = { low: "var(--mint)", medium: "var(--sand)", squeeze: "var(--cyan)" };
+      const fam = { low: "var(--mint)", medium: "var(--sand)", squeeze: "var(--cyan)", large: "var(--accent-2)" };
       cfg.strategies.forEach((s) => {
         const c = U.el("input", { type: "checkbox", "data-s": s.name });
         c.checked = cfg.enabled.includes(s.name);
