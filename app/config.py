@@ -113,7 +113,13 @@ DEFAULT_STRATEGIES = [
      "float_min": 20e6, "float_max": 100e6, "relvol_min": 5, "price_max": 20},
     {"name": "Medium Float - Med Rel Vol - Price $20+", "family": "medium", "trigger": "hod",
      "float_min": 20e6, "float_max": 100e6, "relvol_min": 2, "relvol_max": 5, "price_min": 20},
+    {"name": "Large Cap / High Float - Momentum Squeeze", "family": "large", "trigger": "squeeze",
+     "float_min": 100e6, "up_pct": 5, "window_min": 5},
+    {"name": "Large Cap / High Float - High Rel Vol - Price $20+", "family": "large", "trigger": "hod",
+     "float_min": 100e6, "relvol_min": 2, "price_min": 20},
     {"name": "Squeeze Alert - 52wk Breakout", "family": "squeeze", "trigger": "52w"},
+    {"name": "Squeeze Alert - Up 10% in 5min", "family": "squeeze", "trigger": "squeeze",
+     "up_pct": 10, "window_min": 5},
     {"name": "Squeeze Alert - Up 10% in 10min", "family": "squeeze", "trigger": "squeeze",
      "up_pct": 10, "window_min": 10},
     {"name": "Squeeze Alert - Up 5% in 5min", "family": "squeeze", "trigger": "squeeze",
@@ -174,7 +180,7 @@ DEFAULT_CONFIG = {
     ],
     "active_screen": "s1",
     "tape": {
-        "universe": {"price_min": 1, "price_max": 50, "chg_min": 3, "vol_min": 20e3, "limit": 300},
+        "universe": {"price_min": 1, "price_max": 500, "chg_min": 1, "vol_min": 20e3, "limit": 400},
         "cooldown_sec": 30,
         "max_events": 5000,
         "retention_days": 4,
@@ -193,6 +199,14 @@ def _merge(base: dict, override: dict) -> dict:
             out[k] = _merge(out[k], v)
         else:
             out[k] = v
+    # Ensure any new default tape strategies are added to existing configs
+    if "tape" in out and isinstance(out["tape"], dict) and "strategies" in out["tape"]:
+        existing_names = {s.get("name") for s in out["tape"]["strategies"] if isinstance(s, dict)}
+        for default_s in DEFAULT_STRATEGIES:
+            if default_s["name"] not in existing_names:
+                out["tape"]["strategies"].append(copy.deepcopy(default_s))
+                if "enabled" in out["tape"] and isinstance(out["tape"]["enabled"], list):
+                    out["tape"]["enabled"].append(default_s["name"])
     return out
 
 

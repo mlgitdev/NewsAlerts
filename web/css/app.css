@@ -458,12 +458,15 @@ table.grid { width: 100%; border-collapse: separate; border-spacing: 0; font-var
 .tape-pane .grid td { height: 26px; font-size: 12.5px; border-bottom: 1px solid rgba(0,0,0,.25); }
 .tape-pane .grid tr.low td { background: rgba(52,227,164,.10); }
 .tape-pane .grid tr.medium td { background: rgba(243,207,138,.10); }
+.tape-pane .grid tr.large td { background: rgba(139,92,246,.12); }
 .tape-pane .grid tr.squeeze td { background: rgba(34,211,238,.10); }
 .tape-pane .grid tr.low td:first-child { box-shadow: inset 3px 0 0 var(--mint); }
 .tape-pane .grid tr.medium td:first-child { box-shadow: inset 3px 0 0 var(--sand); }
+.tape-pane .grid tr.large td:first-child { box-shadow: inset 3px 0 0 var(--accent-2); }
 .tape-pane .grid tr.squeeze td:first-child { box-shadow: inset 3px 0 0 var(--cyan); }
 body.bright .tape-pane .grid tr.low td { background: #19e3a2; color: #06140f; }
 body.bright .tape-pane .grid tr.medium td { background: #fbe3b0; color: #1d1405; }
+body.bright .tape-pane .grid tr.large td { background: #c4b5fd; color: #1e1035; }
 body.bright .tape-pane .grid tr.squeeze td { background: #12e0ff; color: #031418; }
 body.bright .tape-pane .grid td.vol-cell { color: #fff; }
 .tape-pane .grid tr.in td { animation: slideIn .5s ease-out; }
