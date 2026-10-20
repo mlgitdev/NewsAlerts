@@ -87,15 +87,52 @@ The repository root checkout on `main` is considered **immutable and read-only f
 
 ---
 
-## 5. Branch & Pull Request Protocol
+---
+
+## 5. Mandatory Issue-First Protocol & Lifecycle
+
+All new features, user requests, enhancements, bug fixes, refactorings, and optimizations **MUST be tracked via a GitHub Issue before active development begins**.
+
+### 1. Mandatory Issue Check & Creation
+- **Check First**: When receiving a user prompt or requirement, query existing issues using `gh issue list`.
+- **Create If Missing**: If no issue exists corresponding to the request, the Agent **MUST create the issue first** using `gh issue create` with the appropriate template format (`bug_report.md`, `feature_request.md`, or `task.md`), Conventional Commit title, and appropriate labels (`bug`, `enhancement`, `task`).
+- Under no circumstances may an Agent create a branch or worktree without an active issue number.
+
+### 2. Worktree & Branch Naming Correlation
+- Every worktree and branch MUST reference the issue number in its descriptor:
+  `feat/<descriptor>-<issue#>`
+  `fix/<descriptor>-<issue#>`
+  `task/<descriptor>-<issue#>`
+  *(Example: `feat/custom-news-search-28`)*
+
+### 3. Pull Request Correlation (`Resolves #<issue#>`)
+- In the PR body (`.github/pull_request_template.md`), explicitly link the issue:
+  `Resolves #<issue#>` or `Closes #<issue#>` in `## Summary` and `## Changes`.
+- This ensures GitHub automatically links the PR to the issue and closes it upon merge.
+
+### 4. Cross-Posting Resolution Details to the Issue
+- Immediately after creating the PR, the Agent MUST post a comment to the issue via `gh issue comment <issue#> --body "..."`:
+  - Mentioning the PR URL (`#<pr#>`)
+  - Summarizing the implementation and changes made
+  - Highlighting test and verification status
+
+### 5. Release Correlation
+- Every SemVer release document (`docs/releases/vX.Y.Z.md` and `docs/RELEASES.md`) MUST catalog all closed issues under `### 🎯 Closed Issues` with clickable links to both the Issue and the resolving PR.
+
+### 6. Repository Skill Reference
+- For full operational workflows, CLI syntax, and examples, consult the [`issue` skill](.agents/skills/issue/SKILL.md).
+
+---
+
+## 6. Branch & Pull Request Protocol
 
 ### 1. Branch Naming Conventions
-- Features: `feat/<short-descriptor>` (e.g. `feat/vwap-filter`)
-- Major Epics: `major/<short-descriptor>` (e.g. `major/v3-architecture`)
-- Bug Fixes: `fix/<short-descriptor>` (e.g. `fix/tape-timestamp`)
-- Documentation: `docs/<short-descriptor>`
-- Performance: `perf/<short-descriptor>`
-- Sub-tasks: `sub/<feature>/<task>`
+- Features: `feat/<short-descriptor>-<issue#>` (e.g. `feat/vwap-filter-29`)
+- Major Epics: `major/<short-descriptor>-<issue#>` (e.g. `major/v3-architecture-30`)
+- Bug Fixes: `fix/<short-descriptor>-<issue#>` (e.g. `fix/tape-timestamp-31`)
+- Documentation: `docs/<short-descriptor>-<issue#>`
+- Performance: `perf/<short-descriptor>-<issue#>`
+- Sub-tasks: `sub/<feature>/<task>-<issue#>`
 
 ### 2. Conventional Commits
 All commit messages must follow Conventional Commits format:
@@ -148,7 +185,7 @@ Whenever application code, UI layout, configuration options, hotkeys, trading st
 
 ---
 
-## 6. Local Verification Gate Before PR Creation
+## 7. Local Verification Gate Before PR Creation
 
 Agents MUST execute the following verification steps prior to opening a PR:
 
@@ -175,7 +212,7 @@ Agents MUST execute the following verification steps prior to opening a PR:
 
 ---
 
-## 7. Package Verification & Automated Fail-Safe Rollback
+## 8. Package Verification & Automated Fail-Safe Rollback
 
 All build and release pipelines enforce the **Deterministic Package Verification Gate**:
 - **In-PR Gate**: If package verification fails, the PR check turns RED and merge is strictly blocked (PR is aborted).
@@ -187,9 +224,10 @@ All build and release pipelines enforce the **Deterministic Package Verification
 
 ---
 
-## 8. Frontend Coding Standards
+## 9. Frontend Coding Standards
 
 - **Core**: Vanilla HTML5 and Vanilla modern ES6+ JavaScript. **No React, Vue, or Angular**.
 - **CSS**: Pure Vanilla CSS using design system tokens defined in [`web/css/app.css`](file:///web/css/app.css). Avoid ad-hoc styling.
 - **Responsiveness**: Resizable panes, splitters, and dynamic tabular data must remain fluid and memory-leak free.
 - **Browser Compatibility**: Edge WebView2 (Chromium) on Windows, Safari WebKit on macOS, WebKit2GTK on Linux.
+

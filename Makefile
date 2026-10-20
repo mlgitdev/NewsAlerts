@@ -29,6 +29,8 @@ ifeq ($(OS),Windows_NT)
     CMD_TEST    := $(PYTHON) -m unittest discover -s tests -p "test_*.py"
     CMD_WT_LIST := $(POWERSHELL) -File ./build.ps1 -Task worktree-list
     CMD_WT_NEW  := $(POWERSHELL) -File ./build.ps1 -Task worktree-new -Branch "$(BRANCH)" -Base "$(BASE)"
+    CMD_ISSUE_LIST := $(POWERSHELL) -File ./build.ps1 -Task issue-list
+    CMD_ISSUE_VIEW := $(POWERSHELL) -File ./build.ps1 -Task issue-view -Branch "$(ISSUE)"
 else
     UNAME_S := $(shell uname -s)
     ifeq ($(UNAME_S),Darwin)
@@ -56,10 +58,13 @@ else
     CMD_TEST    := $(PYTHON) -m unittest discover -s tests -p "test_*.py"
     CMD_WT_LIST := ./scripts/worktree.sh list
     CMD_WT_NEW  := ./scripts/worktree.sh new "$(BRANCH)" "$(BASE)"
+    CMD_ISSUE_LIST := gh issue list --state open
+    CMD_ISSUE_VIEW := gh issue view "$(ISSUE)"
 endif
 
 BRANCH ?=
 BASE ?= main
+ISSUE ?=
 
 all: help
 
@@ -95,6 +100,14 @@ worktree-new:
 	@echo "[*] [$(PLATFORM)] Creating worktree..."
 	@$(CMD_WT_NEW)
 
+issue-list:
+	@echo "[*] [$(PLATFORM)] Listing open GitHub issues..."
+	@$(CMD_ISSUE_LIST)
+
+issue-view:
+	@echo "[*] [$(PLATFORM)] Inspecting GitHub issue $(ISSUE)..."
+	@$(CMD_ISSUE_VIEW)
+
 wiki-sync:
 	@echo "[*] [$(PLATFORM)] Synchronizing GitHub Wiki documentation..."
 	@$(CMD_WIKI_SYNC)
@@ -111,5 +124,7 @@ help:
 	@echo "  make clean          Remove build/, dist/, and cached artifacts"
 	@echo "  make worktree-list  List active Git worktrees under .worktrees/"
 	@echo "  make worktree-new   Create a new isolated worktree (BRANCH=feat/... [BASE=main])"
+	@echo "  make issue-list     List open repository issues via GitHub CLI"
+	@echo "  make issue-view     Inspect details for an issue (ISSUE=<number>)"
 	@echo "  make wiki-sync      Synchronize docs/wiki/ documentation with GitHub Wiki"
 	@echo "  make help           Show this usage guide"

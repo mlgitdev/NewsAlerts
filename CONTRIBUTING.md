@@ -13,7 +13,19 @@ Thank you for your interest in contributing to NewsAlerts! We welcome bug fixes,
 
 ---
 
-## 2. Development Workflow (Git Worktrees)
+## 2. Issue-First Protocol & Lifecycle
+
+Before writing code or spawning a worktree, **every contribution must have an active GitHub Issue**:
+1. **Search Existing Issues**: Run `gh issue list` or search the repository to ensure the topic is not already tracked.
+2. **Create an Issue**: If no issue exists, create one via the appropriate template:
+   - **Bug Report** (`fix:`): For errors, unexpected behavior, or platform crashes.
+   - **Feature Request** (`feat:`): For new filters, data sources, audio alerts, or UI capabilities.
+   - **Task / Enhancement** (`task:`): For refactoring, testing, documentation, or CI/CD work.
+3. **Correlate with PR**: The resolving PR must explicitly reference the issue in its body (`Resolves #<issue#>`).
+
+---
+
+## 3. Development Workflow (Git Worktrees)
 
 To preserve the integrity of the root `main` branch and support clean parallel feature development, **all development work must take place inside an isolated Git Worktree**.
 
@@ -23,22 +35,22 @@ git clone https://github.com/mlgitdev/NewsAlerts.git
 cd NewsAlerts
 ```
 
-### Step 2: Spawn a dedicated Worktree for your feature or fix
-All worktrees are created under the ignored `.worktrees/` directory:
+### Step 2: Spawn a dedicated Worktree referencing the Issue
+All worktrees are created under the ignored `.worktrees/` directory and should append the issue number:
 
 ```powershell
 # Windows PowerShell
-.\build.ps1 -Task worktree-new -Branch feat/your-feature-name -Base main
+.\build.ps1 -Task worktree-new -Branch feat/your-feature-name-28 -Base main
 # Or using the direct helper:
-.\scripts\worktree.ps1 new feat/your-feature-name main
+.\scripts\worktree.ps1 new feat/your-feature-name-28 main
 ```
 
 ```bash
 # Linux / macOS Bash
-./scripts/worktree.sh new feat/your-feature-name main
+./scripts/worktree.sh new feat/your-feature-name-28 main
 ```
 
-*(Native git alternative: `git worktree add -b feat/your-feature-name .worktrees/feat-your-feature-name main`)*
+*(Native git alternative: `git worktree add -b feat/your-feature-name-28 .worktrees/feat-your-feature-name-28 main`)*
 
 ### Step 3: Enter your worktree and develop
 ```bash
@@ -85,7 +97,7 @@ gh pr create
 
 ---
 
-## 3. Commit Conventions
+## 4. Commit Conventions
 
 We strictly enforce **Conventional Commits**:
 `<type>(<scope>): <subject>`
@@ -109,17 +121,18 @@ We strictly enforce **Conventional Commits**:
 
 ---
 
-## 4. Pull Request Requirements
+## 5. Pull Request Requirements
 
 When creating a PR:
 1. Title must conform to Conventional Commits.
 2. Description must use the template defined in `.github/pull_request_template.md`.
 3. Provide clear testing and verification steps.
-4. Guarantee that zero credentials, secrets, or keys are committed.
+4. Reference the resolving issue (`Resolves #<issue#>`).
+5. Guarantee that zero credentials, secrets, or keys are committed.
 
 ---
 
-## 5. Security & Secret Protection
+## 6. Security & Secret Protection
 
 - **Never** commit `keys.toml`, `secrets.toml`, `.env`, API keys, tokens, or passwords.
 - Secret scanning bots automatically audit every PR. PRs containing sensitive patterns will be immediately rejected.

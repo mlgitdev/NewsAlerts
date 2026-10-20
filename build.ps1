@@ -2,7 +2,7 @@
 # Usage: .\build.ps1 [-Task <build|clean|run|check|help>]
 
 param(
-    [ValidateSet("build", "clean", "run", "check", "verify-packages", "wiki-sync", "worktree-new", "worktree-list", "worktree-remove", "worktree-merge", "worktree-prune", "help")]
+    [ValidateSet("build", "clean", "run", "check", "verify-packages", "wiki-sync", "worktree-new", "worktree-list", "worktree-remove", "worktree-merge", "worktree-prune", "issue-list", "issue-view", "help")]
     [string]$Task = "build",
 
     [string]$Branch = "",
@@ -47,6 +47,10 @@ function Show-Help {
     Write-Host "  worktree-remove -Branch <b-name> [-Force]         Remove a worktree and prune metadata" -ForegroundColor Yellow
     Write-Host "  worktree-merge  -Branch <src> -Base <target>      Merge sub-branch back into target feat/ branch" -ForegroundColor Yellow
     Write-Host "  worktree-prune                                    Prune stale worktree references" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "Issue Management Tasks (Issue-First Protocol):"
+    Write-Host "  issue-list                                        List open repository issues via GitHub CLI" -ForegroundColor Yellow
+    Write-Host "  issue-view      -Branch <issue-number>            Inspect specific issue details and discussion" -ForegroundColor Yellow
     Write-Host "  help                                              Show this help message" -ForegroundColor Yellow
     Write-Host ""
 }
@@ -188,6 +192,14 @@ if (-not (Test-Path $WorktreeScript)) {
     $WorktreeScript = Join-Path $ScriptDir "..\..\scripts\worktree.ps1"
 }
 
+function Get-GhCli {
+    $cmd = Get-Command "gh" -ErrorAction SilentlyContinue
+    if ($cmd) { return "gh" }
+    $defPath = "C:\Program Files\GitHub CLI\gh.exe"
+    if (Test-Path $defPath) { return $defPath }
+    return $null
+}
+
 if ($Task -eq "build") {
     Build-Executable
 } elseif ($Task -eq "clean") {
@@ -229,6 +241,24 @@ if ($Task -eq "build") {
     & $WorktreeScript merge-back $Branch $Base
 } elseif ($Task -eq "worktree-prune") {
     & $WorktreeScript prune
+} elseif ($Task -eq "issue-list") {
+    $gh = Get-GhCli
+    if ($gh) {
+        & $gh issue list --state open
+    } else {
+        Write-Error "GitHub CLI (gh) was not found in PATH or standard installation directory."
+    }
+} elseif ($Task -eq "issue-view") {
+    $gh = Get-GhCli
+    if ($gh) {
+        if (-not $Branch) {
+            Write-Host "Usage: .\build.ps1 -Task issue-view -Branch <issue-number>" -ForegroundColor Yellow
+        } else {
+            & $gh issue view $Branch
+        }
+    } else {
+        Write-Error "GitHub CLI (gh) was not found in PATH or standard installation directory."
+    }
 } elseif ($Task -eq "help") {
     Show-Help
 } else {

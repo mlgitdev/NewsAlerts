@@ -1,19 +1,22 @@
 ---
 name: Feature Request
-about: Suggest an idea or new momentum strategy for NewsAlerts
+about: Propose a new feature, strategy, indicator, or terminal capability
 title: 'feat: '
 labels: enhancement
 assignees: mlgitdev
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+### Summary & Motivation
+<!-- What problem are you trying to solve? Why is this feature needed for momentum trading? -->
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen (e.g. new screener filter, tape trigger condition, sound option).
+### Proposed Solution
+<!-- Clear and concise description of the desired behavior, new UI element, or data feed integration. -->
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+### Technical & UI Specifications
+<!-- Detailed specifications: layout changes, API endpoints, audio chimes, keyboard shortcuts, or performance requirements. -->
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+### Alternatives Considered
+<!-- Any alternative solutions, trading workflows, or third-party tools considered. -->
+
+### Additional Context
+<!-- Attach relevant mockups, broker requirements, or screenshots. -->
