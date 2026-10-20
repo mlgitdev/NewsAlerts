@@ -3,7 +3,7 @@
 # Compatible with Windows (GNU Make / ezwinports / winget), Linux, and macOS
 # -----------------------------------------------------------------------------
 
-.PHONY: all build run test verify check clean worktree-list worktree-new help
+.PHONY: all build run test verify check clean worktree-list worktree-new wiki-sync help
 
 # Platform Detection
 ifeq ($(OS),Windows_NT)
@@ -25,6 +25,7 @@ ifeq ($(OS),Windows_NT)
     CMD_CLEAN   := $(POWERSHELL) -File ./build.ps1 -Task clean
     CMD_CHECK   := $(POWERSHELL) -File ./build.ps1 -Task check
     CMD_VERIFY  := $(POWERSHELL) -File ./build.ps1 -Task verify-packages
+    CMD_WIKI_SYNC := $(POWERSHELL) -File ./build.ps1 -Task wiki-sync
     CMD_TEST    := $(PYTHON) -m unittest discover -s tests -p "test_*.py"
     CMD_WT_LIST := $(POWERSHELL) -File ./build.ps1 -Task worktree-list
     CMD_WT_NEW  := $(POWERSHELL) -File ./build.ps1 -Task worktree-new -Branch "$(BRANCH)" -Base "$(BASE)"
@@ -51,6 +52,7 @@ else
     CMD_CLEAN   := rm -rf build/ dist/ .venv/ .pytest_cache/ __pycache__/ app/__pycache__/ tests/__pycache__/ *.spec.bak
     CMD_CHECK   := git diff --staged --name-only | grep -E "keys|secret|token|\.env" && exit 1 || echo "[OK] No secrets found in staged files."
     CMD_VERIFY  := $(PYTHON) scripts/verify-packages.py
+    CMD_WIKI_SYNC := $(PYTHON) scripts/sync_wiki.py
     CMD_TEST    := $(PYTHON) -m unittest discover -s tests -p "test_*.py"
     CMD_WT_LIST := ./scripts/worktree.sh list
     CMD_WT_NEW  := ./scripts/worktree.sh new "$(BRANCH)" "$(BASE)"
@@ -93,6 +95,10 @@ worktree-new:
 	@echo "[*] [$(PLATFORM)] Creating worktree..."
 	@$(CMD_WT_NEW)
 
+wiki-sync:
+	@echo "[*] [$(PLATFORM)] Synchronizing GitHub Wiki documentation..."
+	@$(CMD_WIKI_SYNC)
+
 help:
 	@echo "NewsAlerts Universal Makefile [Platform: $(PLATFORM)]"
 	@echo "======================================================="
@@ -105,4 +111,5 @@ help:
 	@echo "  make clean          Remove build/, dist/, and cached artifacts"
 	@echo "  make worktree-list  List active Git worktrees under .worktrees/"
 	@echo "  make worktree-new   Create a new isolated worktree (BRANCH=feat/... [BASE=main])"
+	@echo "  make wiki-sync      Synchronize docs/wiki/ documentation with GitHub Wiki"
 	@echo "  make help           Show this usage guide"

@@ -126,6 +126,26 @@ Any bug fix, feature addition, or asset correction affecting runtime code or ass
 
 Pure documentation changes (e.g., `README.md`, `docs/`, `AGENTS.md`) or standalone CI workflow edits that do not alter the compiled binary do NOT require a version bump. Application versioning is centrally governed by the root `VERSION` file as the Single Source of Truth (SSOT). When a rebuild is required, update `VERSION` (which automatically propagates across `app/version.py`, `build.ps1`, `NewsAlerts.spec`, runtime UI badges, and test suites) and document the changes in `docs/releases/vX.Y.Z.md` and `docs/RELEASES.md`.
 
+### 5. Mandatory Documentation & GitHub Wiki Synchronization Protocol
+Whenever application code, UI layout, configuration options, hotkeys, trading strategies, or architecture changes:
+1. **Repository Documentation (`docs/`)**:
+   - Update relevant specification and user guide documents (`docs/SPEC.md`, `docs/CONFIGURATION.md`, etc.).
+   - When SemVer version is bumped, author release notes in `docs/releases/vX.Y.Z.md` and add the entry to `docs/RELEASES.md`.
+2. **GitHub Wiki (`docs/wiki/`)**:
+   - Update corresponding wiki topic guides in `docs/wiki/` (e.g., `Home.md`, `Keyboard-Shortcuts-&-Hotkeys.md`, `Real-Time-Momentum-Screener.md`, etc.).
+   - **MANDATORY FOOTER VERSION**: The version badge in the wiki footer [`docs/wiki/_Footer.md`](docs/wiki/_Footer.md) (e.g. `<b>NewsAlerts vX.Y.Z</b>`) MUST always be kept in exact lockstep with the root `VERSION` file.
+3. **Execute Remote Wiki Synchronization**:
+   - Push all updated pages from `docs/wiki/` directly to the remote GitHub Wiki:
+     ```powershell
+     # Windows
+     .\build.ps1 -Task wiki-sync
+     ```
+     ```bash
+     # Linux / macOS
+     python3 scripts/sync_wiki.py
+     ```
+   - *Automated safeguard*: `scripts/sync_wiki.py` automatically inspects and updates `docs/wiki/_Footer.md` against root `VERSION` before pushing to `NewsAlerts.wiki.git`.
+
 ---
 
 ## 6. Local Verification Gate Before PR Creation
@@ -150,6 +170,8 @@ Agents MUST execute the following verification steps prior to opening a PR:
    .\build.ps1 -Task verify-packages
    ```
    Verify standalone binary integrity, PE magic headers, and absence of secret files.
+5. **Wiki & Footer Version Audit**:
+   Verify that any new features or behaviors are documented in `docs/wiki/` and that `docs/wiki/_Footer.md` version matches root `VERSION`.
 
 ---
 

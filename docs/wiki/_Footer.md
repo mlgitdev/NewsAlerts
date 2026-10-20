@@ -1,6 +1,6 @@
 ---
 <p align="center">
   <small>
-    <b>NewsAlerts v2.4.2</b> · Institutional Trading Terminal · Maintained by <a href="https://github.com/mlgitdev">@mlgitdev</a> · <a href="https://github.com/mlgitdev/NewsAlerts">GitHub Repository</a> · <a href="Home">Wiki Home</a>
+    <b>NewsAlerts v2.5.0</b> · Institutional Trading Terminal · Maintained by <a href="https://github.com/mlgitdev">@mlgitdev</a> · <a href="https://github.com/mlgitdev/NewsAlerts">GitHub Repository</a> · <a href="Home">Wiki Home</a>
   </small>
 </p>
