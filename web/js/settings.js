@@ -166,24 +166,120 @@
         ...Settings.field("Min session volume", Settings.num(t.universe, "vol_min", { big: 1 })),
         ...Settings.field("Max symbols", Settings.num(t.universe, "limit")),
         ...Settings.field("Cooldown per symbol/strategy (sec)", Settings.num(t, "cooldown_sec")),
-        ...Settings.field("History retention (days)", Settings.num(t, "retention_days"), "Keeps tape alerts saved on disk for off-hours and weekend review (default: 4 days)."),
-        U.el("h3", {}, "Strategies"));
-      const tbl = U.el("table", { class: "strat" });
-      tbl.append(U.el("tr", {}, U.el("th", {}, "Name"), U.el("th", {}, "Trigger"), STRAT_COLS.map(([, h]) => U.el("th", {}, h))));
-      t.strategies.forEach((s) => {
-        const name = U.el("input", { type: "text", value: s.name });
-        name.onchange = () => {
-          const old = s.name; s.name = name.value.trim() || old;
-          t.enabled = t.enabled.map((n) => (n === old ? s.name : n));
-        };
-        const trig = U.el("select", {}, [["hod", "New HOD"], ["52w", "52w breakout"], ["squeeze", "Up X% in N min"]].map(([v, l]) => U.el("option", { value: v }, l)));
-        trig.value = s.trigger || "hod";
-        trig.onchange = () => (s.trigger = trig.value);
-        tbl.append(U.el("tr", {}, U.el("td", { class: "name" }, name), U.el("td", {}, trig),
-          STRAT_COLS.map(([k]) => U.el("td", {}, Settings.num(s, k, { big: k.startsWith("float") })))));
-      });
-      wrap.append(g, tbl, U.el("div", { class: "help muted", style: "margin-top:10px;font-size:12px" },
-        "HOD strategies fire when a matching stock prints a new session high. Floats accept K/M suffixes. Blank = no limit."));
+        ...Settings.field("History retention (days)", Settings.num(t, "retention_days"), "Keeps tape alerts saved on disk for off-hours and weekend review (default: 4 days)."));
+
+      const stratSection = U.el("div", { class: "strat-section", style: "margin-top:16px;" });
+
+      const renderStrategies = () => {
+        const stratHead = U.el("div", { style: "display:flex;align-items:center;justify-content:space-between;margin:0 0 10px;" },
+          U.el("h3", { style: "margin:0;font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--text-2);" }, `Strategies (${t.strategies.length})`),
+          U.el("div", { style: "display:flex;gap:8px;align-items:center;" },
+            U.el("button", {
+              class: "btn sm primary",
+              onclick: () => {
+                const newName = "Custom Strategy " + (t.strategies.length + 1);
+                const s = {
+                  name: newName,
+                  family: "custom",
+                  trigger: "hod",
+                  float_min: null,
+                  float_max: null,
+                  relvol_min: null,
+                  relvol_max: null,
+                  price_min: null,
+                  price_max: null,
+                  hi52_ratio_min: null,
+                  up_pct: null,
+                  window_min: null,
+                };
+                t.strategies.push(s);
+                if (!t.enabled.includes(s.name)) t.enabled.push(s.name);
+                renderStrategies();
+              }
+            }, "+ Add Strategy"),
+            U.el("button", {
+              class: "btn sm",
+              title: "Export strategies to JSON file",
+              onclick: () => Settings.exportStrategies(t.strategies, t.enabled)
+            }, "💾 Export"),
+            U.el("button", {
+              class: "btn sm",
+              title: "Import strategies from JSON file",
+              onclick: () => {
+                Settings.readJsonFile((err, data, filename) => {
+                  if (err) {
+                    U.toast("alert", "⚠️ Import Failed", "Invalid JSON file: " + err.message);
+                    return;
+                  }
+                  const res = Settings.importStrategiesData(t, data);
+                  if (res.ok) {
+                    renderStrategies();
+                    U.toast("alert", "✓ Strategies Imported", `Successfully imported ${res.count} strategies from ${filename}.`);
+                  } else {
+                    U.toast("alert", "⚠️ Import Failed", res.error);
+                  }
+                });
+              }
+            }, "📂 Import")
+          )
+        );
+
+        const tbl = U.el("table", { class: "strat" });
+        tbl.append(U.el("tr", {},
+          U.el("th", {}, "Name"),
+          U.el("th", {}, "Trigger"),
+          U.el("th", {}, "Family"),
+          STRAT_COLS.map(([, h]) => U.el("th", {}, h)),
+          U.el("th", { style: "width:36px;text-align:center;" }, "")
+        ));
+
+        t.strategies.forEach((s) => {
+          const name = U.el("input", { type: "text", value: s.name });
+          name.onchange = () => {
+            const old = s.name; s.name = name.value.trim() || old;
+            t.enabled = t.enabled.map((n) => (n === old ? s.name : n));
+          };
+          const trig = U.el("select", {}, [["hod", "New HOD"], ["52w", "52w breakout"], ["squeeze", "Up X% in N min"]].map(([v, l]) => U.el("option", { value: v }, l)));
+          trig.value = s.trigger || "hod";
+          trig.onchange = () => (s.trigger = trig.value);
+
+          const fam = U.el("select", {}, [["low", "Low Float"], ["medium", "Med Float"], ["large", "Large Cap"], ["squeeze", "Squeeze"], ["custom", "Custom"]].map(([v, l]) => U.el("option", { value: v }, l)));
+          fam.value = s.family || "custom";
+          fam.onchange = () => (s.family = fam.value);
+
+          const delBtn = U.el("button", {
+            class: "icon-btn strat-del-btn",
+            title: `Delete strategy "${s.name}"`,
+            style: "color:var(--muted);width:26px;height:26px;border-radius:4px;display:grid;place-items:center;",
+            onclick: () => {
+              const idx = t.strategies.indexOf(s);
+              if (idx >= 0) {
+                t.deleted_strategies = t.deleted_strategies || [];
+                if (!t.deleted_strategies.includes(s.name)) t.deleted_strategies.push(s.name);
+                t.strategies.splice(idx, 1);
+                t.enabled = t.enabled.filter((n) => n !== s.name);
+                renderStrategies();
+              }
+            }
+          }, "🗑️");
+
+          tbl.append(U.el("tr", {},
+            U.el("td", { class: "name" }, name),
+            U.el("td", {}, trig),
+            U.el("td", {}, fam),
+            STRAT_COLS.map(([k]) => U.el("td", {}, Settings.num(s, k, { big: k.startsWith("float") }))),
+            U.el("td", { style: "text-align:center;" }, delBtn)
+          ));
+        });
+
+        const help = U.el("div", { class: "help muted", style: "margin-top:10px;font-size:12px" },
+          "HOD strategies fire when a matching stock prints a new session high. Floats accept K/M suffixes. Blank = no limit. Deleting or importing updates the running tape immediately upon saving.");
+
+        stratSection.replaceChildren(stratHead, tbl, help);
+      };
+
+      renderStrategies();
+      wrap.append(g, stratSection);
       return wrap;
     },
 
@@ -393,6 +489,245 @@
 
       wrap.append(header, table, notice);
       return wrap;
+    },
+
+    tab_backup(c) {
+      const wrap = U.el("div", { class: "backup-pane" });
+
+      const header = U.el("div", { style: "margin-bottom:16px;" },
+        U.el("h3", { style: "margin:0 0 6px;font-size:14px;color:var(--text);" }, "Configuration Backup & Strategy Sync"),
+        U.el("p", { class: "muted", style: "margin:0;font-size:12px;line-height:1.4;" },
+          "Export your full terminal settings or specific trading strategies as portable JSON files. Easily restore backups across machines or share strategies with other traders.")
+      );
+
+      const cardsWrap = U.el("div", { class: "backup-cards-grid" });
+
+      // Card 1: Full Configuration Backup
+      const fullCard = U.el("div", { class: "backup-card" },
+        U.el("div", { class: "backup-card-head" },
+          U.el("div", { class: "backup-card-title" }, "💾 Full Application Backup"),
+          U.el("div", { class: "backup-card-badge" }, "Complete State")
+        ),
+        U.el("div", { class: "backup-card-desc" },
+          "Exports all screeners, sound alert configs, tape universe thresholds, hotkeys, and strategies into a single restore file."),
+        U.el("div", { class: "backup-card-actions" },
+          U.el("button", {
+            class: "btn sm primary",
+            onclick: () => {
+              const dt = new Date().toISOString().slice(0, 10);
+              const payload = {
+                app: "NewsAlerts",
+                type: "full_backup",
+                version: App.version || "2.7.0",
+                exported_at: new Date().toISOString(),
+                config: c,
+              };
+              Settings.exportJson(`newsalerts_backup_${dt}.json`, payload);
+              U.toast("alert", "✓ Backup Exported", `Saved full configuration backup as newsalerts_backup_${dt}.json`);
+            }
+          }, "💾 Export Full Backup (.json)"),
+          U.el("button", {
+            class: "btn sm",
+            onclick: () => {
+              Settings.readJsonFile((err, data, filename) => {
+                if (err) {
+                  U.toast("alert", "⚠️ Import Failed", "Invalid JSON file: " + err.message);
+                  return;
+                }
+                const cfg = data.config && typeof data.config === "object" ? data.config : data;
+                if (!cfg || typeof cfg !== "object") {
+                  U.toast("alert", "⚠️ Import Failed", "File does not contain valid NewsAlerts configuration.");
+                  return;
+                }
+                // Update active working copy
+                Object.assign(c, cfg);
+                App.config = c;
+                App.saveConfig(true);
+                Settings.applyUi();
+                Screener.renderBar();
+                Screener.renderTable();
+                Tape.renderAll();
+                News.syncTools();
+                U.toast("alert", "✓ Backup Restored", `Successfully imported configuration from ${filename}.`);
+                // Re-render current tab
+                const body = U.$("#settings-body");
+                if (body) body.replaceChildren(Settings.tab_backup(c));
+              });
+            }
+          }, "📂 Import Backup File")
+        )
+      );
+
+      // Card 2: Strategies Import & Export
+      const stratCard = U.el("div", { class: "backup-card" },
+        U.el("div", { class: "backup-card-head" },
+          U.el("div", { class: "backup-card-title" }, "⚡ Tape Strategies Only"),
+          U.el("div", { class: "backup-card-badge" }, `${c.tape.strategies.length} Active`)
+        ),
+        U.el("div", { class: "backup-card-desc" },
+          "Export your multi-strategy rules engine definitions (HOD, 52w breakouts, squeezes) to share with other traders or import custom setups."),
+        U.el("div", { class: "backup-card-actions" },
+          U.el("button", {
+            class: "btn sm primary",
+            onclick: () => Settings.exportStrategies(c.tape.strategies, c.tape.enabled)
+          }, "💾 Export Strategies (.json)"),
+          U.el("button", {
+            class: "btn sm",
+            onclick: () => {
+              Settings.readJsonFile((err, data, filename) => {
+                if (err) {
+                  U.toast("alert", "⚠️ Import Failed", "Invalid JSON file: " + err.message);
+                  return;
+                }
+                const res = Settings.importStrategiesData(c.tape, data);
+                if (res.ok) {
+                  App.config = c;
+                  App.saveConfig(true);
+                  Tape.renderAll();
+                  U.toast("alert", "✓ Strategies Imported", `Imported ${res.count} strategies from ${filename}.`);
+                  const body = U.$("#settings-body");
+                  if (body) body.replaceChildren(Settings.tab_backup(c));
+                } else {
+                  U.toast("alert", "⚠️ Import Failed", res.error);
+                }
+              });
+            }
+          }, "📂 Import Strategies")
+        )
+      );
+
+      // Card 3: Reset / Factory Defaults
+      const resetCard = U.el("div", { class: "backup-card danger" },
+        U.el("div", { class: "backup-card-head" },
+          U.el("div", { class: "backup-card-title" }, "↺ Factory Reset"),
+          U.el("div", { class: "backup-card-badge danger" }, "Destructive")
+        ),
+        U.el("div", { class: "backup-card-desc" },
+          "Restore all screener presets, sound chimes, hotkeys, and strategies back to original factory defaults. Secret keys in keys.toml will be preserved."),
+        U.el("div", { class: "backup-card-actions" },
+          U.el("button", {
+            class: "btn sm",
+            style: "color:var(--down);border-color:rgba(246,70,93,0.4);",
+            onclick: async () => {
+              if (!confirm("Are you sure you want to reset all terminal settings and strategies back to factory defaults?")) return;
+              try {
+                const fresh = await App.api().reset_config();
+                if (fresh) {
+                  Object.assign(c, fresh);
+                  App.config = fresh;
+                  Settings.applyUi();
+                  Screener.renderBar();
+                  Screener.renderTable();
+                  Tape.renderAll();
+                  News.syncTools();
+                  U.toast("alert", "↺ Factory Reset", "Terminal configuration successfully restored to factory defaults.");
+                  const body = U.$("#settings-body");
+                  if (body) body.replaceChildren(Settings.tab_backup(c));
+                }
+              } catch (e) {
+                U.toast("alert", "⚠️ Reset Error", String(e));
+              }
+            }
+          }, "↺ Restore Factory Defaults")
+        )
+      );
+
+      cardsWrap.append(fullCard, stratCard, resetCard);
+      wrap.append(header, cardsWrap);
+      return wrap;
+    },
+
+    exportJson(filename, data) {
+      try {
+        const str = JSON.stringify(data, null, 2);
+        const blob = new Blob([str], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 500);
+        return true;
+      } catch (err) {
+        U.toast("alert", "⚠️ Export Error", String(err));
+        return false;
+      }
+    },
+
+    exportStrategies(strategies, enabled) {
+      const dt = new Date().toISOString().slice(0, 10);
+      const payload = {
+        app: "NewsAlerts",
+        type: "strategies",
+        version: App.version || "2.7.0",
+        exported_at: new Date().toISOString(),
+        strategies: strategies || [],
+        enabled: enabled || [],
+      };
+      Settings.exportJson(`newsalerts_strategies_${dt}.json`, payload);
+      U.toast("alert", "✓ Strategies Exported", `Saved ${strategies.length} strategies as newsalerts_strategies_${dt}.json`);
+    },
+
+    importStrategiesData(tapeCfg, data) {
+      let incoming = null;
+      if (Array.isArray(data)) {
+        incoming = data;
+      } else if (data && Array.isArray(data.strategies)) {
+        incoming = data.strategies;
+      } else {
+        return { ok: false, error: "JSON does not contain a 'strategies' array." };
+      }
+      let count = 0;
+      incoming.forEach((s) => {
+        if (!s || typeof s !== "object" || !s.name) return;
+        const existingIdx = tapeCfg.strategies.findIndex((x) => x.name === s.name);
+        if (existingIdx >= 0) {
+          tapeCfg.strategies[existingIdx] = s;
+        } else {
+          tapeCfg.strategies.push(s);
+        }
+        if (!tapeCfg.enabled.includes(s.name)) {
+          tapeCfg.enabled.push(s.name);
+        }
+        count++;
+      });
+      return { ok: true, count };
+    },
+
+    readJsonFile(callback) {
+      const fileInput = document.createElement("input");
+      fileInput.type = "file";
+      fileInput.accept = ".json,application/json";
+      fileInput.style.display = "none";
+      document.body.appendChild(fileInput);
+      fileInput.onchange = (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) {
+          document.body.removeChild(fileInput);
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const parsed = JSON.parse(event.target.result);
+            callback(null, parsed, file.name);
+          } catch (err) {
+            callback(err, null, file.name);
+          } finally {
+            document.body.removeChild(fileInput);
+          }
+        };
+        reader.onerror = (err) => {
+          callback(err, null, file.name);
+          document.body.removeChild(fileInput);
+        };
+        reader.readAsText(file);
+      };
+      fileInput.click();
     },
 
     tab_about(c) {

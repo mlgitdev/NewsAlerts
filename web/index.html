@@ -114,6 +114,14 @@
         <!-- NEWS PANE -->
         <section class="pane news-pane" id="news-pane">
           <div class="pane-head" id="news-head"></div>
+          <div class="news-search-bar" id="news-search-bar">
+            <div class="news-input-wrap">
+              <span class="news-search-icon">🔍</span>
+              <input type="text" id="news-sym-input" class="news-sym-input" placeholder="Inspect US symbol (e.g. SMCI, NVDA, AAPL)..." autocomplete="off" spellcheck="false" maxlength="10">
+              <button id="news-sym-go" class="btn sm primary news-sym-btn" title="Inspect custom US symbol">Inspect</button>
+            </div>
+            <div class="news-chips-row" id="news-chips"></div>
+          </div>
           <div class="news-tools" id="news-tools"></div>
           <div class="pane-body" id="news-list"></div>
         </section>
@@ -156,6 +164,7 @@
         <button data-tab="news">News</button>
         <button data-tab="tape">Tape Strategies</button>
         <button data-tab="hotkeys">Hotkeys</button>
+        <button data-tab="backup">Backup & Sync</button>
         <button data-tab="about">About</button>
       </div>
       <div class="modal-body" id="settings-body"></div>
@@ -167,11 +176,11 @@
   </div>
 
   <!-- SCRIPTS -->
-  <script src="js/util.js?v=6"></script>
-  <script src="js/screener.js?v=6"></script>
-  <script src="js/news.js?v=6"></script>
-  <script src="js/tape.js?v=6"></script>
-  <script src="js/settings.js?v=6"></script>
-  <script src="js/app.js?v=6"></script>
+  <script src="js/util.js?v=7"></script>
+  <script src="js/screener.js?v=7"></script>
+  <script src="js/news.js?v=7"></script>
+  <script src="js/tape.js?v=7"></script>
+  <script src="js/settings.js?v=7"></script>
+  <script src="js/app.js?v=7"></script>
 </body>
 </html>

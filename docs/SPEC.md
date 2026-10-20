@@ -141,12 +141,16 @@ Click header to sort; sort persisted per screen. Positive values green, negative
 Clicking a row selects it and loads news in the right pane (§7).
 
 ## 7. News pane
-- Header: symbol, name, price/chg.
+- Header: symbol, name, price/chg, borrow locate status, description, float, bid/ask spread, session VWAP, and TradingView chart button.
+- **Custom Symbol Search & Watchlist**:
+  - Sticky institutional search bar at top of news pane supporting any US common equity ticker (e.g. `SMCI`, `AAPL`, `NVDA`, `NASDAQ:SMCI`).
+  - Strict US market scoping (AMEX, NASDAQ, NYSE common stocks).
+  - Pinned quick-access chips (`[ SMCI × ] [ NVDA × ] [ AAPL × ]`) for rapid watchlist switching and removal.
 - List of headlines within recency window, newest first: time (ET, + "12m ago"), provider badge
   (Benzinga highlighted orange), title.
 - Click headline → expands inline story text; "Open" opens original URL in default browser.
 - Auto-refresh every 30 s while symbol selected; new headline → subtle highlight (+ optional sound).
-- Empty state: "No news in last 12h".
+- Empty state: Hero graphic with immediate guidance to select from Screener, Tape, or enter a custom US symbol.
 
 ## 8. Tape (running momentum events)
 ### 8.1 Universe & engine
@@ -206,7 +210,7 @@ Optional tape sound (default off — the tape is noisy).
   - Visual status feedback: when active, shows normal green-tinted bell; when paused, shows slashed bell (`bellOff`) with pulsing red warning indicator.
 
 ## 10. Settings & Integrations
-TradingView `sessionid`/`sessionid_sign` & real-time connection status · poll intervals · re-entry window · alert volume (0%–100%) · unified pause alerts toggle · news recency & provider · sounds · tape universe & strategy thresholds · Alpaca keys for short borrow locates · Telegram Bot Token, Chat ID, and independent toggles for Screener alerts and Tape momentum alerts (with per-symbol cooldown) · customizable keyboard shortcuts & hotkeys with interactive re-binding and institutional defaults · always-on-top · font size.
+TradingView `sessionid`/`sessionid_sign` & real-time connection status · poll intervals · re-entry window · alert volume (0%–100%) · unified pause alerts toggle · news recency & provider · sounds · tape universe & strategy thresholds · interactive Strategy Builder (`+ Add Strategy`, triggers, family, deletion) · Backup / Import & Export tab (Full config backup `.json`, Strategies `.json` export/import, factory reset) · Alpaca keys for short borrow locates · Telegram Bot Token, Chat ID, and independent toggles for Screener alerts and Tape momentum alerts (with per-symbol cooldown) · customizable keyboard shortcuts & hotkeys with interactive re-binding and institutional defaults · always-on-top · font size.
 
 ## 11. Architecture
 ```

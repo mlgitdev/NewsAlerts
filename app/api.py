@@ -87,7 +87,8 @@ class Api:
         a = self._app
         a.cfg.update(cfg)
         c = a.cfg.get()
-        a.client.set_cookies(c["tv"]["sessionid"], c["tv"]["sessionid_sign"])
+        tv = c.get("tv", {})
+        a.client.set_cookies(tv.get("sessionid", ""), tv.get("sessionid_sign", ""))
         bc = c.get("borrow", {})
         a.borrow.update_credentials(bc.get("alpaca_key_id", ""), bc.get("alpaca_secret_key", ""), bc.get("mode", "auto"))
         if hasattr(a, "alp_news"):
@@ -163,12 +164,27 @@ class Api:
     def get_story(self, story_id: str):
         return self._app.news.story(story_id)
 
+    def reset_config(self):
+        """Restore all application configurations back to factory defaults."""
+        c = self._app.cfg.reset()
+        self.save_config(c)
+        return c
+
+    def get_default_config(self):
+        """Return fresh copy of DEFAULT_CONFIG for inspection or schema reference."""
+        from .config import get_default_config
+        return get_default_config()
+
     def get_quote(self, ticker: str):
-        """Snapshot for the news header when a tape symbol is clicked."""
+        """Snapshot for the news header when a tape symbol is clicked or custom symbol entered."""
         try:
+            sym = str(ticker).split(":")[-1].strip().upper()
+            if not sym:
+                return None
             rows = self._app.client.scan([{"left": "name", "operation": "equal",
-                                           "right": ticker.split(":")[-1]}], "volume", True, 5)
-            row = next((r for r in rows if r["ticker"] == ticker), rows[0] if rows else None)
+                                           "right": sym}], "volume", True, 5)
+            # Find exact match by name or ticker
+            row = next((r for r in rows if r["name"].upper() == sym or r["ticker"].upper() == ticker.upper()), rows[0] if rows else None)
             if not row:
                 return None
             lg = S.logical_row(row, S.current_session())
@@ -179,7 +195,8 @@ class Api:
                     "logoid": row.get("logoid"), "sp": lg["price"], "sc": lg["chg"],
                     "float": lg["float"], "sector": lg["sector"], "borrow": borrow_info,
                     "details": details, "snapshot": snapshot}
-        except Exception:
+        except Exception as e:
+            log.warning("get_quote %s failed: %s", ticker, e)
             return None
 
     # ---------------------------------------------------------------- misc

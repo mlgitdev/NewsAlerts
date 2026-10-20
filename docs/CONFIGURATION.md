@@ -86,3 +86,31 @@ NewsAlerts includes a dedicated **Hotkeys** tab in Settings to customize keyboar
   }
   ```
 - **Focus Protection**: Shortcuts automatically yield when typing inside text boxes or search inputs to prevent accidental triggers.
+
+---
+
+## 6. Interactive Strategy Builder
+
+NewsAlerts provides an interactive Strategy Builder inside Settings → **Tape Strategies**:
+- **Add Custom Strategy (`+ Add Strategy`)**: Click to append a new custom strategy row.
+- **Trigger Type**:
+  - `New HOD`: Fires when a matching stock prints a new session high.
+  - `52w Breakout`: Fires when the price crosses above the 52-week high.
+  - `Up X% in N min`: Momentum squeeze monitoring percent gain over a rolling time window.
+- **Family Classification**: Set strategy family to `Low Float`, `Med Float`, `Large Cap`, `Squeeze`, or `Custom`.
+- **Delete Strategy (`🗑️`)**: Click the trash icon to delete any strategy. Deletions are remembered in `deleted_strategies` so factory defaults do not resurrect.
+- **Rapid Preset Export/Import**: Use the inline `💾 Export` and `📂 Import` buttons above the table to share strategy presets.
+
+---
+
+## 7. Backup / Import & Export Sync
+
+The **Backup & Sync** tab in Settings allows full disaster recovery and strategy distribution:
+- **Full Application Backup**:
+  - `💾 Export Full Backup (.json)`: Saves complete configuration (`screeners`, `alerts`, `hotkeys`, `news`, `tape`).
+  - `📂 Import Backup File`: Validates and restores complete configuration with immediate UI live-reload.
+- **Strategies Sync**:
+  - `💾 Export Strategies (.json)`: Saves only the `strategies` and `enabled` arrays.
+  - `📂 Import Strategies`: Merges or updates strategies into the active running tape.
+- **Factory Defaults Reset**:
+  - `↺ Restore Factory Defaults`: Reverts configuration to factory baseline while preserving `keys.toml`.

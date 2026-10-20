@@ -30,10 +30,18 @@ All settings and secrets reside strictly in the operating system's standard user
 - **`tape_history.json`**: Rolling 4-day tape history cache (up to 5,000 prints).
 - **`app.log`**: Rolling terminal diagnostics and connection logs.
 
----
-
 ## 🛡️ Best Practices
 
 1. Never commit `.env`, `keys.toml`, or `config.json` to any git branch.
 2. In-app settings are automatically validated and written atomically with file locks.
 3. Automated pre-commit and CI workflows scan for credential patterns on every build.
+
+---
+
+## 💾 Backup & Sync Center
+
+Use the **Backup & Sync** tab in Settings to safeguard your configuration:
+- **Full Application Backup**: Click `💾 Export Full Backup (.json)` to generate a complete snapshot of all screeners, audio alerts, and strategies. Use `📂 Import Backup File` to restore or migrate to another machine.
+- **Strategy Sync**: Click `💾 Export Strategies (.json)` to share momentum strategies with trading partners, or import community presets via `📂 Import Strategies`.
+- **Factory Reset**: Click `↺ Restore Factory Defaults` to reset terminal settings back to fresh defaults while safely preserving `keys.toml`.
+

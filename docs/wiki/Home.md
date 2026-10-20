@@ -13,8 +13,8 @@ Built on a native, ultra-responsive architecture (`pywebview` + Vanilla ES6+/CSS
 | **[TradingView Integration & Charts](TradingView-Integration-&-Charts)** | Real-time session feeds & **One-Click Chart Popout** via the news pane icon |
 | **[Real-Time Momentum Screener](Real-Time-Momentum-Screener)** | Sub-second low-float screener, live `NEW` badges, dynamic criteria filtering |
 | **[Running Momentum Tape](Running-Momentum-Tape)** | Warrior-Trading style HOD & squeeze breakout prints with 4-day disk persistence |
-| **[Multi-Strategy Rules Engine](Multi-Strategy-Rules-Engine)** | Granular strategy selection (Low Float Momo, Squeeze 52wk, velocity surges) |
-| **[Catalyst News Wire & Benzinga](Catalyst-News-Wire-&-Benzinga)** | Zero-lag wire PRs (beating the 15-minute retail delay) and story reader |
+| **[Multi-Strategy Rules Engine](Multi-Strategy-Rules-Engine)** | Interactive Strategy Builder (`+ Add Strategy`), trigger types, and Backup & Sync |
+| **[Catalyst News Wire & Benzinga](Catalyst-News-Wire-&-Benzinga)** | Zero-lag wire PRs, custom US equity ticker search, and watchlist chips |
 | **[Short Borrow Locates](Short-Borrow-Locates-(Alpaca-&-TradingView))** | Live broker-grade `ETB`, `HTB`, and `NO BORROW` badges for short squeeze edge |
 | **[Audio Alerts & Volume Control](Audio-Alerts-&-Volume-Controls)** | Instant audio chimes, visual rising triangle scrubber, master bell mute |
 | **[Telegram Push Notifications](Telegram-Push-Notifications)** | Sub-second asynchronous push alerts with full stats and one-click chart links |

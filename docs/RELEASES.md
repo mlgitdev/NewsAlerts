@@ -37,6 +37,7 @@ All official releases are produced deterministically through GitHub Actions:
 
 ## Release History
 
+- [v2.7.0 Release Notes](releases/v2.7.0.md) — Custom US equity symbol search in News wire (AMEX, NASDAQ, NYSE), interactive Strategy Builder with trigger types and deletion in Settings, and Backup / Import & Export JSON synchronization.
 - [v2.6.0 Release Notes](releases/v2.6.0.md) — Large-Cap & High-Float Momentum Squeeze strategies, high-velocity 5-min surge alerts (Up 10% in 5min), TradingView change|5 velocity, and expanded universe boundaries ($1–$500).
 - [v2.5.0 Release Notes](releases/v2.5.0.md) — Customizable Keyboard Shortcuts & Hotkey Configuration tab in Settings with interactive key capture, institutional defaults, and multi-OS config persistence.
 - [v2.4.5 Release Notes](releases/v2.4.5.md) — Single Source of Truth (SSOT) architecture via root `VERSION` file, dynamic runtime propagation, and complete decoupling of static version strings.
