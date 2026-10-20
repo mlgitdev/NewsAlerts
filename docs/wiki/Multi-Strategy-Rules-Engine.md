@@ -29,10 +29,25 @@ NewsAlerts includes a modular **Rules Engine** that categorizes and tags momentu
 
 ---
 
-## ⚙️ Strategy Selection & Tuning
+## ⚙️ Interactive Strategy Builder & Customization
 
-- Open **Settings** (`S` or gear icon) and switch to the **Strategies** tab.
-- Toggle individual strategies on or off with a single click.
-- Each strategy features distinct color badges on the tape (Low Float = mint, Medium Float = sand, Squeeze = cyan, Large Cap = violet/purple) and dedicated sound triggers.
-- Inactive strategies are suppressed from triggering audio chimes or Telegram notifications.
+NewsAlerts includes a dynamic **Strategy Builder** inside Settings → **Tape Strategies**:
+- **Add Custom Strategy (`+ Add Strategy`)**: Add unlimited personalized momentum strategies with custom float ranges, relative volume thresholds, price filters, 52-week breakout ratios, and surge velocity windows.
+- **Trigger Type Selection**:
+  - `New HOD`: Triggers when matching stock prints a new session high.
+  - `52w Breakout`: Triggers on 52-week high cross.
+  - `Up X% in N min`: Evaluates percent surge over rolling window.
+- **Family Badges**: Categorize as `Low Float` (mint), `Med Float` (sand), `Large Cap` (violet), `Squeeze` (cyan), or `Custom` (blue).
+- **Delete Strategy (`🗑️`)**: Remove unwanted strategies with one click; deletions are tracked in `deleted_strategies` so factory defaults do not resurrect.
+- **Portable JSON Sync**: Export strategies (`💾 Export`) to share with other traders or import community strategy presets (`📂 Import`).
+
+---
+
+## 📦 Backup & Sync Center
+
+Access the dedicated **Backup & Sync** tab in Settings for full state preservation:
+- **Full Configuration Backup (`.json`)**: Export screeners, audio alerts, volume levels, hotkeys, and strategies into a portable backup file for disaster recovery or machine migration.
+- **Strategy Preset Import/Export**: Share or import trading strategies independently.
+- **Factory Reset Safeguard**: Revert settings back to factory defaults at any time with one click.
+
 

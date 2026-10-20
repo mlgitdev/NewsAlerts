@@ -18,6 +18,22 @@
       News.head = U.$("#news-head");
       News.tools = U.$("#news-tools");
       News.list = U.$("#news-list");
+      News.symInput = U.$("#news-sym-input");
+      News.symBtn = U.$("#news-sym-go");
+      News.chips = U.$("#news-chips");
+
+      if (News.symInput) {
+        News.symInput.onkeydown = (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            News.submitCustomSymbol();
+          }
+        };
+      }
+      if (News.symBtn) {
+        News.symBtn.onclick = () => News.submitCustomSymbol();
+      }
+
       const bz = U.el("input", { type: "checkbox", id: "news-bz-only" });
       const rec = U.el("select", { id: "news-recency" }, RECENCY.map(([v, t]) => U.el("option", { value: v }, t)));
       News.count = U.el("span", { class: "muted", style: "margin-left:auto" });
@@ -30,6 +46,7 @@
       News.list.addEventListener("click", News.onClick);
       App.sub("select", (t) => { Screener.select(t); });
       App.sub("config", News.syncTools);
+      News.renderChips();
       News.renderEmpty();
     },
 
@@ -41,6 +58,92 @@
         News.rec.append(U.el("option", { value: h }, lbl));
       }
       News.rec.value = h;
+      News.renderChips();
+    },
+
+    async submitCustomSymbol() {
+      if (!News.symInput) return;
+      const raw = News.symInput.value.trim().toUpperCase();
+      if (!raw) return;
+      const sym = raw.split(":").pop().replace(/[^A-Z0-9.\-]/g, "");
+      if (!sym) return;
+
+      News.symInput.disabled = true;
+      if (News.symBtn) { News.symBtn.disabled = true; News.symBtn.textContent = "…"; }
+
+      try {
+        const q = await App.api().get_quote(sym);
+        if (!q || !q.ticker) {
+          U.toast("alert", "⚠️ Symbol Not Found", `Symbol "${sym}" was not found on US exchanges (AMEX, NASDAQ, NYSE).`, null, 5000);
+          return;
+        }
+
+        // Add to custom symbols list
+        const list = App.config.news.custom_symbols || (App.config.news.custom_symbols = []);
+        const cleanSym = q.symbol || sym;
+        const idx = list.indexOf(cleanSym);
+        if (idx >= 0) list.splice(idx, 1);
+        list.unshift(cleanSym);
+        if (list.length > 15) list.length = 15;
+        App.saveConfig(true);
+        News.renderChips();
+
+        News.symInput.value = "";
+        await News.select(q.ticker, q);
+      } catch (err) {
+        U.toast("alert", "⚠️ Lookup Failed", String(err), null, 4000);
+      } finally {
+        News.symInput.disabled = false;
+        if (News.symBtn) { News.symBtn.disabled = false; News.symBtn.textContent = "Inspect"; }
+        News.symInput.focus();
+      }
+    },
+
+    renderChips() {
+      if (!News.chips) return;
+      const list = App.config.news.custom_symbols || [];
+      if (!list.length) {
+        News.chips.replaceChildren();
+        return;
+      }
+      const activeSym = News.ticker ? News.ticker.split(":").pop().toUpperCase() : "";
+      const chips = list.map((s) => {
+        const chip = U.el("span", {
+          class: "news-chip" + (s.toUpperCase() === activeSym ? " active" : ""),
+          title: `Inspect ${s} catalyst wire`
+        }, s);
+        const del = U.el("span", {
+          class: "news-chip-del",
+          title: `Remove ${s} from custom watchlist`,
+          onclick: (e) => {
+            e.stopPropagation();
+            const arr = App.config.news.custom_symbols || [];
+            const i = arr.indexOf(s);
+            if (i >= 0) arr.splice(i, 1);
+            App.saveConfig(true);
+            News.renderChips();
+          }
+        }, "×");
+        chip.append(del);
+        chip.onclick = () => News.selectCustomSymbol(s);
+        return chip;
+      });
+      News.chips.replaceChildren(...chips);
+    },
+
+    async selectCustomSymbol(sym) {
+      if (!sym) return;
+      try {
+        const q = await App.api().get_quote(sym);
+        if (q && q.ticker) {
+          News.select(q.ticker, q);
+        } else {
+          News.select(sym, null);
+        }
+      } catch (e) {
+        News.select(sym, null);
+      }
+      News.renderChips();
     },
 
     renderEmpty() {
@@ -50,10 +153,11 @@
           U.el("img", { src: "img/hero.jpg", class: "news-hero-img", alt: "NewsAlerts Hero" }),
           U.el("div", { class: "news-hero-caption" },
             U.el("div", { class: "news-hero-title" }, "Real-Time Momentum Intelligence"),
-            U.el("div", { class: "news-hero-sub" }, "Click any symbol from the Screener or Tape to inspect live news headlines and short borrow locates.")
+            U.el("div", { class: "news-hero-sub" }, "Click any symbol from the Screener or Tape, or enter a custom US symbol above to inspect live catalyst news.")
           )
         )
       );
+      News.renderChips();
     },
 
     async select(ticker, info) {
@@ -61,6 +165,7 @@
       News.ticker = ticker;
       News.info = info || null;
       News.renderHead();
+      News.renderChips();
       App.api().get_quote(ticker).then((q) => {
         if (q && News.ticker === ticker) {
           News.info = Object.assign({}, News.info, q);

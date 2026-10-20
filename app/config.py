@@ -161,7 +161,7 @@ DEFAULT_CONFIG = {
         "telegram_bot_token": "",
         "telegram_chat_id": "",
     },
-    "news": {"recency_hours": 12, "benzinga_only": False},
+    "news": {"recency_hours": 12, "benzinga_only": False, "custom_symbols": []},
     "screens": [
         {
             "id": "s1",
@@ -186,6 +186,7 @@ DEFAULT_CONFIG = {
         "retention_days": 4,
         "enabled": [s["name"] for s in DEFAULT_STRATEGIES],
         "strategies": DEFAULT_STRATEGIES,
+        "deleted_strategies": [],
     },
     "hotkeys": copy.deepcopy(DEFAULT_HOTKEYS),
     "ui": {"always_on_top": False, "font_size": 13, "news_width": 420, "tape_height": 300},
@@ -199,11 +200,12 @@ def _merge(base: dict, override: dict) -> dict:
             out[k] = _merge(out[k], v)
         else:
             out[k] = v
-    # Ensure any new default tape strategies are added to existing configs
+    # Ensure any new default tape strategies are added to existing configs, respecting user deletions
     if "tape" in out and isinstance(out["tape"], dict) and "strategies" in out["tape"]:
+        deleted = set(out["tape"].get("deleted_strategies", []))
         existing_names = {s.get("name") for s in out["tape"]["strategies"] if isinstance(s, dict)}
         for default_s in DEFAULT_STRATEGIES:
-            if default_s["name"] not in existing_names:
+            if default_s["name"] not in existing_names and default_s["name"] not in deleted:
                 out["tape"]["strategies"].append(copy.deepcopy(default_s))
                 if "enabled" in out["tape"] and isinstance(out["tape"]["enabled"], list):
                     out["tape"]["enabled"].append(default_s["name"])
@@ -266,9 +268,19 @@ class Config:
             self.data = _merge(DEFAULT_CONFIG, new)
             self.save()
 
+    def reset(self) -> dict:
+        with self._lock:
+            self.data = copy.deepcopy(DEFAULT_CONFIG)
+            self.save()
+            return copy.deepcopy(self.data)
+
     def __getitem__(self, key):
         with self._lock:
             return self.data[key]
+
+
+def get_default_config() -> dict:
+    return copy.deepcopy(DEFAULT_CONFIG)
 
 
 def ensure_app_dir_initialized() -> Path:
