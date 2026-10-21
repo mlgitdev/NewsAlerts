@@ -118,14 +118,14 @@ class Api:
         a.bus.emit("config", cfg)
         return {"ok": True, "volume": vol}
 
-    def send_telegram_test(self):
-        ok, msg = self._app.telegram.send_test_message()
+    def send_telegram_test(self, bot_token: str = "", chat_id: str = ""):
+        ok, msg = self._app.telegram.send_test_message(bot_token=bot_token, chat_id=chat_id)
         return {"ok": ok, "message": msg}
 
-    def test_alpaca(self):
+    def test_alpaca(self, key_id: str = "", secret_key: str = ""):
         a = self._app
-        kid = a.borrow.key_id
-        sec = a.borrow.secret_key
+        kid = (key_id or "").strip() or a.borrow.key_id
+        sec = (secret_key or "").strip() or a.borrow.secret_key
         if not (kid and sec):
             return {"ok": False, "message": "No Alpaca keys found in secrets/keys.toml or settings."}
         try:

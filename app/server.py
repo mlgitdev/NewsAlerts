@@ -116,7 +116,10 @@ def make_app(api, web_dir: Path) -> Bottle:
     @app.route("/api/test_telegram", method=["POST"])
     def test_telegram():
         try:
-            return json_resp(api.send_telegram_test())
+            data = request.json if request.json and isinstance(request.json, dict) else {}
+            bot_token = data.get("bot_token", "")
+            chat_id = data.get("chat_id", "")
+            return json_resp(api.send_telegram_test(bot_token=bot_token, chat_id=chat_id))
         except Exception as e:
             log.exception("Error in /api/test_telegram: %s", e)
             return json_resp({"ok": False, "message": str(e)})
@@ -124,7 +127,10 @@ def make_app(api, web_dir: Path) -> Bottle:
     @app.route("/api/test_alpaca", method=["POST"])
     def test_alpaca():
         try:
-            return json_resp(api.test_alpaca())
+            data = request.json if request.json and isinstance(request.json, dict) else {}
+            key_id = data.get("key_id", "")
+            secret_key = data.get("secret_key", "")
+            return json_resp(api.test_alpaca(key_id=key_id, secret_key=secret_key))
         except Exception as e:
             log.exception("Error in /api/test_alpaca: %s", e)
             return json_resp({"ok": False, "message": str(e)})

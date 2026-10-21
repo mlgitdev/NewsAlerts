@@ -72,6 +72,33 @@ class TestApiMethods(unittest.TestCase):
         self.mock_app.cfg.reset.assert_called_once()
         self.assertEqual(res, default_cfg)
 
+    def test_send_telegram_test_forwards_credentials(self):
+        self.mock_app.telegram.send_test_message.return_value = (True, "Test alert sent to Telegram successfully!")
+        res = self.api.send_telegram_test(bot_token="123456:ABC-DEF", chat_id="987654321")
+        self.mock_app.telegram.send_test_message.assert_called_once_with(
+            bot_token="123456:ABC-DEF", chat_id="987654321"
+        )
+        self.assertTrue(res["ok"])
+        self.assertEqual(res["message"], "Test alert sent to Telegram successfully!")
+
+    @patch("requests.get")
+    def test_test_alpaca_uses_provided_credentials(self, mock_get):
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = {"id": "acc-123", "buying_power": "50000.00", "status": "ACTIVE"}
+        mock_get.return_value = mock_resp
+
+        res = self.api.test_alpaca(key_id="CUSTOM_KEY", secret_key="CUSTOM_SECRET")
+        self.assertTrue(res["ok"])
+        self.assertIn("ACTIVE", res["message"])
+        self.assertIn("$50,000.00", res["message"])
+
+        # Verify headers used custom keys
+        mock_get.assert_called_once()
+        _, kwargs = mock_get.call_args
+        self.assertEqual(kwargs["headers"]["APCA-API-KEY-ID"], "CUSTOM_KEY")
+        self.assertEqual(kwargs["headers"]["APCA-API-SECRET-KEY"], "CUSTOM_SECRET")
+
 
 if __name__ == "__main__":
     unittest.main()

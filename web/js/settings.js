@@ -128,7 +128,10 @@
             btn.disabled = true;
             btn.textContent = "Sending…";
             try {
-              const res = await App.api().send_telegram_test();
+              const res = await App.api().send_telegram_test({
+                bot_token: a.telegram_bot_token || "",
+                chat_id: a.telegram_chat_id || "",
+              });
               if (res.ok) {
                 U.toast("alert", "✈️ Telegram Sent", res.message);
                 btn.textContent = "✓ Sent!";
@@ -324,7 +327,10 @@
             btn.disabled = true;
             btn.textContent = "Testing…";
             try {
-              const res = await App.api().test_alpaca();
+              const res = await App.api().test_alpaca({
+                key_id: b.alpaca_key_id || "",
+                secret_key: b.alpaca_secret_key || "",
+              });
               if (res.ok) {
                 U.toast("alert", "🦙 Alpaca Connected", res.message);
                 btn.textContent = "✓ Connected!";
