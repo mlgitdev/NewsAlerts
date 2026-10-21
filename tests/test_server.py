@@ -108,6 +108,70 @@ class TestServerStaticRoutes(unittest.TestCase):
         if hasattr(res, "close"):
             res.close()
 
+    def test_test_telegram_route_with_payload(self):
+        import json
+        self.api.send_telegram_test.return_value = {"ok": True, "message": "Sent!"}
+        payload = json.dumps({"bot_token": "token123", "chat_id": "chat456"}).encode("utf-8")
+        status_line = []
+        headers_list = []
+
+        def start_response(status, headers, exc_info=None):
+            status_line.append(status)
+            headers_list.extend(headers)
+
+        environ = {
+            "REQUEST_METHOD": "POST",
+            "PATH_INFO": "/api/test_telegram",
+            "CONTENT_TYPE": "application/json",
+            "CONTENT_LENGTH": str(len(payload)),
+            "wsgi.input": io.BytesIO(payload),
+            "wsgi.errors": io.StringIO(),
+            "wsgi.version": (1, 0),
+            "wsgi.multithread": False,
+            "wsgi.multiprocess": False,
+            "wsgi.run_once": False,
+            "wsgi.url_scheme": "http",
+            "SERVER_NAME": "localhost",
+            "SERVER_PORT": "8080",
+        }
+        res = self.app(environ, start_response)
+        self.assertTrue(status_line and status_line[0].startswith("200"))
+        self.api.send_telegram_test.assert_called_once_with(bot_token="token123", chat_id="chat456")
+        if hasattr(res, "close"):
+            res.close()
+
+    def test_test_alpaca_route_with_payload(self):
+        import json
+        self.api.test_alpaca.return_value = {"ok": True, "message": "Connected!"}
+        payload = json.dumps({"key_id": "key_abc", "secret_key": "sec_xyz"}).encode("utf-8")
+        status_line = []
+        headers_list = []
+
+        def start_response(status, headers, exc_info=None):
+            status_line.append(status)
+            headers_list.extend(headers)
+
+        environ = {
+            "REQUEST_METHOD": "POST",
+            "PATH_INFO": "/api/test_alpaca",
+            "CONTENT_TYPE": "application/json",
+            "CONTENT_LENGTH": str(len(payload)),
+            "wsgi.input": io.BytesIO(payload),
+            "wsgi.errors": io.StringIO(),
+            "wsgi.version": (1, 0),
+            "wsgi.multithread": False,
+            "wsgi.multiprocess": False,
+            "wsgi.run_once": False,
+            "wsgi.url_scheme": "http",
+            "SERVER_NAME": "localhost",
+            "SERVER_PORT": "8080",
+        }
+        res = self.app(environ, start_response)
+        self.assertTrue(status_line and status_line[0].startswith("200"))
+        self.api.test_alpaca.assert_called_once_with(key_id="key_abc", secret_key="sec_xyz")
+        if hasattr(res, "close"):
+            res.close()
+
 
 if __name__ == "__main__":
     unittest.main()

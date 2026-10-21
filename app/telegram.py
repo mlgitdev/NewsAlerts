@@ -93,10 +93,10 @@ class TelegramService:
             return
         self._queue.put(text)
 
-    def send_test_message(self) -> tuple[bool, str]:
+    def send_test_message(self, bot_token: str = "", chat_id: str = "") -> tuple[bool, str]:
         with self._lock:
-            token = self.bot_token
-            cid = self.chat_id
+            token = (bot_token or "").strip() or self.bot_token
+            cid = str(chat_id or "").strip() or self.chat_id
         if not (token and cid):
             return False, "Telegram bot_token or admin_chat_id not configured. Enter them in Settings -> Alerts or put a keys.toml file in %APPDATA%\\NewsAlerts\\keys.toml"
         msg = (

@@ -37,6 +37,7 @@ All official releases are produced deterministically through GitHub Actions:
 
 ## Release History
 
+- [v2.7.2 Release Notes](releases/v2.7.2.md) — Real-time in-flight credential testing for Telegram and Alpaca without saving and reopening Settings (Resolves #31).
 - [v2.7.1 Release Notes](releases/v2.7.1.md) — Issue-First protocol and management skill, standardized templates, automated validation bot, 7-day stale reminders, and post-merge CI release and wiki synchronization.
 - [v2.7.0 Release Notes](releases/v2.7.0.md) — Custom US equity symbol search in News wire (AMEX, NASDAQ, NYSE), interactive Strategy Builder with trigger types and deletion in Settings, and Backup / Import & Export JSON synchronization.
 - [v2.6.0 Release Notes](releases/v2.6.0.md) — Large-Cap & High-Float Momentum Squeeze strategies, high-velocity 5-min surge alerts (Up 10% in 5min), TradingView change|5 velocity, and expanded universe boundaries ($1–$500).
