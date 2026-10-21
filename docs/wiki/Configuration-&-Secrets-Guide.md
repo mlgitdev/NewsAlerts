@@ -40,8 +40,22 @@ All settings and secrets reside strictly in the operating system's standard user
 
 ## 💾 Backup & Sync Center
 
-Use the **Backup & Sync** tab in Settings to safeguard your configuration:
-- **Full Application Backup**: Click `💾 Export Full Backup (.json)` to generate a complete snapshot of all screeners, audio alerts, and strategies. Use `📂 Import Backup File` to restore or migrate to another machine.
-- **Strategy Sync**: Click `💾 Export Strategies (.json)` to share momentum strategies with trading partners, or import community presets via `📂 Import Strategies`.
-- **Factory Reset**: Click `↺ Restore Factory Defaults` to reset terminal settings back to fresh defaults while safely preserving `keys.toml`.
+Use the **Backup & Sync** tab in Settings to safeguard your configuration, export setups, or reset state:
+
+<p align="center">
+  <a href="https://raw.githubusercontent.com/mlgitdev/NewsAlerts/main/docs/img/backup_sync.png">
+    <img src="https://raw.githubusercontent.com/mlgitdev/NewsAlerts/main/docs/img/backup_sync.png" alt="Backup & Sync Center" width="100%" style="border-radius:10px; border:1px solid #2a3347; box-shadow:0 8px 24px rgba(0,0,0,0.45);" />
+  </a>
+  <br>
+  <small><em>Settings → Backup & Sync: Full application backup, strategy definition sync, and destructive factory reset.</em></small>
+</p>
+
+1. **Full Application Backup (`Complete State`)**:
+   - `💾 Export Full Backup (.json)`: Click to generate a complete portable JSON snapshot of all screeners, sound alert paths, volume settings, tape universe thresholds, hotkeys, and strategies.
+   - `📂 Import Backup File`: Validates JSON schema and restores terminal state across machines or after reinstallation with immediate live-reload.
+2. **Tape Strategies Only Sync (`N Active`)**:
+   - `💾 Export Strategies (.json)`: Share your multi-strategy rules engine definitions (HOD, 52w breakouts, squeezes) with other traders.
+   - `📂 Import Strategies`: Import custom setups directly into your active tape without altering your personal screener filters or API keys.
+3. **Factory Reset Safeguard (`Destructive`)**:
+   - `↺ Restore Factory Defaults`: Restore all screener presets, sound chimes, hotkeys, and strategies back to original factory defaults. Secret keys stored in `keys.toml` will be strictly preserved.
 
