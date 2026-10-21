@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: NewsAlerts Documentation & Wiki
+    url: https://github.com/mlgitdev/NewsAlerts/wiki
+    about: Explore official terminal guides, strategy configuration, and hotkeys.
+  - name: GitHub Releases & Binaries
+    url: https://github.com/mlgitdev/NewsAlerts/releases
+    about: Download verified standalone binaries for Windows, macOS, and Linux.

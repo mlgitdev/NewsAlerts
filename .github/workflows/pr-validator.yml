@@ -20,14 +20,13 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
           echo "Validating PR title: '$PR_TITLE'"
-          REGEX="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9_\.\-]+\))?: .{3,80}$"
+          REGEX="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|task|revert)(\([a-zA-Z0-9_\.\-]+\))?: .{3,120}$"
           if [[ ! "$PR_TITLE" =~ $REGEX ]]; then
             echo "::error::PR Title '$PR_TITLE' does not conform to Conventional Commits standard."
             echo "Expected format: '<type>(<optional-scope>): <description>'"
-            echo "Allowed types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
+            echo "Allowed types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, task, revert"
             echo "Example: 'feat(tape): add momentum volume surge filter'"
             echo "TITLE_OK=false" >> $GITHUB_ENV
-            exit 1
           else
             echo "✓ PR Title follows Conventional Commits format."
             echo "TITLE_OK=true" >> $GITHUB_ENV
@@ -58,7 +57,6 @@ jobs:
               echo "  - $m"
             done
             echo "BODY_OK=false" >> $GITHUB_ENV
-            exit 1
           else
             echo "✓ All required PR description sections are present."
             echo "BODY_OK=true" >> $GITHUB_ENV
@@ -109,3 +107,10 @@ jobs:
                 body: message
               });
             }
+
+      - name: Fail if Validation Incomplete
+        run: |
+          if [[ "$TITLE_OK" != "true" || "$BODY_OK" != "true" ]]; then
+            echo "::error::PR validation failed (Title: $TITLE_OK, Body: $BODY_OK)."
+            exit 1
+          fi

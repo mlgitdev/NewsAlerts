@@ -27,6 +27,12 @@ make verify
 
 # Audit for accidental secret or credential leaks
 make check
+
+# List open GitHub issues (Issue-First Protocol)
+make issue-list
+
+# Inspect specific issue details and discussion
+make issue-view ISSUE=<number>
 ```
 
 ---

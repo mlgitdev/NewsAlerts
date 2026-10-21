@@ -2,6 +2,8 @@ name: Release Automation & Multi-OS Packaging
 
 on:
   push:
+    branches:
+      - main
     tags:
       - "v*.*.*"
   workflow_dispatch:
@@ -16,8 +18,53 @@ permissions:
   issues: write
 
 jobs:
+  check-release:
+    name: Check if Release Needed
+    runs-on: ubuntu-latest
+    outputs:
+      should_release: ${{ steps.check.outputs.should_release }}
+      version_tag: ${{ steps.check.outputs.version_tag }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check version and existing release
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            TAG="${{ github.event.inputs.version }}"
+            echo "Workflow dispatch requested release for $TAG"
+            echo "should_release=true" >> $GITHUB_OUTPUT
+            echo "version_tag=$TAG" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref_type }}" == "tag" ]]; then
+            TAG="${{ github.ref_name }}"
+            echo "Tag pushed: $TAG"
+            echo "should_release=true" >> $GITHUB_OUTPUT
+            echo "version_tag=$TAG" >> $GITHUB_OUTPUT
+          else
+            # Push to main branch
+            VERSION=$(cat VERSION | tr -d '[:space:]')
+            TAG="v$VERSION"
+            echo "Checking if release for $TAG exists on GitHub..."
+            if gh release view "$TAG" >/dev/null 2>&1; then
+              echo "Release $TAG already exists on GitHub. Skipping release build."
+              echo "should_release=false" >> $GITHUB_OUTPUT
+              echo "version_tag=$TAG" >> $GITHUB_OUTPUT
+            else
+              echo "Release $TAG does not exist yet! Proceeding with release build."
+              echo "should_release=true" >> $GITHUB_OUTPUT
+              echo "version_tag=$TAG" >> $GITHUB_OUTPUT
+            fi
+          fi
+
   build-windows:
     name: Package Windows Release (x64)
+    needs: [check-release]
+    if: needs.check-release.outputs.should_release == 'true'
     runs-on: windows-latest
     steps:
       - name: Checkout repository
@@ -55,6 +102,8 @@ jobs:
 
   build-macos:
     name: Package macOS Release (arm64)
+    needs: [check-release]
+    if: needs.check-release.outputs.should_release == 'true'
     runs-on: macos-latest
     steps:
       - name: Checkout repository
@@ -80,6 +129,8 @@ jobs:
 
   build-linux:
     name: Package Linux Release (x64)
+    needs: [check-release]
+    if: needs.check-release.outputs.should_release == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -100,7 +151,8 @@ jobs:
 
   verify-and-publish:
     name: Verify Packages & Publish Release
-    needs: [build-windows, build-macos, build-linux]
+    needs: [check-release, build-windows, build-macos, build-linux]
+    if: needs.check-release.outputs.should_release == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository with full history
@@ -121,12 +173,12 @@ jobs:
       - name: Determine Release Version & Body
         id: release-info
         run: |
-          TAG="${{ github.ref_name }}"
+          TAG="${{ needs.check-release.outputs.version_tag }}"
           if [[ -z "$TAG" || "$TAG" == "main" ]]; then
             if [ -f "VERSION" ]; then
               TAG="v$(cat VERSION | tr -d '[:space:]')"
             else
-              TAG="${{ github.event.inputs.version || 'v2.4.5' }}"
+              TAG="${{ github.event.inputs.version || 'v2.7.1' }}"
             fi
           fi
           echo "VERSION_TAG=$TAG" >> $GITHUB_ENV
@@ -136,9 +188,9 @@ jobs:
           if [ -f "$NOTES_FILE" ]; then
             echo "Found release notes at $NOTES_FILE"
             echo "NOTES_PATH=$NOTES_FILE" >> $GITHUB_ENV
-          elif [ -f "docs/releases/v2.4.0.md" ]; then
-            echo "Using docs/releases/v2.4.0.md as fallback notes"
-            echo "NOTES_PATH=docs/releases/v2.4.0.md" >> $GITHUB_ENV
+          elif [ -f "docs/releases/v2.7.0.md" ]; then
+            echo "Using docs/releases/v2.7.0.md as fallback notes"
+            echo "NOTES_PATH=docs/releases/v2.7.0.md" >> $GITHUB_ENV
           else
             echo "NOTES_PATH=" >> $GITHUB_ENV
           fi
@@ -214,3 +266,10 @@ jobs:
           files: dist-release/*
           draft: false
           prerelease: false
+
+      - name: Synchronize GitHub Wiki Documentation
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 scripts/sync_wiki.py || echo "Wiki sync step completed or skipped"

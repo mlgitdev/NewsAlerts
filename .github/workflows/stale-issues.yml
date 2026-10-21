@@ -1,0 +1,110 @@
+name: Stale Issues & Inactivity Reminder Bot
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  manage-stale-and-reminders:
+    name: Check Inactive Issues & Send Reminders
+    runs-on: ubuntu-latest
+    steps:
+      - name: Process Stale Issues & 7-Day Inactivity Reminders
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const now = new Date();
+            const MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+            // Fetch open issues (up to 100)
+            const issuesRes = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100,
+              sort: 'updated',
+              direction: 'asc'
+            });
+
+            const openIssues = issuesRes.data.filter(i => !i.pull_request);
+            console.log(`Auditing ${openIssues.length} open issues for activity...`);
+
+            for (const issue of openIssues) {
+              const issueNumber = issue.number;
+              const labels = issue.labels.map(l => (typeof l === 'string' ? l : l.name).toLowerCase());
+
+              // Skip pinned, security, or explicitly protected issues
+              if (labels.includes('pinned') || labels.includes('security') || labels.includes('in-progress')) {
+                console.log(`Skipping protected issue #${issueNumber}`);
+                continue;
+              }
+
+              const lastUpdated = new Date(issue.updated_at);
+              const daysInactive = (now - lastUpdated) / MS_PER_DAY;
+              console.log(`Issue #${issueNumber} ("${issue.title}") inactive for ${daysInactive.toFixed(1)} days`);
+
+              const isStale = labels.includes('stale');
+              const reminderSent = labels.includes('reminder-sent');
+
+              // 1. Auto-close after 37 days (30 days to stale + 7 days grace)
+              if (isStale && daysInactive >= 7) {
+                console.log(`Closing stale issue #${issueNumber}`);
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  body: `### 🔒 Issue Closed Due to Inactivity\n\nThis issue has been closed following 37+ days of inactivity without an update. If this is still an active bug or feature request, feel free to reopen with updated context or details!`
+                });
+
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  state: 'closed',
+                  state_reason: 'not_planned'
+                });
+                continue;
+              }
+
+              // 2. Mark Stale at 30 days
+              if (daysInactive >= 30 && !isStale) {
+                console.log(`Marking issue #${issueNumber} as stale`);
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  labels: ['stale']
+                });
+
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  body: `### ⏰ Stale Issue Notice (30 Days Inactive)\n\nThis issue has seen no activity for 30 days and has been marked as **stale**. It will be automatically closed in **7 days** if no further activity occurs.\n\n*To keep this issue open, please post a comment with an update.*`
+                });
+                continue;
+              }
+
+              // 3. 7-Day Inactivity Reminder
+              if (daysInactive >= 7 && !reminderSent && !isStale) {
+                console.log(`Sending 7-day reminder for issue #${issueNumber}`);
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  labels: ['reminder-sent']
+                });
+
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  body: `### 🔔 Inactivity Reminder (7 Days)\n\nFriendly check-in: This issue has had no updates or activity for 7 days.\n\n- If more reproduction steps, logs, or clarification are required, please provide an update.\n- If this is ready for development, verify that all acceptance criteria are documented under the **Issue-First Protocol**.\n\n*Thank you!*`
+                });
+              }
+            }

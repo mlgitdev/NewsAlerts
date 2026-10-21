@@ -78,6 +78,8 @@ make check                           # Audit for credential leaks
 make clean                           # Remove build artifacts and caches
 make worktree-list                   # List active git worktrees
 make worktree-new BRANCH=feat/<name> # Create new isolated git worktree
+make issue-list                      # List open issues (Issue-First Protocol)
+make issue-view ISSUE=<number>       # Inspect specific issue details
 make help                            # Display usage guide and detected platform
 ```
 

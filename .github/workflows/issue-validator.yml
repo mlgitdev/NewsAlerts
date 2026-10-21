@@ -1,0 +1,158 @@
+name: Issue Validation Bot
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  validate-issue:
+    name: Validate Issue Template & Structure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate Issue Template Structure
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const title = (issue.title || '').trim();
+            const body = (issue.body || '').trim();
+            const issueNumber = issue.number;
+            const labels = (issue.labels || []).map(l => (typeof l === 'string' ? l : l.name).toLowerCase());
+
+            console.log(`Validating Issue #${issueNumber}: "${title}"`);
+
+            // 1. Detect Issue Type
+            let issueType = 'unknown';
+            const titleLower = title.toLowerCase();
+
+            if (titleLower.startsWith('fix') || labels.includes('bug') || body.includes('Steps to Reproduce')) {
+              issueType = 'bug';
+            } else if (titleLower.startsWith('feat') || labels.includes('enhancement') || body.includes('Proposed Solution')) {
+              issueType = 'feature';
+            } else if (titleLower.startsWith('task') || titleLower.startsWith('chore') || titleLower.startsWith('refactor') || titleLower.startsWith('docs') || labels.includes('task') || body.includes('Objective')) {
+              issueType = 'task';
+            }
+
+            // 2. Validate Conventional Commit title pattern
+            const titleRegex = /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|task|revert)(\([a-zA-Z0-9_\.\-]+\))?: .{3,100}$/i;
+            const titleValid = titleRegex.test(title);
+
+            // 3. Define Required Sections per Type
+            let requiredSections = [];
+            if (issueType === 'bug') {
+              requiredSections = ['Description', 'Steps to Reproduce', 'Expected Behavior'];
+            } else if (issueType === 'feature') {
+              requiredSections = ['Summary & Motivation', 'Proposed Solution'];
+            } else if (issueType === 'task') {
+              requiredSections = ['Objective', 'Proposed Changes'];
+            } else {
+              // Generic fallback: must have at least Description or Summary
+              requiredSections = ['Description'];
+            }
+
+            // 4. Verify sections exist and contain non-placeholder content
+            const missingSections = [];
+            for (const section of requiredSections) {
+              const regex = new RegExp(`###\\s+${section.replace(/&/g, '&?')}`, 'i');
+              if (!regex.test(body)) {
+                missingSections.push(section);
+              } else {
+                // Check if the section only contains comments or whitespace
+                const parts = body.split(regex);
+                if (parts.length > 1) {
+                  const sectionContent = parts[1].split(/###\s+/)[0];
+                  // Strip HTML comments <!-- ... --> and whitespace
+                  const cleanContent = sectionContent.replace(/<!--[\s\S]*?-->/g, '').trim();
+                  if (cleanContent.length < 5) {
+                    missingSections.push(`${section} (empty or placeholder)`);
+                  }
+                }
+              }
+            }
+
+            const isValid = titleValid && missingSections.length === 0;
+
+            // 5. Build Bot Response Message
+            let message = '';
+            if (isValid) {
+              message = `### ✅ Issue Validation Passed\n\n` +
+                `- [x] Conventional Commit title syntax (\`${title.split(':')[0] || 'type'}\`)\n` +
+                `- [x] Verified issue type: **${issueType.toUpperCase()}**\n` +
+                `- [x] Required template sections present and filled out\n\n` +
+                `*This issue is well-structured and ready for work according to the **Issue-First Protocol**.*`;
+            } else {
+              message = `### ⚠️ Issue Validation Incomplete\n\n` +
+                `To maintain institutional terminal quality and traceability, all issues must adhere to the standardized templates.\n\n` +
+                `Please update this issue to address the following:\n\n`;
+
+              if (!titleValid) {
+                message += `- ❌ **Title Format**: Must follow Conventional Commits format: \`<type>(<optional-scope>): <description>\` (e.g. \`feat(news): add watchlist search\`, \`fix(tape): correct 5m rvol\`).\n`;
+              }
+              if (missingSections.length > 0) {
+                message += `- ❌ **Missing / Incomplete Template Sections**:\n`;
+                for (const m of missingSections) {
+                  message += `  - \`### ${m}\`\n`;
+                }
+                message += `\n> *Tip: Please edit the issue description to supply details for the highlighted sections above.*`;
+              }
+            }
+
+            // 6. Manage Labels
+            const labelsToAdd = [];
+            const labelsToRemove = [];
+
+            if (isValid) {
+              if (issueType === 'bug' && !labels.includes('bug')) labelsToAdd.push('bug');
+              if (issueType === 'feature' && !labels.includes('enhancement')) labelsToAdd.push('enhancement');
+              if (issueType === 'task' && !labels.includes('task')) labelsToAdd.push('task');
+              if (labels.includes('incomplete-template')) labelsToRemove.push('incomplete-template');
+            } else {
+              if (!labels.includes('incomplete-template')) labelsToAdd.push('incomplete-template');
+              if (!labels.includes('needs-triage')) labelsToAdd.push('needs-triage');
+            }
+
+            if (labelsToAdd.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                labels: labelsToAdd
+              }).catch(err => console.log('Label add error:', err.message));
+            }
+
+            for (const rLabel of labelsToRemove) {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                name: rLabel
+              }).catch(() => {});
+            }
+
+            // 7. Find existing bot comment or create a new one
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+            });
+            const botComment = comments.data.find(c => c.body.includes('Issue Validation'));
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: message
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                body: message
+              });
+            }
