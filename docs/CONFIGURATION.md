@@ -42,7 +42,7 @@ Receive instant push notifications on your phone or desktop when a runner pops u
 
 ---
 
-## 4. Tape Strategies
+## 4. Tape Strategies & Quick-Filter Popout
 
 The Tape monitors the momentum universe (configurable: Price $1–$500, Min Change 1%, up to 400 symbols) and evaluates real-time momentum strategies:
 - **Low Float – Former Momo Stock**: Float < 20M, RelVol ≥ 1.5, 52w high ratio ≥ 2.0.
@@ -59,7 +59,20 @@ The Tape monitors the momentum universe (configurable: Price $1–$500, Min Chan
 - **Squeeze Alert – Up 10% in 10min**: 10% gain in 10 minutes (up-only within active window).
 - **Squeeze Alert – Up 5% in 5min**: 5% gain in 5 minutes (up-only within active window).
 
-Each strategy can be individually toggled on/off in the **Tape Strategies** settings tab.
+### Quick-Filter Popout (Tape Header)
+Active traders do not need to open Settings to adjust strategies during fast sessions. Clicking the `🔔 Strategies [N/M]` button directly in the running tape header launches a floating quick-toggle menu:
+
+<p align="center">
+  <a href="img/tape_strategies_menu.png">
+    <img src="img/tape_strategies_menu.png" alt="Tape Strategies Quick-Filter Menu" width="380" style="border-radius:8px; border:1px solid #2a3347; box-shadow:0 8px 24px rgba(0,0,0,0.45);" />
+  </a>
+  <br>
+  <small><em>Tape header quick-toggle dropdown: One-click strategy toggles with matching color bullets and master select/unselect.</em></small>
+</p>
+
+- **Select / Unselect All**: Instant master checkbox to enable or disable all strategy streams with one click.
+- **Color Bullet Indicators**: Colored markers correlate directly with tape highlight rows (mint for Low Float, sand for Med Float, violet for Large Cap, cyan for Squeeze).
+- **Live Active Counter**: Header badge updates dynamically (e.g. `Strategies 11/13`) showing active rule filters.
 
 ---
 
@@ -89,28 +102,46 @@ NewsAlerts includes a dedicated **Hotkeys** tab in Settings to customize keyboar
 
 ---
 
-## 6. Interactive Strategy Builder
+## 6. Interactive Strategy Builder (Settings)
 
 NewsAlerts provides an interactive Strategy Builder inside Settings → **Tape Strategies**:
+
+<p align="center">
+  <a href="img/strategy_builder.png">
+    <img src="img/strategy_builder.png" alt="Interactive Strategy Builder" width="100%" style="border-radius:10px; border:1px solid #2a3347; box-shadow:0 8px 24px rgba(0,0,0,0.45);" />
+  </a>
+  <br>
+  <small><em>Settings → Tape Strategies: Rule definition table, trigger selectors, family tags, inline export/import, and universe thresholds.</em></small>
+</p>
+
 - **Add Custom Strategy (`+ Add Strategy`)**: Click to append a new custom strategy row.
 - **Trigger Type**:
   - `New HOD`: Fires when a matching stock prints a new session high.
   - `52w Breakout`: Fires when the price crosses above the 52-week high.
   - `Up X% in N min`: Momentum squeeze monitoring percent gain over a rolling time window.
 - **Family Classification**: Set strategy family to `Low Float`, `Med Float`, `Large Cap`, `Squeeze`, or `Custom`.
-- **Delete Strategy (`🗑️`)**: Click the trash icon to delete any strategy. Deletions are remembered in `deleted_strategies` so factory defaults do not resurrect.
-- **Rapid Preset Export/Import**: Use the inline `💾 Export` and `📂 Import` buttons above the table to share strategy presets.
+- **Delete Strategy (`🗑️`)**: Click the trash icon to delete any strategy. Deletions are remembered in `deleted_strategies` so factory defaults do not resurrect upon reboot.
+- **Rapid Preset Export/Import**: Use the inline `💾 Export` and `📂 Import` buttons directly above the table to share strategy presets.
 
 ---
 
-## 7. Backup / Import & Export Sync
+## 7. Backup / Import & Export Sync Center
 
-The **Backup & Sync** tab in Settings allows full disaster recovery and strategy distribution:
-- **Full Application Backup**:
-  - `💾 Export Full Backup (.json)`: Saves complete configuration (`screeners`, `alerts`, `hotkeys`, `news`, `tape`).
+The **Backup & Sync** tab in Settings allows full disaster recovery, strategy sharing, and clean state resets:
+
+<p align="center">
+  <a href="img/backup_sync.png">
+    <img src="img/backup_sync.png" alt="Backup & Sync Center" width="100%" style="border-radius:10px; border:1px solid #2a3347; box-shadow:0 8px 24px rgba(0,0,0,0.45);" />
+  </a>
+  <br>
+  <small><em>Settings → Backup & Sync: Full application backup, strategy definition sync, and destructive factory reset.</em></small>
+</p>
+
+- **Full Application Backup (`Complete State`)**:
+  - `💾 Export Full Backup (.json)`: Saves complete terminal state (`screeners`, `alerts`, `hotkeys`, `news`, `tape`).
   - `📂 Import Backup File`: Validates and restores complete configuration with immediate UI live-reload.
-- **Strategies Sync**:
+- **Tape Strategies Only Sync (`N Active`)**:
   - `💾 Export Strategies (.json)`: Saves only the `strategies` and `enabled` arrays.
   - `📂 Import Strategies`: Merges or updates strategies into the active running tape.
-- **Factory Defaults Reset**:
-  - `↺ Restore Factory Defaults`: Reverts configuration to factory baseline while preserving `keys.toml`.
+- **Factory Defaults Reset (`Destructive`)**:
+  - `↺ Restore Factory Defaults`: Reverts configuration to factory baseline while securely preserving `keys.toml`.

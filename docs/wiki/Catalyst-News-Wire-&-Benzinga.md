@@ -18,15 +18,23 @@ NewsAlerts connects directly to low-latency institutional news wires—including
 
 ## 📰 Terminal News Features
 
+<p align="center">
+  <a href="https://raw.githubusercontent.com/mlgitdev/NewsAlerts/main/docs/img/terminal.png">
+    <img src="https://raw.githubusercontent.com/mlgitdev/NewsAlerts/main/docs/img/terminal.png" alt="News Wire & Custom Symbol Inspection" width="100%" style="border-radius:10px; border:1px solid #2a3347; box-shadow:0 8px 24px rgba(0,0,0,0.45);" />
+  </a>
+  <br>
+  <small><em>News Wire in Action: On-demand SMCI inspection with real-time price, float, ETB borrow badge, and breaking catalyst wire.</em></small>
+</p>
+
 1. **Custom US Symbol Search & Watchlist Chips**:
    - Inspect news and catalyst wires for any US common equity on demand (e.g. `SMCI`, `NVDA`, `AAPL`).
-   - Strictly scoped to US markets (AMEX, NASDAQ, NYSE).
-   - Enter ticker and press `Enter` (or click `Inspect`) to load full company metadata, live price, float, bid/ask spread, and Benzinga headlines.
-   - Inspected symbols are saved as interactive watchlist chips (`[ SMCI × ] [ NVDA × ]`) for rapid one-click switching and deletion.
+   - **Market Scoping**: Queries are strictly resolved against primary US equities across NASDAQ, NYSE, and AMEX.
+   - **Keyboard & Mouse**: Type any ticker into the search bar and press `Enter` (or click `Inspect`) to load full company metadata, live price, float, bid/ask spread, session VWAP, and wire headlines.
+   - **Interactive Watchlist Chips**: Inspected symbols are saved as interactive quick-access chips (`[ SMCI × ] [ NVDA × ]`) for rapid one-click switching and deletion.
 2. **Instant Story Viewer**:
    Click any ticker in the screener or tape to pull up its full press releases with source timestamp and publisher attribution.
 3. **One-Click TradingView Chart Popout**:
-   Click the **Chart Icon** (`#news-chart`) in the news pane header to immediately view the corresponding interactive chart on TradingView.
+   Click the **Chart Icon** (`#news-chart`) in the news pane header to immediately view the corresponding interactive chart on TradingView in your browser.
 4. **Configurable Time Horizons**:
    Filter news stories using the one-click horizon selector:
    - `1h` · `2h` · `4h` · `8h` · `12h` · `24h` · `3d` · `7d`

@@ -82,16 +82,18 @@ Non-session fields: `float_shares_outstanding`, `market_cap_basic`, `sector`,
 │ Filter chips: [Float 300K–25M ×] [Price 1–20 ×] [Chg% >10 ×] [Vol >50K ×]│
 │              [Rel vol ≥ … ×] [+ add filter]                               │
 ├───────────────────────────────────────────────┬──────────────────────────┤
-│ SCREENER TABLE                                │ NEWS  (symbol: TCRT)      │
-│ Sym | Name | Price | Chg% | S.Price | S.Chg% |│ [Benzinga only ☐] [12h▾]  │
-│ Float | S.Vol | Vol | RelVol@t | RelVol |     │ • 08:14  Benzinga  Why is │
-│ MktCap | Sector | 📰 | First seen             │   … expandable story      │
+│ SCREENER TABLE                                │ NEWS  (SMCI 37.55 ETB ⧉) │
+│ Sym | Name | Price | Chg% | S.Price | S.Chg% |│ [🔍 Inspect US symbol... ]│
+│ Float | S.Vol | Vol | RelVol@t | RelVol |     │ [Benzinga only · last 12h]│
+│ MktCap | Sector | 📰 | First seen             │ • 19:11 Super Micro AI...│
 ├───────────────────────────────────────────────┴──────────────────────────┤
-│ TAPE — Small Cap High of Day Momentum   [Strategies ▾] [⏸] [⧉ pop-out]   │
+│ TAPE — Small Cap High of Day Momentum   [🔔 Strategies 11/13] [⏸] [🗑] [⧉]│
 │ Time | Sym | Price | Vol | Float | RelVol | RelVol5m% | Chg% | Gap |...   │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 - Panes are resizable (drag splitters); sizes persisted.
+- News pane features custom US equity symbol inspection (`#news-sym-input`) and quick watchlist chips.
+- Tape header features instant quick-filter popout (`Strategies 11/13`) with color bullets and select/unselect all.
 - Tape can pop out into its own window (second pywebview window).
 - Dark theme matching TradingView look.
 
@@ -180,6 +182,21 @@ Clicking a row selects it and loads news in the right pane (§7).
 | Squeeze Alert – Up 10% in 5min | price ≥ 1.10 × lowest in 5 min or change\|5 ≥ 10% (high-velocity spike) |
 | Squeeze Alert – Up 10% in 10min | price ≥ 1.10 × lowest price in last 10 min (up-only within active 10m window) |
 | Squeeze Alert – Up 5% in 5min | price ≥ 1.05 × lowest price in last 5 min (up-only within active 5m window) |
+
+### 8.2.1 Tape Header Quick-Filter Popout
+The tape header features an interactive `[🔔 Strategies N/M]` popout button allowing traders to filter active strategy streams directly from the running tape:
+- **Floating Dropdown**: Opens right from the tape view without interrupting active screeners or charts.
+- **Master Toggle**: `Select / Unselect All` checkbox enables or disables all strategies with a single click.
+- **Color-Coded Bullet Indicators**: Color markers match tape print highlight families (mint = Low Float, sand = Med Float, violet = Large Cap, cyan = Squeeze).
+- **Instant Reactive Filter**: Toggling any strategy immediately hides/shows matching historical rows and halts audio/Telegram alerts for disabled rules.
+
+### 8.2.2 Interactive Strategy Builder (Settings)
+Inside Settings → **Tape Strategies**, traders have access to the full Strategy Builder:
+- **Add Custom Strategy (`+ Add Strategy`)**: Define custom Float bounds, RelVol thresholds, Price filters, and surge velocities.
+- **Triggers**: Supports `New HOD`, `52w Breakout`, and `Up X% in N min`.
+- **Family Badges**: Categorize rules into Low Float, Med Float, Large Cap, Squeeze, or Custom.
+- **Deletions (`🗑️`)**: Deleted strategies are tracked in `deleted_strategies` in user configuration to prevent automatic resurrection.
+- **Inline Import & Export**: Export presets (`💾 Export`) or import community strategies (`📂 Import`).
 
 ### 8.3 Tape columns
 Time · Symbol (click → news) · Price · Volume · Float · Rel Vol (daily) · Rel Vol 5m % ·
