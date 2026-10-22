@@ -33,6 +33,7 @@ Active momentum day trading requires spotting low-float runners the split second
 - ⚡ **Zero-Latency Inbound Alerts**: Plays an instant audio chime (with interactive volume control & one-click pause) and sends Telegram push notifications the exact second a ticker breaches your screening criteria.
 - 🌊 **Running Momentum Tape**: Warrior-Trading style High of Day (HOD) and Squeeze Breakout prints with 4-day local disk persistence for weekend and off-hours trade review.
 - 🎯 **Interactive Strategy Builder & Tape Quick-Filter**: Construct customized momentum rules (`+ Add Strategy`) with trigger selectors, float ranges, and surge velocities in Settings, with instant one-click toggles right from the tape header (`Strategies 11/13`).
+- 📋 **TradingView Cloud Watchlist Sync & 1-Click Quick-Add**: Real-time cloud watchlist selector bar docked directly above news headlines, paired with 1-click quick-add (`+`) buttons next to tickers in the Screener, Tape, and News header. Features 3-second green/red flickering feedback and instant cloud sync directly into your TradingView Desktop app.
 - 📰 **Zero-Lag Catalyst Confirmation (Beat the 15-Min Delay)**: Unlike retail charting platforms where news lags by 5 to 15 minutes, NewsAlerts pulls fresh headlines the second they cross the wire (Benzinga, GlobeNewswire, PR Newswire), enabling immediate verification of whether a runner is moving on real PR or sym-play noise.
 - 🔍 **Custom US Equity Search & Watchlist Chips**: Inspect real-time quotes, float, borrow locates, and Benzinga headlines for any US equity ticker on demand, pinned as interactive quick-access chips.
 - 💾 **Configuration Backup & Strategy Sync**: Full disaster recovery export/import (`.json`) for screeners, sound configs, and strategies, with independent strategy preset sharing and safe factory reset.
@@ -49,7 +50,7 @@ Active momentum day trading requires spotting low-float runners the split second
     <img src="docs/img/terminal.png" alt="NewsAlerts Real-Time Momentum Terminal" width="100%" style="border-radius:10px; border:1px solid #2a3347; box-shadow:0 8px 24px rgba(0,0,0,0.45);" />
   </a>
   <br>
-  <small><em>Live institutional terminal capture (v2.7.0): Real-time screener, high-of-day momentum tape with large-cap & small-cap squeeze prints, custom symbol search bar, and catalyst news wire.</em></small>
+  <small><em>Live institutional terminal capture (v2.8.0): Real-time screener with 1-click watchlist quick-add, high-of-day momentum tape, TradingView cloud watchlist selector, and catalyst news wire.</em></small>
 </p>
 
 | Terminal Feature | Live Interface Capture |
@@ -181,19 +182,6 @@ If package verification fails during a release run on `main`:
 2. **Git Tag Deleted**: The remote tag (e.g. `v2.4.1`) is deleted via `git push --delete origin <tag>`.
 3. **Automated Branch Rollback**: The `main` branch is automatically reverted to the last known good commit (`git revert HEAD`).
 4. **Critical Incident Issue**: An automated GitHub issue is opened with full logs, commit SHA, and assigned to `@mlgitdev`.
-
----
-
-## ✨ Key Terminal Features
-
-- 🚨 **Instant Audio & Telegram Alerts**: Fires on newly discovered momentum symbols matching user-defined screen criteria.
-- 🔔 **Unified Alert Control (The Bell)**: One-click master toggle that both mutes audio chimes and pauses Telegram alert dispatching.
-- 🔊 **Visual Rising Triangle Volume Control**: Smoothly scrub chime volume from 0% to 100% with real-time per-process Windows WinMM audio scaling.
-- 🌊 **Real-Time Running Tape**: Warrior-Trading style High of Day (HOD) and Squeeze Breakout momentum tape with 4-day local disk persistence for off-hours and weekend review.
-- 🩳 **Short Borrow Locates**: Real-time `HTB` (Hard to Borrow), `ETB` (Easy to Borrow), and `NO BORROW` indicators powered by live Alpaca API and TradingView market feeds.
-- 📰 **Recent News Intelligence**: Direct Benzinga and financial wire headlines with configurable recency windows (1h, 2h, 4h, 8h, 12h, 24h, 3d, 7d).
-- 🏷️ **Interactive Corner Version Badge**: Live SemVer 2.0.0 version indicator docked in the bottom-right corner of the terminal with click-to-open system diagnostic details.
-- 📦 **100% Portable Executable**: Standalone single `.exe` (~14 MB) embedding the custom icon and running without external Python or Node.js runtimes.
 
 ---
 

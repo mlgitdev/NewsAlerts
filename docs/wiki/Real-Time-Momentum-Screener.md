@@ -19,6 +19,9 @@ The **Momentum Screener** is the core scanning engine of NewsAlerts. It continuo
   - **Borrow Status**: Institutional shortability locates (`ETB`, `HTB`, `NO BORROW`).
   - **Relative Volume**: 5-minute and daily relative volume surge multiples.
 
+- **1-Click TradingView Watchlist Quick-Add (`+`)**:
+  Every screener row includes a dedicated quick-add `+` button next to the ticker. Clicking it instantly qualifies the exchange and appends the symbol to your selected TradingView cloud watchlist (visible in real-time on TradingView Desktop), accompanied by a 3-second green flickering glow (`✓`).
+
 - **Configurable Screening Criteria**:
   Adjust screening filters in real time via the Settings modal (`S` hotkey):
   - **Minimum & Maximum Price**: Target low-priced small caps (e.g., $1.00 to $20.00).
