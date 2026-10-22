@@ -48,11 +48,17 @@ By default, unauthenticated TradingView connections receive delayed data (~15-mi
 
 *(New in v2.8.0)*
 
-NewsAlerts synchronizes directly with your custom TradingView cloud watchlists, eliminating the need to alt-tab and manually search for tickers while momentum is moving.
+<p align="center">
+  <a href="https://raw.githubusercontent.com/mlgitdev/NewsAlerts/main/docs/img/watchlist_sync.png">
+    <img src="https://raw.githubusercontent.com/mlgitdev/NewsAlerts/main/docs/img/watchlist_sync.png" alt="TradingView Cloud Watchlist Synchronization & Quick-Add" width="100%" style="border-radius:10px; border:1px solid #2a3347; box-shadow:0 8px 24px rgba(0,0,0,0.45);" />
+  </a>
+  <br>
+  <small><em>Live Watchlist Synchronization (v2.8.0): Clicking the <code>+</code> button next to NCPL triggers a 3-second green flickering glow (<code>✓</code>) and instantly appends the symbol to the active TradingView cloud watchlist (shown live in TradingView Desktop on the right).</em></small>
+</p>
 
 ```
 +------------------------------------------------------------------------------------+
-| 📋 Watchlist: [ Small-Cap Runners (18)  ▾ ]  [🔄]                       [TV Cloud] |
+| 📋 WATCHLIST: [ MomentumTrading (3)  ▾ ]  [🔄]                       [TV CLOUD]   |
 +------------------------------------------------------------------------------------+
 ```
 

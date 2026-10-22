@@ -58,6 +58,13 @@ Displays a color-coded status badge directly next to each symbol in both the Scr
 
 ### 3.4 TradingView Cloud Watchlist Integration & 1-Click Quick-Add
 Seamless cloud watchlist synchronization with user TradingView accounts:
+
+<p align="center">
+  <img src="img/watchlist_sync.png" alt="TradingView Cloud Watchlist Synchronization & Quick-Add" width="100%" style="border-radius:10px; border:1px solid #2a3347; box-shadow:0 8px 24px rgba(0,0,0,0.45);" />
+  <br>
+  <small><em>Live Watchlist Synchronization (v2.8.0): Clicking the <code>+</code> button next to NCPL triggers a 3-second green flickering glow (<code>✓</code>) and instantly appends the symbol to the active TradingView cloud watchlist (shown live in TradingView Desktop on the right).</em></small>
+</p>
+
 - **Watchlist Selector Bar**:
   - Located directly above the News pane (`#news-pane`) for rapid watchlist switching during active trading.
   - Dropdown populated with user TradingView cloud watchlists (`https://www.tradingview.com/api/v1/symbols_list/custom/`), displaying list title and symbol counts.
