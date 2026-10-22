@@ -37,6 +37,7 @@ All official releases are produced deterministically through GitHub Actions:
 
 ## Release History
 
+- [v2.8.0 Release Notes](releases/v2.8.0.md) — TradingView Cloud Watchlist Integration & 1-Click Symbol Quick-Add with 3-second green/red visual flickering feedback (Resolves #33).
 - [v2.7.2 Release Notes](releases/v2.7.2.md) — Real-time in-flight credential testing for Telegram and Alpaca without saving and reopening Settings (Resolves #31).
 - [v2.7.1 Release Notes](releases/v2.7.1.md) — Issue-First protocol and management skill, standardized templates, automated validation bot, 7-day stale reminders, and post-merge CI release and wiki synchronization.
 - [v2.7.0 Release Notes](releases/v2.7.0.md) — Custom US equity symbol search in News wire (AMEX, NASDAQ, NYSE), interactive Strategy Builder with trigger types and deletion in Settings, and Backup / Import & Export JSON synchronization.

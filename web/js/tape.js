@@ -104,7 +104,17 @@
             style: "margin-left:6px;",
             title: `Borrow: ${b.label} (${b.status === "easy" ? "Easy to borrow" : b.status === "hard" ? "Hard to borrow" : b.status === "none" ? "No borrow available" : "N/A"})`
           }, b.label);
-          td.append(U.el("span", { class: "sym-link" }, e.symbol), bTag);
+          const addBtn = U.el("button", {
+            class: "btn-wl-add",
+            title: `Add ${e.symbol} to active TradingView watchlist`,
+            onclick: (ev) => {
+              ev.stopPropagation();
+              if (window.App && App.handleAddToWatchlist) {
+                App.handleAddToWatchlist(addBtn, e.ticker || e.symbol);
+              }
+            }
+          }, "+");
+          td.append(U.el("span", { class: "sym-link" }, e.symbol), addBtn, bTag);
         } else td.textContent = fn(e);
         if (i === 3) {
           td.classList.add("vol-cell");

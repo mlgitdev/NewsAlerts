@@ -303,7 +303,17 @@
               class: "tag-borrow " + b.status,
               title: `Borrow: ${b.label} (${b.status === "easy" ? "Easy to borrow" : b.status === "hard" ? "Hard to borrow" : b.status === "none" ? "No borrow available" : "N/A"})`
             }, b.label);
-            td.append(U.el("div", { class: "sym" }, U.logo(r.logoid, r.symbol), U.el("span", { class: "tkr" }, r.symbol), bTag, r.is_new ? U.el("span", { class: "tag-new" }, "NEW") : null));
+            const addBtn = U.el("button", {
+              class: "btn-wl-add",
+              title: `Add ${r.symbol} to active TradingView watchlist`,
+              onclick: (e) => {
+                e.stopPropagation();
+                if (window.App && App.handleAddToWatchlist) {
+                  App.handleAddToWatchlist(addBtn, r.ticker || r.symbol);
+                }
+              }
+            }, "+");
+            td.append(U.el("div", { class: "sym" }, U.logo(r.logoid, r.symbol), U.el("span", { class: "tkr" }, r.symbol), addBtn, bTag, r.is_new ? U.el("span", { class: "tag-new" }, "NEW") : null));
           } else if (c.k === "desc") {
             td.append(U.el("div", { class: "desc", title: r.desc }, r.desc));
           } else if (c.k === "news_ts") {

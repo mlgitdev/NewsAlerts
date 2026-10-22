@@ -19,6 +19,17 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(creds || {}),
     }).then((r) => r.json()),
+    get_watchlists: () => fetch("/api/tv_watchlists").then((r) => r.json()),
+    select_watchlist: (list_id, title) => fetch("/api/tv_watchlist/select", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ list_id, title }),
+    }).then((r) => r.json()),
+    add_to_watchlist: (list_id, symbol) => fetch("/api/tv_watchlist/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ list_id, symbol }),
+    }).then((r) => r.json()),
     set_focused: (focused) => fetch("/api/set_focused", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

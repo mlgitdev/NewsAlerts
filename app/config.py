@@ -189,6 +189,13 @@ DEFAULT_CONFIG = {
         "deleted_strategies": [],
     },
     "hotkeys": copy.deepcopy(DEFAULT_HOTKEYS),
+    "watchlist": {
+        "active_id": "",
+        "active_title": "Default",
+        "custom_lists": [
+            {"id": "local_default", "title": "Momentum Watchlist", "symbols": []}
+        ],
+    },
     "ui": {"always_on_top": False, "font_size": 13, "news_width": 420, "tape_height": 300},
 }
 

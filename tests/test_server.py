@@ -172,6 +172,98 @@ class TestServerStaticRoutes(unittest.TestCase):
         if hasattr(res, "close"):
             res.close()
 
+    def test_tv_watchlists_route(self):
+        self.api.get_watchlists.return_value = {"ok": True, "watchlists": [{"id": "1", "title": "Test"}]}
+        status_line = []
+        headers_list = []
+
+        def start_response(status, headers, exc_info=None):
+            status_line.append(status)
+            headers_list.extend(headers)
+
+        environ = {
+            "REQUEST_METHOD": "GET",
+            "PATH_INFO": "/api/tv_watchlists",
+            "wsgi.input": io.BytesIO(),
+            "wsgi.errors": io.StringIO(),
+            "wsgi.version": (1, 0),
+            "wsgi.multithread": False,
+            "wsgi.multiprocess": False,
+            "wsgi.run_once": False,
+            "wsgi.url_scheme": "http",
+            "SERVER_NAME": "localhost",
+            "SERVER_PORT": "8080",
+        }
+        res = self.app(environ, start_response)
+        self.assertTrue(status_line and status_line[0].startswith("200"))
+        self.api.get_watchlists.assert_called_once()
+        if hasattr(res, "close"):
+            res.close()
+
+    def test_tv_watchlist_select_route(self):
+        import json
+        self.api.select_watchlist.return_value = {"ok": True, "active_id": "123", "active_title": "Day Trades"}
+        payload = json.dumps({"list_id": "123", "title": "Day Trades"}).encode("utf-8")
+        status_line = []
+        headers_list = []
+
+        def start_response(status, headers, exc_info=None):
+            status_line.append(status)
+            headers_list.extend(headers)
+
+        environ = {
+            "REQUEST_METHOD": "POST",
+            "PATH_INFO": "/api/tv_watchlist/select",
+            "CONTENT_TYPE": "application/json",
+            "CONTENT_LENGTH": str(len(payload)),
+            "wsgi.input": io.BytesIO(payload),
+            "wsgi.errors": io.StringIO(),
+            "wsgi.version": (1, 0),
+            "wsgi.multithread": False,
+            "wsgi.multiprocess": False,
+            "wsgi.run_once": False,
+            "wsgi.url_scheme": "http",
+            "SERVER_NAME": "localhost",
+            "SERVER_PORT": "8080",
+        }
+        res = self.app(environ, start_response)
+        self.assertTrue(status_line and status_line[0].startswith("200"))
+        self.api.select_watchlist.assert_called_once_with(list_id="123", title="Day Trades")
+        if hasattr(res, "close"):
+            res.close()
+
+    def test_tv_watchlist_add_route(self):
+        import json
+        self.api.add_to_watchlist.return_value = {"ok": True, "symbol": "NASDAQ:AAPL", "list_id": "123"}
+        payload = json.dumps({"list_id": "123", "symbol": "AAPL"}).encode("utf-8")
+        status_line = []
+        headers_list = []
+
+        def start_response(status, headers, exc_info=None):
+            status_line.append(status)
+            headers_list.extend(headers)
+
+        environ = {
+            "REQUEST_METHOD": "POST",
+            "PATH_INFO": "/api/tv_watchlist/add",
+            "CONTENT_TYPE": "application/json",
+            "CONTENT_LENGTH": str(len(payload)),
+            "wsgi.input": io.BytesIO(payload),
+            "wsgi.errors": io.StringIO(),
+            "wsgi.version": (1, 0),
+            "wsgi.multithread": False,
+            "wsgi.multiprocess": False,
+            "wsgi.run_once": False,
+            "wsgi.url_scheme": "http",
+            "SERVER_NAME": "localhost",
+            "SERVER_PORT": "8080",
+        }
+        res = self.app(environ, start_response)
+        self.assertTrue(status_line and status_line[0].startswith("200"))
+        self.api.add_to_watchlist.assert_called_once_with(list_id="123", symbol="AAPL")
+        if hasattr(res, "close"):
+            res.close()
+
 
 if __name__ == "__main__":
     unittest.main()

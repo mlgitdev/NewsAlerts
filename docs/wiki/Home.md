@@ -18,7 +18,7 @@ Built on a native, ultra-responsive architecture (`pywebview` + Vanilla ES6+/CSS
 
 | Topic | Description |
 | :--- | :--- |
-| **[TradingView Integration & Charts](TradingView-Integration-&-Charts)** | Real-time session feeds & **One-Click Chart Popout** via the news pane icon |
+| **[TradingView Integration & Charts](TradingView-Integration-&-Charts)** | Real-time session feeds, **Cloud Watchlist Sync**, and **One-Click Chart Popout** |
 | **[Real-Time Momentum Screener](Real-Time-Momentum-Screener)** | Sub-second low-float screener, live `NEW` badges, dynamic criteria filtering |
 | **[Running Momentum Tape](Running-Momentum-Tape)** | Warrior-Trading style HOD & squeeze breakout prints with 4-day persistence & quick-filter dropdown |
 | **[Multi-Strategy Rules Engine](Multi-Strategy-Rules-Engine)** | Interactive Strategy Builder (`+ Add Strategy`), 13 built-in rules, trigger types, and Backup & Sync |

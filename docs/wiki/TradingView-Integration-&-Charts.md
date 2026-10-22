@@ -44,6 +44,37 @@ By default, unauthenticated TradingView connections receive delayed data (~15-mi
 
 ---
 
+## 📋 Cloud Watchlist Synchronization & Quick-Add (`+`)
+
+*(New in v2.8.0)*
+
+NewsAlerts synchronizes directly with your custom TradingView cloud watchlists, eliminating the need to alt-tab and manually search for tickers while momentum is moving.
+
+```
++------------------------------------------------------------------------------------+
+| 📋 Watchlist: [ Small-Cap Runners (18)  ▾ ]  [🔄]                       [TV Cloud] |
++------------------------------------------------------------------------------------+
+```
+
+### 1. Watchlist Selector Bar
+- **Location**: Positioned directly above the News pane (`#news-pane`).
+- **Dynamic Watchlist Dropdown**: Displays all custom watchlists registered to your authenticated TradingView account, along with their current symbol count.
+- **On-Demand Cloud Sync (`🔄`)**: Click the refresh button to pull any newly added watchlists or external edits without restarting the application.
+- **Connection Badge**: Shows `[TV Cloud]` when authenticated with TradingView, or `[Local]` when operating in offline/fallback mode.
+
+### 2. 1-Click Quick-Add (`+`) Buttons
+Every stock symbol throughout the terminal is equipped with a high-visibility `+` quick-add button:
+- **Momentum Screener Table**: Beside each symbol badge in the main scanner view.
+- **Running Momentum Tape**: Directly next to the symbol in each momentum print.
+- **News Header**: Next to the active inspected ticker in the catalyst wire.
+
+### 3. Visual Flickering Feedback
+To maximize trader focus and prevent workflow interruption:
+- **🟢 Silent Green Flickering (3 seconds)**: When a symbol is added (or if it is already present in the target watchlist), the `+` button pulses with a vibrant institutional green glow animation and turns into `✓` for 3 seconds. No disruptive modal popups or confirmation dialogs occur.
+- **🔴 Red Flickering & Toast (3 seconds)**: If session credentials expire or a network error occurs, the button pulses red (`✕`) for 3 seconds and an alert toast displays the exact diagnostic failure.
+
+---
+
 ## 🛡️ Security & Token Isolation
 
 - Your session cookies are stored exclusively in your local user configuration directory (`%APPDATA%\NewsAlerts\config.json` on Windows or `~/Library/Application Support/NewsAlerts/` on macOS).

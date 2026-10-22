@@ -99,6 +99,98 @@ class TestApiMethods(unittest.TestCase):
         self.assertEqual(kwargs["headers"]["APCA-API-KEY-ID"], "CUSTOM_KEY")
         self.assertEqual(kwargs["headers"]["APCA-API-SECRET-KEY"], "CUSTOM_SECRET")
 
+    def test_get_watchlists_tradingview_cloud(self):
+        self.mock_app.cfg.get.return_value = {
+            "watchlist": {"active_id": "tv_1", "active_title": "Day Trades", "custom_lists": []}
+        }
+        self.mock_app.client.get_watchlists.return_value = {
+            "ok": True,
+            "watchlists": [{"id": "tv_1", "title": "Day Trades", "count": 12}],
+        }
+        res = self.api.get_watchlists()
+        self.assertTrue(res["ok"])
+        self.assertTrue(res["connected"])
+        self.assertEqual(res["source"], "tradingview")
+        self.assertEqual(len(res["watchlists"]), 1)
+        self.assertEqual(res["active_id"], "tv_1")
+
+    def test_get_watchlists_local_fallback(self):
+        self.mock_app.cfg.get.return_value = {
+            "watchlist": {
+                "active_id": "local_default",
+                "active_title": "Momentum Watchlist",
+                "custom_lists": [{"id": "local_default", "title": "Momentum Watchlist", "symbols": ["AAPL"]}],
+            }
+        }
+        self.mock_app.client.get_watchlists.return_value = {
+            "ok": False,
+            "message": "Session unauthenticated",
+            "watchlists": [],
+        }
+        res = self.api.get_watchlists()
+        self.assertTrue(res["ok"])
+        self.assertFalse(res["connected"])
+        self.assertEqual(res["source"], "local")
+        self.assertEqual(res["active_id"], "local_default")
+
+    def test_select_watchlist(self):
+        cfg = {"watchlist": {"active_id": "tv_1", "active_title": "Old"}}
+        self.mock_app.cfg.get.return_value = cfg
+        res = self.api.select_watchlist("tv_2", "New Watchlist")
+        self.assertTrue(res["ok"])
+        self.assertEqual(res["active_id"], "tv_2")
+        self.assertEqual(res["active_title"], "New Watchlist")
+        self.mock_app.cfg.update.assert_called_once()
+
+    def test_add_to_watchlist_tradingview(self):
+        self.mock_app.client.sessionid = "active_tv_session"
+        cfg = {
+            "watchlist": {
+                "active_id": "12345",
+                "active_title": "Momentum",
+                "custom_lists": [],
+            }
+        }
+        self.mock_app.cfg.get.return_value = cfg
+        self.mock_app.client.add_to_watchlist.return_value = {
+            "ok": True,
+            "message": "Symbol added to TradingView watchlist",
+            "symbol": "NASDAQ:TSLA",
+            "list_id": "12345",
+        }
+
+        # Mock quote lookup for exchange qualification
+        mock_row = {"ticker": "NASDAQ:TSLA", "name": "TSLA", "description": "Tesla", "close": 200.0, "change": 5.0, "volume": 10e6, "relative_volume_10d_calc": 1.0, "float_shares_outstanding": 3e9}
+        self.mock_app.client.scan.return_value = [mock_row]
+        self.mock_app.borrow.get_status.return_value = {"status": "easy", "label": "ETB"}
+        self.mock_app.borrow.get_details.return_value = {}
+        self.mock_app.borrow.get_snapshot.return_value = {}
+
+        res = self.api.add_to_watchlist("12345", "TSLA")
+        self.assertTrue(res["ok"])
+        self.mock_app.client.add_to_watchlist.assert_called_once_with("12345", "NASDAQ:TSLA")
+
+    def test_add_to_watchlist_local(self):
+        self.mock_app.client.sessionid = ""
+        cfg = {
+            "watchlist": {
+                "active_id": "local_default",
+                "active_title": "Momentum Watchlist",
+                "custom_lists": [{"id": "local_default", "title": "Momentum Watchlist", "symbols": []}],
+            }
+        }
+        self.mock_app.cfg.get.return_value = cfg
+
+        res = self.api.add_to_watchlist("local_default", "NVDA")
+        self.assertTrue(res["ok"])
+        self.assertEqual(res["source"], "local")
+        self.mock_app.cfg.update.assert_called_once()
+
+        # Adding same symbol again reports already_exists: True
+        res_dup = self.api.add_to_watchlist("local_default", "NVDA")
+        self.assertTrue(res_dup["ok"])
+        self.assertTrue(res_dup.get("already_exists"))
+
 
 if __name__ == "__main__":
     unittest.main()

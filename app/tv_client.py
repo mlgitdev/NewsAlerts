@@ -181,3 +181,70 @@ class TVClient:
         except Exception as e:
             log.warning("story %s failed: %s", story_id, e)
             return {}
+
+    # ------------------------------------------------------------- watchlists
+    def get_watchlists(self) -> dict:
+        """Fetch user custom watchlists from TradingView using session cookies."""
+        with self._lock:
+            sessionid = self.sessionid
+        if not sessionid:
+            return {"ok": False, "authenticated": False, "message": "TradingView sessionid not configured", "watchlists": []}
+        try:
+            r = self._s.get("https://www.tradingview.com/api/v1/symbols_list/custom/", timeout=8)
+            if r.status_code == 200:
+                data = r.json()
+                lists = data if isinstance(data, list) else data.get("data", [])
+                watchlists = []
+                for item in lists:
+                    if isinstance(item, dict) and "id" in item:
+                        watchlists.append({
+                            "id": str(item["id"]),
+                            "title": str(item.get("title") or item.get("name") or f"Watchlist {item['id']}"),
+                            "symbols": list(item.get("symbols") or []),
+                            "count": len(item.get("symbols") or []),
+                        })
+                return {"ok": True, "authenticated": True, "watchlists": watchlists}
+            if r.status_code in (401, 403):
+                return {"ok": False, "authenticated": False, "message": "TradingView session expired or unauthorized", "watchlists": []}
+            return {"ok": False, "authenticated": False, "message": f"TradingView returned status {r.status_code}", "watchlists": []}
+        except Exception as e:
+            log.warning("get_watchlists error: %s", e)
+            return {"ok": False, "authenticated": False, "message": str(e), "watchlists": []}
+
+    def add_to_watchlist(self, list_id: str, symbol: str) -> dict:
+        """Add a ticker symbol to a TradingView custom watchlist."""
+        with self._lock:
+            sessionid = self.sessionid
+        if not sessionid:
+            return {"ok": False, "message": "TradingView sessionid not configured. Enter it in Settings."}
+        list_id = str(list_id or "").strip()
+        sym = str(symbol or "").strip().upper()
+        if not list_id or not sym:
+            return {"ok": False, "message": "Watchlist ID and symbol are required."}
+
+        try:
+            # 1. Try direct append endpoint
+            append_url = f"https://www.tradingview.com/api/v1/symbols_list/custom/{list_id}/append/"
+            r = self._s.post(append_url, json={"symbols": [sym]}, timeout=8)
+            if r.status_code in (200, 201, 204):
+                return {"ok": True, "message": f"Added {sym} to TradingView watchlist", "symbol": sym, "list_id": list_id}
+            if r.status_code == 400 and ("already" in r.text.lower() or "exist" in r.text.lower()):
+                return {"ok": True, "already_exists": True, "message": f"{sym} already in watchlist", "symbol": sym, "list_id": list_id}
+
+            # 2. Fallback: inspect current symbols and update list
+            get_url = f"https://www.tradingview.com/api/v1/symbols_list/custom/{list_id}/"
+            gr = self._s.get(get_url, timeout=8)
+            if gr.status_code == 200:
+                ldata = gr.json()
+                cur_syms = list(ldata.get("symbols") or []) if isinstance(ldata, dict) else []
+                if sym in cur_syms:
+                    return {"ok": True, "already_exists": True, "message": f"{sym} already in watchlist", "symbol": sym, "list_id": list_id}
+                cur_syms.append(sym)
+                pr = self._s.post(get_url, json={"symbols": cur_syms}, timeout=8)
+                if pr.status_code in (200, 201, 204):
+                    return {"ok": True, "message": f"Added {sym} to TradingView watchlist", "symbol": sym, "list_id": list_id}
+
+            return {"ok": False, "message": f"TradingView error (HTTP {r.status_code}): {r.text[:120]}"}
+        except Exception as e:
+            log.warning("add_to_watchlist error for %s in %s: %s", sym, list_id, e)
+            return {"ok": False, "message": str(e)}
