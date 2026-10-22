@@ -9,7 +9,7 @@ Built on a native, ultra-responsive architecture (`pywebview` + Vanilla ES6+/CSS
     <img src="https://raw.githubusercontent.com/mlgitdev/NewsAlerts/main/docs/img/terminal.png" alt="NewsAlerts Real-Time Momentum Terminal" width="100%" style="border-radius:10px; border:1px solid #2a3347; box-shadow:0 10px 30px rgba(0,0,0,0.5);" />
   </a>
   <br>
-  <small><em>Live institutional terminal capture (v2.7.0): Real-time screener, high-of-day momentum tape with large-cap & small-cap squeeze prints, custom symbol search bar, and catalyst news wire.</em></small>
+  <small><em>Live institutional terminal capture (v2.8.0): Real-time screener with 1-click watchlist quick-add, high-of-day momentum tape, TradingView cloud watchlist selector, and catalyst news wire.</em></small>
 </p>
 
 ---
@@ -40,14 +40,17 @@ Built on a native, ultra-responsive architecture (`pywebview` + Vanilla ES6+/CSS
 2. **One-Click Chart Launching**:
    No need to manually type ticker symbols into separate charting windows. The News pane features a dedicated **Chart Icon** (`#news-chart`) in the symbol header that immediately pops open the full TradingView interactive chart for the active ticker in your browser.
 
-3. **Multi-Strategy Inbound Audio Chimes & Quick-Filter**:
+3. **TradingView Cloud Watchlist Sync & 1-Click Quick-Add**:
+   Direct integration with TradingView's cloud symbols list API. Select your target watchlist directly above the news pane and use the 1-click `+` buttons next to any ticker in the screener or tape to sync tickers instantly to TradingView Desktop without manual entry. Features 3-second green flickering feedback on success.
+
+4. **Multi-Strategy Inbound Audio Chimes & Quick-Filter**:
    Active traders cannot watch multiple screens continuously. NewsAlerts rings an instant auditory chime the exact second a ticker enters your strategy criteria. Traders can toggle strategies directly on the tape header (`Strategies 11/13`) without entering settings.
 
-4. **Interactive Strategy Builder & Preset Sharing**:
+5. **Interactive Strategy Builder & Preset Sharing**:
    Full in-terminal Strategy Builder (`+ Add Strategy`) in Settings with trigger selection (`New HOD`, `52w Breakout`, `Up X% in N min`), family tagging, and inline portable JSON import/export.
 
-5. **Institutional Short Locates**:
+6. **Institutional Short Locates**:
    Direct integration with Alpaca Brokerage locate APIs surfaces real-time `ETB` (Easy to Borrow), `HTB` (Hard to Borrow), and `NO BORROW` badges on every screener row and tape print, exposing high-probability short-squeeze opportunities instantly.
 
-6. **Full State Backup & Disaster Recovery**:
+7. **Full State Backup & Disaster Recovery**:
    The Backup & Sync Center allows traders to export full application backups, synchronize tactical strategies independently, or execute clean factory resets while securely preserving user API keys.
