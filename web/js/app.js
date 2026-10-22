@@ -616,7 +616,7 @@
         U.toast(
           "err",
           "⚠️ Failed to Add to Watchlist",
-          res?.error || "Could not add symbol to TradingView watchlist. Please check session cookies.",
+          res?.message || res?.error || "Could not add symbol to TradingView watchlist. Please check session cookies.",
           null,
           5000
         );

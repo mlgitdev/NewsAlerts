@@ -223,26 +223,23 @@ class TVClient:
             return {"ok": False, "message": "Watchlist ID and symbol are required."}
 
         try:
-            # 1. Try direct append endpoint
-            append_url = f"https://www.tradingview.com/api/v1/symbols_list/custom/{list_id}/append/"
-            r = self._s.post(append_url, json={"symbols": [sym]}, timeout=8)
-            if r.status_code in (200, 201, 204):
-                return {"ok": True, "message": f"Added {sym} to TradingView watchlist", "symbol": sym, "list_id": list_id}
-            if r.status_code == 400 and ("already" in r.text.lower() or "exist" in r.text.lower()):
-                return {"ok": True, "already_exists": True, "message": f"{sym} already in watchlist", "symbol": sym, "list_id": list_id}
-
-            # 2. Fallback: inspect current symbols and update list
+            # 1. Check if symbol already exists in watchlist
             get_url = f"https://www.tradingview.com/api/v1/symbols_list/custom/{list_id}/"
             gr = self._s.get(get_url, timeout=8)
             if gr.status_code == 200:
                 ldata = gr.json()
                 cur_syms = list(ldata.get("symbols") or []) if isinstance(ldata, dict) else []
-                if sym in cur_syms:
+                bare_sym = sym.split(":")[-1]
+                if any(s == sym or s.split(":")[-1] == bare_sym for s in cur_syms):
                     return {"ok": True, "already_exists": True, "message": f"{sym} already in watchlist", "symbol": sym, "list_id": list_id}
-                cur_syms.append(sym)
-                pr = self._s.post(get_url, json={"symbols": cur_syms}, timeout=8)
-                if pr.status_code in (200, 201, 204):
-                    return {"ok": True, "message": f"Added {sym} to TradingView watchlist", "symbol": sym, "list_id": list_id}
+
+            # 2. Append endpoint expects a JSON list of symbol strings: ["EXCHANGE:TICKER"]
+            append_url = f"https://www.tradingview.com/api/v1/symbols_list/custom/{list_id}/append/"
+            r = self._s.post(append_url, json=[sym], timeout=8)
+            if r.status_code in (200, 201, 204):
+                return {"ok": True, "message": f"Added {sym} to TradingView watchlist", "symbol": sym, "list_id": list_id}
+            if r.status_code == 400 and ("already" in r.text.lower() or "exist" in r.text.lower()):
+                return {"ok": True, "already_exists": True, "message": f"{sym} already in watchlist", "symbol": sym, "list_id": list_id}
 
             return {"ok": False, "message": f"TradingView error (HTTP {r.status_code}): {r.text[:120]}"}
         except Exception as e:
