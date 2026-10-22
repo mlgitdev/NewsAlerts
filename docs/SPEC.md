@@ -56,6 +56,31 @@ Displays a color-coded status badge directly next to each symbol in both the Scr
 - **N/A / Unknown**: 🟠 **Orange** (`na data orange`) — Data unavailable or symbol unlisted for locate
 - **Data Source**: Integrated with Alpaca Broker API (free paper account keys in Settings / secrets) for real-time broker locates (`borrow_status: hard_to_borrow` -> HTB Yellow, `easy_to_borrow` -> ETB Red), with an intelligent float-based heuristic fallback (float < 500K = No Borrow, 500K–50M = HTB, > 50M = ETB).
 
+### 3.4 TradingView Cloud Watchlist Integration & 1-Click Quick-Add
+Seamless cloud watchlist synchronization with user TradingView accounts:
+
+<p align="center">
+  <img src="img/watchlist_sync.png" alt="TradingView Cloud Watchlist Synchronization & Quick-Add" width="100%" style="border-radius:10px; border:1px solid #2a3347; box-shadow:0 8px 24px rgba(0,0,0,0.45);" />
+  <br>
+  <small><em>Live Watchlist Synchronization (v2.8.0): Clicking the <code>+</code> button next to NCPL triggers a 3-second green flickering glow (<code>✓</code>) and instantly appends the symbol to the active TradingView cloud watchlist (shown live in TradingView Desktop on the right).</em></small>
+</p>
+
+- **Watchlist Selector Bar**:
+  - Located directly above the News pane (`#news-pane`) for rapid watchlist switching during active trading.
+  - Dropdown populated with user TradingView cloud watchlists (`https://www.tradingview.com/api/v1/symbols_list/custom/`), displaying list title and symbol counts.
+  - Sync button (`🔄`) to refresh remote lists on demand without restarting the terminal.
+  - Live status badge indicating cloud connection (`TV Cloud`) or local fallback mode (`Local`).
+- **1-Click Quick-Add (`+`) Buttons**:
+  - Positioned adjacent to stock symbols in:
+    1. Screener table (symbol column)
+    2. Momentum Tape rows (symbol column)
+    3. News pane header (inspected symbol)
+  - Automatic exchange qualification: bare tickers (e.g. `SMCI`) are resolved to institutional `EXCHANGE:TICKER` standard (e.g. `NASDAQ:SMCI`) prior to submission.
+- **Visual Feedback & Error Feedback**:
+  - **Success / Already in Watchlist**: Silent green flickering glow animation (`flicker-green`) on the `+` button for 3 seconds, transforming into `✓`. No disruptive alert or modal popup.
+  - **Failure (e.g. session expired, network failure)**: Red flickering glow animation (`flicker-red`) on the `+` button for 3 seconds, transforming into `✕`, paired with an error toast notification.
+  - **Offline / Local Fallback**: When unauthenticated, symbols are saved to the persistent local `config.json` watchlist (`local_default`).
+
 ## 4. Market sessions
 Session selector: **Auto | Pre-market | Regular | Post-market** (Auto uses ET clock:
 Pre 04:00–09:30, Regular 09:30–16:00, Post 16:00–20:00, otherwise "Closed" → last session).
@@ -82,16 +107,19 @@ Non-session fields: `float_shares_outstanding`, `market_cap_basic`, `sector`,
 │ Filter chips: [Float 300K–25M ×] [Price 1–20 ×] [Chg% >10 ×] [Vol >50K ×]│
 │              [Rel vol ≥ … ×] [+ add filter]                               │
 ├───────────────────────────────────────────────┬──────────────────────────┤
-│ SCREENER TABLE                                │ NEWS  (SMCI 37.55 ETB ⧉) │
-│ Sym | Name | Price | Chg% | S.Price | S.Chg% |│ [🔍 Inspect US symbol... ]│
-│ Float | S.Vol | Vol | RelVol@t | RelVol |     │ [Benzinga only · last 12h]│
-│ MktCap | Sector | 📰 | First seen             │ • 19:11 Super Micro AI...│
+│ SCREENER TABLE                                │ [📋 Watchlist: Momentum (24)▾ 🔄] [TV Cloud]
+│ Sym | Name | Price | Chg% | S.Price | S.Chg% |│ NEWS  (SMCI 37.55 [+] ETB ⧉)
+│ Float | S.Vol | Vol | RelVol@t | RelVol |     │ [🔍 Inspect US symbol... ]
+│ MktCap | Sector | 📰 | First seen             │ [Benzinga only · last 12h]
+│ [SMCI +] [NVDA +] [AAPL +]                    │ • 19:11 Super Micro AI...
 ├───────────────────────────────────────────────┴──────────────────────────┤
 │ TAPE — Small Cap High of Day Momentum   [🔔 Strategies 11/13] [⏸] [🗑] [⧉]│
 │ Time | Sym | Price | Vol | Float | RelVol | RelVol5m% | Chg% | Gap |...   │
+│ 19:15 [SMCI +] 37.55  2.1M  12.4M   4.5x ...                             │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 - Panes are resizable (drag splitters); sizes persisted.
+- Watchlist Selector Bar (`#watchlist-bar`) positioned directly above the News pane.
 - News pane features custom US equity symbol inspection (`#news-sym-input`) and quick watchlist chips.
 - Tape header features instant quick-filter popout (`Strategies 11/13`) with color bullets and select/unselect all.
 - Tape can pop out into its own window (second pywebview window).

@@ -43,6 +43,7 @@
 
     // Topbar wiring
     initVolumeControl();
+    initWatchlistControl();
     U.$("#btn-mute").onclick = toggleMute;
     U.$("#btn-alerts").onclick = toggleDrawer;
     U.$("#btn-settings").onclick = () => Settings.open();
@@ -73,6 +74,7 @@
         tv_pro_plan: auth.pro_plan,
         tv_error: auth.error,
       });
+      if (App.reloadWatchlists) App.reloadWatchlists();
     });
     App.sub("new_symbols", onNewSymbols);
     App.sub("tape_popped", setTapePopped);
@@ -498,6 +500,146 @@
       }
     });
   }
+
+  async function initWatchlistControl() {
+    const select = U.$("#watchlist-select");
+    const syncBtn = U.$("#btn-watchlist-sync");
+    const badge = U.$("#watchlist-status-badge");
+    if (!select) return;
+
+    async function loadWatchlists() {
+      if (syncBtn) syncBtn.classList.add("rotating");
+      try {
+        const res = await App.api().get_watchlists();
+        if (select) {
+          select.replaceChildren();
+          const wls = res.watchlists || [];
+          if (!wls.length) {
+            select.append(U.el("option", { value: "" }, "No watchlists found"));
+          } else {
+            wls.forEach((w) => {
+              const opt = U.el("option", { value: w.id }, `${w.title} (${w.count || 0})`);
+              if (w.id === res.active_id) opt.selected = true;
+              select.append(opt);
+            });
+            if (res.active_id) {
+              select.value = res.active_id;
+            } else if (wls[0]) {
+              select.value = wls[0].id;
+            }
+          }
+        }
+        if (badge) {
+          if (res.connected) {
+            badge.textContent = "TV Cloud";
+            badge.className = "watchlist-status-badge";
+            badge.title = "Synchronized with TradingView Cloud Watchlists";
+            badge.onclick = null;
+          } else {
+            badge.textContent = "Local";
+            badge.className = "watchlist-status-badge local";
+            badge.title = "TradingView session not active — using local watchlist (Click for Settings)";
+            badge.onclick = () => Settings.open("tv");
+          }
+        }
+      } catch (e) {
+        if (badge) {
+          badge.textContent = "Offline";
+          badge.className = "watchlist-status-badge local";
+        }
+      } finally {
+        if (syncBtn) syncBtn.classList.remove("rotating");
+      }
+    }
+
+    App.reloadWatchlists = loadWatchlists;
+
+    select.onchange = async () => {
+      const selectedId = select.value;
+      const selectedTitle = select.options[select.selectedIndex]?.text?.replace(/\s*\(\d+\)$/, "") || "";
+      if (!App.config) App.config = {};
+      if (!App.config.watchlist) App.config.watchlist = {};
+      App.config.watchlist.active_id = selectedId;
+      App.config.watchlist.active_title = selectedTitle;
+      try {
+        await App.api().select_watchlist(selectedId, selectedTitle);
+      } catch (e) {}
+    };
+
+    if (syncBtn) {
+      syncBtn.onclick = () => {
+        loadWatchlists();
+        U.toast("info", "🔄 Watchlists Synced", "Refreshed TradingView custom watchlists", null, 2000);
+      };
+    }
+
+    await loadWatchlists();
+  }
+
+  async function handleAddToWatchlist(btn, symbol) {
+    if (!symbol || !btn) return;
+    if (btn.classList.contains("adding") || btn.classList.contains("flicker-green") || btn.classList.contains("flicker-red")) {
+      return;
+    }
+    const select = U.$("#watchlist-select");
+    const activeId = select ? select.value : (App.config?.watchlist?.active_id || "");
+    const origText = btn.textContent;
+    btn.classList.add("adding");
+
+    try {
+      const res = await App.api().add_to_watchlist(activeId, symbol);
+      btn.classList.remove("adding");
+
+      if (res && res.ok) {
+        // Success or already exists: silent green flickering for 3 seconds
+        btn.classList.add("flicker-green");
+        btn.textContent = "✓";
+        if (select && select.options[select.selectedIndex] && !res.already_exists) {
+          const opt = select.options[select.selectedIndex];
+          const m = opt.textContent.match(/^(.*?)\s*\((\d+)\)$/);
+          if (m) {
+            opt.textContent = `${m[1]} (${parseInt(m[2], 10) + 1})`;
+          }
+        }
+        setTimeout(() => {
+          btn.classList.remove("flicker-green");
+          btn.textContent = origText;
+        }, 3000);
+      } else {
+        // Failure: red flickering for 3 seconds + alert popup toast
+        btn.classList.add("flicker-red");
+        btn.textContent = "✕";
+        setTimeout(() => {
+          btn.classList.remove("flicker-red");
+          btn.textContent = origText;
+        }, 3000);
+        U.toast(
+          "err",
+          "⚠️ Failed to Add to Watchlist",
+          res?.message || res?.error || "Could not add symbol to TradingView watchlist. Please check session cookies.",
+          null,
+          5000
+        );
+      }
+    } catch (err) {
+      btn.classList.remove("adding");
+      btn.classList.add("flicker-red");
+      btn.textContent = "✕";
+      setTimeout(() => {
+        btn.classList.remove("flicker-red");
+        btn.textContent = origText;
+      }, 3000);
+      U.toast(
+        "err",
+        "⚠️ Failed to Add to Watchlist",
+        String(err.message || err),
+        null,
+        5000
+      );
+    }
+  }
+
+  App.handleAddToWatchlist = handleAddToWatchlist;
 
   function renderVersionBadges(ver) {
     const formatted = ver.startsWith("v") ? ver : `v${ver}`;

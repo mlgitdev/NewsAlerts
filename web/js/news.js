@@ -208,10 +208,21 @@
         metaParts.push("Marginable");
       }
 
+      const addBtn = U.el("button", {
+        class: "btn-wl-add",
+        title: `Add ${sym} to active TradingView watchlist`,
+        onclick: (e) => {
+          e.stopPropagation();
+          if (window.App && App.handleAddToWatchlist) {
+            App.handleAddToWatchlist(addBtn, News.ticker || sym);
+          }
+        }
+      }, "+");
+
       News.head.replaceChildren(
         U.el("div", { class: "news-head" }, U.logo(i.logoid, sym),
           U.el("div", {},
-            U.el("div", { class: "name" }, sym, " ",
+            U.el("div", { class: "name" }, sym, " ", addBtn,
               i.sp != null ? U.el("span", { class: "num", style: "font-weight:500;margin-left:6px" }, U.price(i.sp)) : null,
               i.sc != null ? U.el("span", { class: "num " + U.cls(i.sc), style: "font-weight:600;margin-left:6px;font-size:12.5px" }, U.pct(i.sc)) : null,
               bTag),

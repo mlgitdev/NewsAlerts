@@ -135,6 +135,36 @@ def make_app(api, web_dir: Path) -> Bottle:
             log.exception("Error in /api/test_alpaca: %s", e)
             return json_resp({"ok": False, "message": str(e)})
 
+    @app.route("/api/tv_watchlists", method=["GET"])
+    def get_tv_watchlists():
+        try:
+            return json_resp(api.get_watchlists())
+        except Exception as e:
+            log.exception("Error in /api/tv_watchlists: %s", e)
+            return json_resp({"ok": False, "message": str(e), "watchlists": []})
+
+    @app.route("/api/tv_watchlist/select", method=["POST"])
+    def select_tv_watchlist():
+        try:
+            data = request.json if request.json and isinstance(request.json, dict) else {}
+            list_id = data.get("list_id", "")
+            title = data.get("title", "")
+            return json_resp(api.select_watchlist(list_id=list_id, title=title))
+        except Exception as e:
+            log.exception("Error in /api/tv_watchlist/select: %s", e)
+            return json_resp({"ok": False, "message": str(e)})
+
+    @app.route("/api/tv_watchlist/add", method=["POST"])
+    def add_to_tv_watchlist():
+        try:
+            data = request.json if request.json and isinstance(request.json, dict) else {}
+            list_id = data.get("list_id", "")
+            symbol = data.get("symbol", "")
+            return json_resp(api.add_to_watchlist(list_id=list_id, symbol=symbol))
+        except Exception as e:
+            log.exception("Error in /api/tv_watchlist/add: %s", e)
+            return json_resp({"ok": False, "message": str(e)})
+
     @app.route("/api/set_volume", method=["POST"])
     def set_volume():
         try:

@@ -113,6 +113,21 @@
 
         <!-- NEWS PANE -->
         <section class="pane news-pane" id="news-pane">
+          <!-- TRADINGVIEW WATCHLIST SELECTOR BAR -->
+          <div class="watchlist-bar" id="watchlist-bar">
+            <div class="watchlist-bar-left">
+              <span class="watchlist-icon" title="TradingView Cloud Watchlist">📋</span>
+              <span class="watchlist-label">Watchlist:</span>
+              <select id="watchlist-select" class="watchlist-select" title="Active TradingView Watchlist to add symbols to">
+                <option value="">Loading watchlists…</option>
+              </select>
+              <button id="btn-watchlist-sync" class="btn sm icon-btn-sync" title="Sync / refresh TradingView watchlists">🔄</button>
+            </div>
+            <div class="watchlist-bar-right">
+              <span id="watchlist-status-badge" class="watchlist-status-badge"></span>
+            </div>
+          </div>
+
           <div class="pane-head" id="news-head"></div>
           <div class="news-search-bar" id="news-search-bar">
             <div class="news-input-wrap">

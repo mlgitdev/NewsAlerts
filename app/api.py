@@ -243,3 +243,107 @@ class Api:
         self._app.tape.clear()
         self._app.bus.emit("tape_cleared", {})
         return True
+
+    # ------------------------------------------------------------- watchlists
+    def get_watchlists(self) -> dict:
+        a = self._app
+        cfg = a.cfg.get()
+        wl_cfg = cfg.setdefault("watchlist", {
+            "active_id": "",
+            "active_title": "Default",
+            "custom_lists": [{"id": "local_default", "title": "Momentum Watchlist", "symbols": []}],
+        })
+
+        # Query TradingView if session is available
+        res = a.client.get_watchlists()
+        if res.get("ok") and res.get("watchlists"):
+            tv_lists = res["watchlists"]
+            # Ensure an active_id is set
+            active_id = wl_cfg.get("active_id")
+            if not active_id or not any(x["id"] == active_id for x in tv_lists):
+                wl_cfg["active_id"] = tv_lists[0]["id"]
+                wl_cfg["active_title"] = tv_lists[0]["title"]
+                a.cfg.update(cfg)
+            return {
+                "ok": True,
+                "source": "tradingview",
+                "connected": True,
+                "authenticated": True,
+                "active_id": wl_cfg.get("active_id", ""),
+                "active_title": wl_cfg.get("active_title", ""),
+                "watchlists": tv_lists,
+            }
+
+        # Fallback to local watchlists
+        local_lists = wl_cfg.get("custom_lists", [{"id": "local_default", "title": "Momentum Watchlist", "symbols": []}])
+        active_id = wl_cfg.get("active_id")
+        if not active_id or not any(x["id"] == active_id for x in local_lists):
+            wl_cfg["active_id"] = local_lists[0]["id"]
+            wl_cfg["active_title"] = local_lists[0]["title"]
+            a.cfg.update(cfg)
+        return {
+            "ok": True,
+            "source": "local",
+            "connected": False,
+            "authenticated": False,
+            "message": res.get("message") or "TradingView session not connected. Using local watchlists.",
+            "active_id": wl_cfg.get("active_id", ""),
+            "active_title": wl_cfg.get("active_title", ""),
+            "watchlists": local_lists,
+        }
+
+    def select_watchlist(self, list_id: str, title: str = "") -> dict:
+        a = self._app
+        cfg = a.cfg.get()
+        wl_cfg = cfg.setdefault("watchlist", {})
+        wl_cfg["active_id"] = str(list_id or "").strip()
+        if title:
+            wl_cfg["active_title"] = str(title).strip()
+        a.cfg.update(cfg)
+        return {"ok": True, "active_id": wl_cfg["active_id"], "active_title": wl_cfg.get("active_title", "")}
+
+    def add_to_watchlist(self, list_id: str, symbol: str) -> dict:
+        a = self._app
+        sym = str(symbol or "").strip().upper()
+        if not sym:
+            return {"ok": False, "message": "Symbol is required."}
+
+        # Resolve full exchange prefix if missing (e.g. SMCI -> NASDAQ:SMCI)
+        full_ticker = sym
+        if ":" not in full_ticker:
+            q = self.get_quote(sym)
+            if q and q.get("ticker"):
+                full_ticker = q["ticker"]
+            else:
+                full_ticker = f"NASDAQ:{sym}"
+
+        # If list_id starts with local_ or no list_id provided, store locally
+        cfg = a.cfg.get()
+        wl_cfg = cfg.setdefault("watchlist", {})
+        target_id = str(list_id or wl_cfg.get("active_id") or "local_default").strip()
+
+        if target_id.startswith("local_") or not a.client.sessionid:
+            lists = wl_cfg.setdefault("custom_lists", [{"id": "local_default", "title": "Momentum Watchlist", "symbols": []}])
+            target = next((x for x in lists if x["id"] == target_id), None)
+            if not target:
+                target = {"id": target_id, "title": "Momentum Watchlist", "symbols": []}
+                lists.append(target)
+            if full_ticker not in target["symbols"] and sym not in target["symbols"]:
+                target["symbols"].append(full_ticker)
+                a.cfg.update(cfg)
+                return {"ok": True, "source": "local", "message": f"Added {full_ticker} to local watchlist", "symbol": full_ticker, "list_id": target_id}
+            return {"ok": True, "already_exists": True, "source": "local", "message": f"{full_ticker} already in watchlist", "symbol": full_ticker, "list_id": target_id}
+
+        # Target is a TradingView list
+        res = a.client.add_to_watchlist(target_id, full_ticker)
+        if res.get("ok"):
+            # Mirror in local custom_lists
+            lists = wl_cfg.setdefault("custom_lists", [])
+            target = next((x for x in lists if x["id"] == target_id), None)
+            if not target:
+                target = {"id": target_id, "title": wl_cfg.get("active_title", "TradingView Watchlist"), "symbols": []}
+                lists.append(target)
+            if full_ticker not in target["symbols"]:
+                target["symbols"].append(full_ticker)
+                a.cfg.update(cfg)
+        return res
