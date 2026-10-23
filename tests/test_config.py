@@ -168,8 +168,33 @@ class TestAppDirResolution(unittest.TestCase):
                     self.assertEqual(reloaded.data["alerts"]["volume"], 80)
                     self.assertEqual(reloaded.data["news"]["custom_symbols"], [])
 
+    def test_banned_symbols_default_and_persistence(self):
+        custom = (self.temp_dir / "banned_cfg_test").resolve()
+        with patch.dict(os.environ, {"NEWSALERTS_DIR": str(custom)}):
+            with patch("app.config.APP_DIR", custom):
+                cfg_path = custom / "config.json"
+                with patch("app.config.CONFIG_PATH", cfg_path):
+                    config = Config()
+                    self.assertIn("banned_symbols", config.data)
+                    self.assertIn("YMAT", config.data["banned_symbols"])
+                    self.assertFalse(config.data["filter_banned"])
+
+                    # Update banned symbols
+                    config.update({
+                        "banned_symbols": ["YMAT", "GCT"],
+                        "filter_banned": True,
+                    })
+                    self.assertEqual(config.data["banned_symbols"], ["YMAT", "GCT"])
+                    self.assertTrue(config.data["filter_banned"])
+
+                    # Verify reloaded
+                    reloaded = Config()
+                    self.assertEqual(reloaded.data["banned_symbols"], ["YMAT", "GCT"])
+                    self.assertTrue(reloaded.data["filter_banned"])
+
 
 if __name__ == "__main__":
     unittest.main()
+
 
 

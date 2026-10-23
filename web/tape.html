@@ -36,6 +36,29 @@
       Tape.mount(document.getElementById("tape-host"), { popout: true });
       if (state.tape) Tape.load(state.tape);
 
+      App.banSymbol = async function (symbol) {
+        const sym = String(symbol || "").split(":").pop().trim().toUpperCase();
+        if (!sym) return;
+        App.config.banned_symbols = App.config.banned_symbols || [];
+        if (!App.config.banned_symbols.includes(sym)) {
+          App.config.banned_symbols.push(sym);
+          await App.api().ban_symbol(sym);
+          Tape.renderAll();
+        }
+      };
+
+      App.unbanSymbol = async function (symbol) {
+        const sym = String(symbol || "").split(":").pop().trim().toUpperCase();
+        if (!sym) return;
+        App.config.banned_symbols = App.config.banned_symbols || [];
+        const idx = App.config.banned_symbols.indexOf(sym);
+        if (idx !== -1) {
+          App.config.banned_symbols.splice(idx, 1);
+          await App.api().unban_symbol(sym);
+          Tape.renderAll();
+        }
+      };
+
       let lastEventId = state.last_event_id || 0;
       while (true) {
         try {

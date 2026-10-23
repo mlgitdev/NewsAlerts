@@ -114,7 +114,19 @@
               }
             }
           }, "+");
-          td.append(U.el("span", { class: "sym-link" }, e.symbol), addBtn, bTag);
+          const isBanned = window.App && App.config && App.config.banned_symbols && App.config.banned_symbols.map((x) => x.toUpperCase()).includes((e.symbol || "").toUpperCase());
+          const banBtn = U.el("button", {
+            class: "btn-ban-sym" + (isBanned ? " is-banned" : ""),
+            title: isBanned ? `Symbol ${e.symbol} is banned (closing-only). Click to unban.` : `Ban ${e.symbol} (IB Closing-Only / Restricted)`,
+            onclick: (ev) => {
+              ev.stopPropagation();
+              if (window.App) {
+                if (isBanned) App.unbanSymbol(e.symbol || e.ticker);
+                else App.banSymbol(e.symbol || e.ticker);
+              }
+            }
+          }, "🚫");
+          td.append(U.el("span", { class: "sym-link" }, e.symbol), addBtn, banBtn, bTag);
         } else td.textContent = fn(e);
         if (i === 3) {
           td.classList.add("vol-cell");
@@ -130,10 +142,18 @@
     renderAll() {
       if (!Tape.tbody || !App.config) return;
       const en = Tape.enabled();
+      const bannedSet = (App.config && App.config.filter_banned && App.config.banned_symbols)
+        ? new Set(App.config.banned_symbols.map((s) => s.toUpperCase()))
+        : null;
       const frag = document.createDocumentFragment();
       let n = 0;
       for (const e of Tape.events) {
         if (!en.has(e.strategy)) continue;
+        if (bannedSet) {
+          const sym = (e.symbol || "").toUpperCase();
+          const tkr = (e.ticker || "").split(":").pop().toUpperCase();
+          if (bannedSet.has(sym) || bannedSet.has(tkr)) continue;
+        }
         frag.append(Tape.row(e, false));
         if (++n >= MAX_DOM) break;
       }
@@ -148,7 +168,17 @@
     add(evs) {
       Tape.events = evs.concat(Tape.events).slice(0, 5000);
       const en = Tape.enabled();
-      const vis = evs.filter((e) => en.has(e.strategy));
+      const bannedSet = (App.config && App.config.filter_banned && App.config.banned_symbols)
+        ? new Set(App.config.banned_symbols.map((s) => s.toUpperCase()))
+        : null;
+      let vis = evs.filter((e) => en.has(e.strategy));
+      if (bannedSet) {
+        vis = vis.filter((e) => {
+          const sym = (e.symbol || "").toUpperCase();
+          const tkr = (e.ticker || "").split(":").pop().toUpperCase();
+          return !bannedSet.has(sym) && !bannedSet.has(tkr);
+        });
+      }
       if (!vis.length) return;
       if (Tape.paused) { Tape.pending = vis.concat(Tape.pending); Tape.updateNewBtn(); return; }
       Tape.insert(vis, true);

@@ -194,21 +194,29 @@ class ScreenerWorker(threading.Thread):
             self.emit("screener", self.last_rows)
 
         if new_syms and screen.get("alert") and was_seeded:
-            by_t = {r["ticker"]: r for r in rows}
-            payload = {"screen_id": screen["id"], "screen_name": screen["name"], "ts": now,
-                       "symbols": [by_t[t] for t in new_syms]}
-            self.emit("new_symbols", payload)
-            is_paused = bool(c["alerts"].get("mute", False))
-            if not is_paused:
-                self.sounds.play(c["alerts"]["sound_new_symbol"])
-            for t in new_syms:
-                row_data = by_t[t]
-                if self.telegram and c["alerts"].get("telegram_enabled", True) and not is_paused:
-                    cached = self.news.cached(t)
-                    fresh = NewsService.recent(cached, c["news"]["recency_hours"]) if cached else []
-                    latest_title = fresh[0]["title"] if fresh else ""
-                    self.telegram.send_new_symbol_alert(screen["name"], session, row_data, latest_title)
-                self.prefetch.want(t, self._on_new_symbol_news, priority=True)
+            filter_banned = bool(c.get("filter_banned", False))
+            banned_syms = set(s.upper() for s in c.get("banned_symbols", []))
+            alert_syms = new_syms
+            if filter_banned and banned_syms:
+                alert_syms = [t for t in new_syms if t.split(":")[-1].upper() not in banned_syms]
+
+            if alert_syms:
+                by_t = {r["ticker"]: r for r in rows}
+                payload = {"screen_id": screen["id"], "screen_name": screen["name"], "ts": now,
+                           "symbols": [by_t[t] for t in alert_syms if t in by_t]}
+                self.emit("new_symbols", payload)
+                is_paused = bool(c["alerts"].get("mute", False))
+                if not is_paused:
+                    self.sounds.play(c["alerts"]["sound_new_symbol"])
+                for t in alert_syms:
+                    if t in by_t:
+                        row_data = by_t[t]
+                        if self.telegram and c["alerts"].get("telegram_enabled", True) and not is_paused:
+                            cached = self.news.cached(t)
+                            fresh = NewsService.recent(cached, c["news"]["recency_hours"]) if cached else []
+                            latest_title = fresh[0]["title"] if fresh else ""
+                            self.telegram.send_new_symbol_alert(screen["name"], session, row_data, latest_title)
+                    self.prefetch.want(t, self._on_new_symbol_news, priority=True)
 
     def _on_new_symbol_news(self, ticker: str, items: list[dict]) -> None:
         c = self.cfg.get()

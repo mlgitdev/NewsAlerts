@@ -22,9 +22,13 @@ The **Momentum Screener** is the core scanning engine of NewsAlerts. It continuo
 - **1-Click TradingView Watchlist Quick-Add (`+`)**:
   Every screener row includes a dedicated quick-add `+` button next to the ticker. Clicking it instantly qualifies the exchange and appends the symbol to your selected TradingView cloud watchlist (visible in real-time on TradingView Desktop), accompanied by a 3-second green flickering glow (`✓`).
 
+- **1-Click Broker Banned / Closing-Only Blacklist (`🚫`)**:
+  Every screener row includes a dedicated `🚫` button next to the ticker. If an active stock is placed in "closing-only" status or rejected by your broker (e.g. Interactive Brokers margin restrictions or penny stock rules on symbols like `YMAT`), click `🚫` to immediately blacklist it. When the topbar **`[🚫 Banned: ON]`** filter is active, banned symbols are immediately hidden from both the Screener and Tape, and alert chimes are suppressed.
+
 - **Configurable Screening Criteria**:
   Adjust screening filters in real time via the Settings modal (`S` hotkey):
   - **Minimum & Maximum Price**: Target low-priced small caps (e.g., $1.00 to $20.00).
   - **Minimum % Change**: Filter out low-volatility tickers (e.g., minimum +10% or +20%).
   - **Maximum Float**: Focus strictly on explosive low-float equities (e.g., Float < 10M or < 20M shares).
   - **Minimum Volume**: Exclude illiquid stocks (e.g., minimum 500k shares traded).
+

@@ -47,6 +47,7 @@
     // Topbar wiring
     initVolumeControl();
     initWatchlistControl();
+    initFilterBannedControl();
     U.$("#btn-mute").onclick = toggleMute;
     U.$("#btn-alerts").onclick = toggleDrawer;
     U.$("#btn-settings").onclick = () => Settings.open();
@@ -253,11 +254,91 @@
   function onConfig(c) {
     App.config = c;
     updateMuteBtn();
+    updateFilterBannedButton();
     if (c.alerts?.volume !== undefined) {
       renderVolume(c.alerts.volume);
     }
     Settings.applyUi();
   }
+
+  function updateFilterBannedButton() {
+    const btn = U.$("#btn-filter-banned");
+    const txt = U.$("#filter-banned-text");
+    if (!btn || !txt) return;
+    const active = !!(App.config && App.config.filter_banned);
+    const count = (App.config && App.config.banned_symbols) ? App.config.banned_symbols.length : 0;
+    btn.classList.toggle("banned-on", active);
+    btn.classList.toggle("active", active);
+    txt.textContent = active ? `Banned: ON (${count})` : `Banned: OFF`;
+    btn.title = active
+      ? `IB Closing-Only Filter ACTIVE (${count} symbol(s) hidden). Click to show all.`
+      : `IB Closing-Only Filter OFF. Click to hide ${count} banned / closing-only symbol(s).`;
+  }
+
+  function initFilterBannedControl() {
+    const btn = U.$("#btn-filter-banned");
+    if (btn) {
+      btn.onclick = async () => {
+        const current = !!(App.config && App.config.filter_banned);
+        const next = !current;
+        App.config.filter_banned = next;
+        updateFilterBannedButton();
+        await App.api().toggle_filter_banned(next);
+        U.toast(
+          next ? "info" : "muted",
+          `Closing-Only Filter ${next ? "ON" : "OFF"}`,
+          next
+            ? `Hiding ${App.config.banned_symbols?.length || 0} banned symbols from Screener & Tape.`
+            : `Showing all symbols on Screener & Tape.`
+        );
+        Screener.renderTable();
+        Tape.renderAll();
+      };
+    }
+    updateFilterBannedButton();
+  }
+
+  App.banSymbol = async function (symbol) {
+    const sym = String(symbol || "").split(":").pop().trim().toUpperCase();
+    if (!sym) return;
+    App.config.banned_symbols = App.config.banned_symbols || [];
+    if (!App.config.banned_symbols.includes(sym)) {
+      App.config.banned_symbols.push(sym);
+      await App.api().ban_symbol(sym);
+      U.toast(
+        "warn",
+        `🚫 Symbol Banned: ${sym}`,
+        App.config.filter_banned
+          ? `${sym} added to banned list and hidden from Screener & Tape.`
+          : `${sym} added to banned list. Turn ON the topbar 🚫 Banned filter to hide it.`,
+        null,
+        3500
+      );
+      updateFilterBannedButton();
+      Screener.renderTable();
+      Tape.renderAll();
+      if (window.News && News.renderHead) News.renderHead();
+    } else {
+      U.toast("info", `${sym} already in banned list`, `Symbol is already cataloged in Closing-Only list.`);
+    }
+  };
+
+  App.unbanSymbol = async function (symbol) {
+    const sym = String(symbol || "").split(":").pop().trim().toUpperCase();
+    if (!sym) return;
+    App.config.banned_symbols = App.config.banned_symbols || [];
+    const idx = App.config.banned_symbols.indexOf(sym);
+    if (idx !== -1) {
+      App.config.banned_symbols.splice(idx, 1);
+      await App.api().unban_symbol(sym);
+      U.toast("info", `Unbanned: ${sym}`, `${sym} removed from banned list.`);
+      updateFilterBannedButton();
+      Screener.renderTable();
+      Tape.renderAll();
+      if (window.News && News.renderHead) News.renderHead();
+    }
+  };
+
 
   function onNewSymbols(p) {
     const syms = p.symbols || [];

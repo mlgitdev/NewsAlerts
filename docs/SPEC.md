@@ -258,6 +258,11 @@ Optional tape sound (default off — the tape is noisy).
 TradingView `sessionid`/`sessionid_sign` & real-time connection status · poll intervals · re-entry window · alert volume (0%–100%) · unified pause alerts toggle · news recency & provider · sounds · tape universe & strategy thresholds · interactive Strategy Builder (`+ Add Strategy`, triggers, family, deletion) · Backup / Import & Export tab (Full config backup `.json`, Strategies `.json` export/import, factory reset) · Alpaca keys for short borrow locates · Telegram Bot Token, Chat ID, and independent toggles for Screener alerts and Tape momentum alerts (with per-symbol cooldown) · customizable keyboard shortcuts & hotkeys with interactive re-binding and institutional defaults · always-on-top · font size.
 - **Storage Transparency & Direct Directory Access**: Settings → About and Settings → Backup & Sync display the active resolved OS directory (`APP_DIR`) on disk alongside a one-click `📂 Open App Data Folder` button (spawning Windows Explorer, macOS Finder, or Linux file manager).
 - **Credential Storage Architecture**: Credentials entered in the GUI are stored in `<APP_DIR>/config.json` with password masking and atomic writes. Alternatively, a standalone `<APP_DIR>/keys.toml` file can be used for separated secret management (which takes priority when present).
+- **Broker Closing-Only & Banned Stock Filter**:
+  - Interactive topbar toggle pill (`[🚫 Banned: ON / OFF]`) dynamically filters banned/closing-only symbols from both the Screener table and Running Tape stream without reloads.
+  - Quick-action `🚫` ban buttons next to ticker symbols in Screener rows, Tape momentum cards, and News header.
+  - Dedicated **Settings &rarr; 🚫 Banned Stocks** manager with chip list, one-click unban buttons, manual ticker entry (`+ Add Symbol`), and clear all action.
+  - Suppresses audio chimes and Telegram alerts for blacklisted tickers when active. Persisted in `config.json` under `banned_symbols` (default `["YMAT"]`) and `filter_banned`.
 
 ## 11. Architecture
 ```

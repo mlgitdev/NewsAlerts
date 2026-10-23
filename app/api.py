@@ -395,3 +395,41 @@ class Api:
                 target["symbols"].append(full_ticker)
                 a.cfg.update(cfg)
         return res
+
+    # ------------------------------------------------------------- banned symbols
+    def ban_symbol(self, symbol: str) -> dict:
+        """Add symbol to banned/closing-only list and emit config update."""
+        sym = str(symbol).split(":")[-1].strip().upper()
+        if not sym:
+            return {"ok": False, "error": "Empty symbol"}
+        cfg = self._app.cfg.get()
+        banned = cfg.setdefault("banned_symbols", [])
+        if sym not in banned:
+            banned.append(sym)
+            self._app.cfg.update(cfg)
+            self._app.bus.emit("config", cfg)
+        return {"ok": True, "banned_symbols": banned, "symbol": sym}
+
+    def unban_symbol(self, symbol: str) -> dict:
+        """Remove symbol from banned/closing-only list and emit config update."""
+        sym = str(symbol).split(":")[-1].strip().upper()
+        cfg = self._app.cfg.get()
+        banned = cfg.setdefault("banned_symbols", [])
+        if sym in banned:
+            banned.remove(sym)
+            self._app.cfg.update(cfg)
+            self._app.bus.emit("config", cfg)
+        return {"ok": True, "banned_symbols": banned, "symbol": sym}
+
+    def toggle_filter_banned(self, enabled: bool | None = None) -> dict:
+        """Toggle or set filter_banned state."""
+        cfg = self._app.cfg.get()
+        if enabled is None:
+            new_val = not bool(cfg.get("filter_banned", False))
+        else:
+            new_val = bool(enabled)
+        cfg["filter_banned"] = new_val
+        self._app.cfg.update(cfg)
+        self._app.bus.emit("config", cfg)
+        return {"ok": True, "filter_banned": new_val}
+

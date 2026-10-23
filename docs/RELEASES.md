@@ -37,6 +37,7 @@ All official releases are produced deterministically through GitHub Actions:
 
 ## Release History
 
+- [v2.10.0 Release Notes](releases/v2.10.0.md) — Introduced Broker Closing-Only & Banned Stock Filter Engine with topbar interactive toggle, 1-click 🚫 blacklisting in Screener, Tape, and News, dedicated Settings manager, and alert suppression for un-tradeable broker tickers like `YMAT` (Resolves #44).
 - [v2.9.0 Release Notes](releases/v2.9.0.md) — Introduced Dual Distribution Model (portable single-binary + pre-extracted app in `%LOCALAPPDATA%\Programs\NewsAlerts` with Inno Setup Windows installer), achieving sub-300ms terminal startup, storage transparency with one-click folder access, and universal US-listed stock coverage removing foreign jurisdiction restrictions for tickers like `SAIQ` (Resolves #39, #41).
 - [v2.8.1 Release Notes](releases/v2.8.1.md) — Eliminated cross-thread WinForms UI deadlock on save settings and eliminated redundant background auth and bulk asset fetches (Resolves #37).
 

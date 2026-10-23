@@ -171,3 +171,19 @@ In **Settings (`S`) &rarr; About** and **Settings &rarr; Backup & Sync**, the te
    - Alpaca: **▶ Test Alpaca Connection** checks account buying power and active status.
    - Telegram: **✈️ Send Test Message** dispatches an instant probe ping to the configured chat.
 
+---
+
+## 9. Broker Closing-Only & Banned Stock Filter
+
+For day traders using Interactive Brokers (IBKR) or other brokerages, certain volatile micro-caps or penny stocks (e.g. `YMAT` on `NASDAQ.SCM`) may be placed into "closing-only" or margin-restricted status by broker risk management desks, blocking new buy orders.
+
+NewsAlerts provides an integrated filtering and blacklisting engine:
+1. **Top Banner Toggle Switch (`[🚫 Banned: ON / OFF]`)**:
+   - Toggles filtering across both the **Screener grid** and the **Tape momentum stream**.
+   - Suppresses audio chimes and Telegram alerts for blacklisted symbols when active.
+2. **1-Click 🚫 Symbol Blacklist**:
+   - Click the `🚫` icon button next to any symbol in the Screener, Tape, or News header to ban it immediately.
+3. **Settings Banned Stocks Manager (`Settings → 🚫 Banned Stocks`)**:
+   - View, add, or remove banned tickers (`config.json` &rarr; `banned_symbols`).
+   - Add tickers manually using the `+ Add Symbol` input.
+
