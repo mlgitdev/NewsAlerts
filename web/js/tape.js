@@ -114,7 +114,8 @@
               }
             }
           }, "+");
-          const isBanned = window.App && App.config && App.config.banned_symbols && App.config.banned_symbols.map((x) => x.toUpperCase()).includes((e.symbol || "").toUpperCase());
+          const bannedList = (window.App && App.config && App.config.banned_symbols) ? App.config.banned_symbols.map((x) => x.toUpperCase()) : [];
+          const isBanned = bannedList.includes((e.symbol || "").toUpperCase()) || bannedList.includes((e.ticker || "").split(":").pop().toUpperCase());
           const banBtn = U.el("button", {
             class: "btn-ban-sym" + (isBanned ? " is-banned" : ""),
             title: isBanned ? `Symbol ${e.symbol} is banned (closing-only). Click to unban.` : `Ban ${e.symbol} (IB Closing-Only / Restricted)`,

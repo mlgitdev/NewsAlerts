@@ -275,6 +275,8 @@
       : `IB Closing-Only Filter OFF. Click to hide ${count} banned / closing-only symbol(s).`;
   }
 
+  App.updateFilterBannedButton = updateFilterBannedButton;
+
   function initFilterBannedControl() {
     const btn = U.$("#btn-filter-banned");
     if (btn) {

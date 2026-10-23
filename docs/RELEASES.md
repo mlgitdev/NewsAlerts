@@ -37,6 +37,7 @@ All official releases are produced deterministically through GitHub Actions:
 
 ## Release History
 
+- [v2.10.2 Release Notes](releases/v2.10.2.md) — Fixed topbar banned filter badge count synchronization upon saving Settings, standardized bare and qualified ticker matching across Screener, Tape, and News, and updated flagship terminal and settings showcase media across documentation (Resolves #48).
 - [v2.10.1 Release Notes](releases/v2.10.1.md) — Eliminated false positive momentum tape squeeze alerts on flat and declining stocks like `STAK`, isolated server velocity calculations to regular session, and added 5-minute background auto-refresh synchronization for TradingView custom watchlists (Resolves #46).
 - [v2.10.0 Release Notes](releases/v2.10.0.md) — Introduced Broker Closing-Only & Banned Stock Filter Engine with topbar interactive toggle, 1-click 🚫 blacklisting in Screener, Tape, and News, dedicated Settings manager, and alert suppression for un-tradeable broker tickers like `YMAT` (Resolves #44).
 - [v2.9.0 Release Notes](releases/v2.9.0.md) — Introduced Dual Distribution Model (portable single-binary + pre-extracted app in `%LOCALAPPDATA%\Programs\NewsAlerts` with Inno Setup Windows installer), achieving sub-300ms terminal startup, storage transparency with one-click folder access, and universal US-listed stock coverage removing foreign jurisdiction restrictions for tickers like `SAIQ` (Resolves #39, #41).

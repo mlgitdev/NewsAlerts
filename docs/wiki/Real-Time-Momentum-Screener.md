@@ -25,6 +25,14 @@ The **Momentum Screener** is the core scanning engine of NewsAlerts. It continuo
 - **1-Click Broker Banned / Closing-Only Blacklist (`🚫`)**:
   Every screener row includes a dedicated `🚫` button next to the ticker. If an active stock is placed in "closing-only" status or rejected by your broker (e.g. Interactive Brokers margin restrictions or penny stock rules on symbols like `YMAT`), click `🚫` to immediately blacklist it. When the topbar **`[🚫 Banned: ON]`** filter is active, banned symbols are immediately hidden from both the Screener and Tape, and alert chimes are suppressed.
 
+<p align="center">
+  <a href="https://raw.githubusercontent.com/mlgitdev/NewsAlerts/main/docs/img/banned_stocks.png">
+    <img src="https://raw.githubusercontent.com/mlgitdev/NewsAlerts/main/docs/img/banned_stocks.png" alt="Banned & Closing-Only Stocks Manager" width="100%" style="border-radius:10px; border:1px solid #2a3347; box-shadow:0 8px 24px rgba(0,0,0,0.45);" />
+  </a>
+  <br>
+  <small><em>Settings & Data Sources: Banned & Closing-Only Stocks manager with interactive chips, manual symbol add input, active filter toggle, and clear all.</em></small>
+</p>
+
 - **Configurable Screening Criteria**:
   Adjust screening filters in real time via the Settings modal (`S` hotkey):
   - **Minimum & Maximum Price**: Target low-priced small caps (e.g., $1.00 to $20.00).

@@ -28,7 +28,9 @@
       bg.classList.add("show");
       U.$("#settings-save").onclick = () => {
         App.config = c; App.saveConfig(true); Settings.applyUi(); bg.classList.remove("show");
+        if (App.updateFilterBannedButton) App.updateFilterBannedButton();
         Screener.renderBar(); Screener.renderTable(); Tape.renderAll(); News.syncTools();
+        if (window.News && News.renderHead) News.renderHead();
       };
       U.$("#settings-cancel").onclick = () => Settings.close();
       U.$("#settings-close").onclick = () => Settings.close();

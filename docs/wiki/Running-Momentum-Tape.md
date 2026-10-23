@@ -66,3 +66,9 @@ Unlike web-based scanners that erase your tape history the moment you refresh or
 ## 🚫 Broker Banned / Closing-Only Stock Filter
 
 Each event card on the running tape features a dedicated `🚫` blacklist button alongside the symbol. Clicking it adds the symbol to your banned tickers list. When the topbar **`[🚫 Banned: ON]`** filter is active, tape prints for banned stocks are automatically hidden from view and audio chimes are suppressed.
+
+<p align="center">
+  <a href="https://raw.githubusercontent.com/mlgitdev/NewsAlerts/main/docs/img/banned_stocks.png">
+    <img src="https://raw.githubusercontent.com/mlgitdev/NewsAlerts/main/docs/img/banned_stocks.png" alt="Banned Stocks Manager" width="100%" style="border-radius:10px; border:1px solid #2a3347; box-shadow:0 8px 24px rgba(0,0,0,0.45);" />
+  </a>
+</p>
