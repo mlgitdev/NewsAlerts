@@ -264,6 +264,103 @@ class TestServerStaticRoutes(unittest.TestCase):
         if hasattr(res, "close"):
             res.close()
 
+    def test_ban_symbol_route(self):
+        import json
+        self.api.ban_symbol.return_value = {"ok": True, "banned_symbols": ["AIOK"], "symbol": "AIOK"}
+        payload = json.dumps({"symbol": "AIOK"}).encode("utf-8")
+        status_line = []
+        headers_list = []
+
+        def start_response(status, headers, exc_info=None):
+            status_line.append(status)
+            headers_list.extend(headers)
+
+        environ = {
+            "REQUEST_METHOD": "POST",
+            "PATH_INFO": "/api/ban_symbol",
+            "CONTENT_TYPE": "application/json",
+            "CONTENT_LENGTH": str(len(payload)),
+            "wsgi.input": io.BytesIO(payload),
+            "wsgi.errors": io.StringIO(),
+            "wsgi.version": (1, 0),
+            "wsgi.multithread": False,
+            "wsgi.multiprocess": False,
+            "wsgi.run_once": False,
+            "wsgi.url_scheme": "http",
+            "SERVER_NAME": "localhost",
+            "SERVER_PORT": "8080",
+        }
+        res = self.app(environ, start_response)
+        self.assertTrue(status_line and status_line[0].startswith("200"))
+        self.api.ban_symbol.assert_called_once_with("AIOK")
+        if hasattr(res, "close"):
+            res.close()
+
+    def test_unban_symbol_route(self):
+        import json
+        self.api.unban_symbol.return_value = {"ok": True, "banned_symbols": [], "symbol": "AIOK"}
+        payload = json.dumps({"symbol": "AIOK"}).encode("utf-8")
+        status_line = []
+        headers_list = []
+
+        def start_response(status, headers, exc_info=None):
+            status_line.append(status)
+            headers_list.extend(headers)
+
+        environ = {
+            "REQUEST_METHOD": "POST",
+            "PATH_INFO": "/api/unban_symbol",
+            "CONTENT_TYPE": "application/json",
+            "CONTENT_LENGTH": str(len(payload)),
+            "wsgi.input": io.BytesIO(payload),
+            "wsgi.errors": io.StringIO(),
+            "wsgi.version": (1, 0),
+            "wsgi.multithread": False,
+            "wsgi.multiprocess": False,
+            "wsgi.run_once": False,
+            "wsgi.url_scheme": "http",
+            "SERVER_NAME": "localhost",
+            "SERVER_PORT": "8080",
+        }
+        res = self.app(environ, start_response)
+        self.assertTrue(status_line and status_line[0].startswith("200"))
+        self.api.unban_symbol.assert_called_once_with("AIOK")
+        if hasattr(res, "close"):
+            res.close()
+
+    def test_toggle_filter_banned_route(self):
+        import json
+        self.api.toggle_filter_banned.return_value = {"ok": True, "filter_banned": True}
+        payload = json.dumps({"enabled": True}).encode("utf-8")
+        status_line = []
+        headers_list = []
+
+        def start_response(status, headers, exc_info=None):
+            status_line.append(status)
+            headers_list.extend(headers)
+
+        environ = {
+            "REQUEST_METHOD": "POST",
+            "PATH_INFO": "/api/toggle_filter_banned",
+            "CONTENT_TYPE": "application/json",
+            "CONTENT_LENGTH": str(len(payload)),
+            "wsgi.input": io.BytesIO(payload),
+            "wsgi.errors": io.StringIO(),
+            "wsgi.version": (1, 0),
+            "wsgi.multithread": False,
+            "wsgi.multiprocess": False,
+            "wsgi.run_once": False,
+            "wsgi.url_scheme": "http",
+            "SERVER_NAME": "localhost",
+            "SERVER_PORT": "8080",
+        }
+        res = self.app(environ, start_response)
+        self.assertTrue(status_line and status_line[0].startswith("200"))
+        self.api.toggle_filter_banned.assert_called_once_with(True)
+        if hasattr(res, "close"):
+            res.close()
+
 
 if __name__ == "__main__":
     unittest.main()
+

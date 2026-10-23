@@ -214,10 +214,22 @@
       Tape.newBtn.classList.toggle("show", show);
       Tape.newBtn.textContent = n ? `New Events ↑ (${n})` : "New Events ↑";
       const en = Tape.enabled();
-      const vis = Tape.events.filter((e) => en.has(e.strategy)).length;
+      const bannedSet = (App.config && App.config.filter_banned && App.config.banned_symbols)
+        ? new Set(App.config.banned_symbols.map((s) => s.toUpperCase()))
+        : null;
+      const vis = Tape.events.filter((e) => {
+        if (!en.has(e.strategy)) return false;
+        if (bannedSet) {
+          const sym = (e.symbol || "").toUpperCase();
+          const tkr = (e.ticker || "").split(":").pop().toUpperCase();
+          if (bannedSet.has(sym) || bannedSet.has(tkr)) return false;
+        }
+        return true;
+      }).length;
       const days = App.config?.tape?.retention_days || 4;
       Tape.count.textContent = Tape.paused ? "· paused" : (vis ? `· ${vis} alerts (${days}d history)` : "");
     },
+
 
     updateStrBtn() {
       const all = App.config.tape.strategies.length;

@@ -37,6 +37,7 @@ All official releases are produced deterministically through GitHub Actions:
 
 ## Release History
 
+- [v2.10.3 Release Notes](releases/v2.10.3.md) — Implemented missing backend `/api/ban_symbol`, `/api/unban_symbol`, and `/api/toggle_filter_banned` routes, added client `_api` helpers, and switched blacklisting UI flow to synchronous optimistic rendering to eliminate button state freezes and count desync (Resolves #54).
 - [v2.10.2 Release Notes](releases/v2.10.2.md) — Fixed topbar banned filter badge count synchronization upon saving Settings, standardized bare and qualified ticker matching across Screener, Tape, and News, and updated flagship terminal and settings showcase media across documentation (Resolves #48).
 - [v2.10.1 Release Notes](releases/v2.10.1.md) — Eliminated false positive momentum tape squeeze alerts on flat and declining stocks like `STAK`, isolated server velocity calculations to regular session, and added 5-minute background auto-refresh synchronization for TradingView custom watchlists (Resolves #46).
 - [v2.10.0 Release Notes](releases/v2.10.0.md) — Introduced Broker Closing-Only & Banned Stock Filter Engine with topbar interactive toggle, 1-click 🚫 blacklisting in Screener, Tape, and News, dedicated Settings manager, and alert suppression for un-tradeable broker tickers like `YMAT` (Resolves #44).
