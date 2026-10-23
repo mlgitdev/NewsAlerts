@@ -195,14 +195,24 @@ class PackageVerifier:
         self.log_ok(f"Windows installer verified: {exe_path.name} ({size_mb:.1f} MB, valid Win32 PE header).")
         return True
 
+    def verify_macos_dmg(self, dmg_path: Path) -> bool:
+        """Verify macOS DMG disk image installer package."""
+        print(f"\n[*] Auditing macOS DMG Installer: {dmg_path.name} ({dmg_path.stat().st_size / 1024 / 1024:.2f} MB)...")
+        if not dmg_path.exists() or dmg_path.stat().st_size < 1024 * 1024:
+            self.log_error(f"macOS DMG package {dmg_path} is missing or suspiciously small (<1MB)!")
+            return False
+        self.log_ok(f"macOS DMG verified: {dmg_path.name} ({dmg_path.stat().st_size / 1024 / 1024:.1f} MB).")
+        return True
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="NewsAlerts Release Package & Binary Verifier")
-    parser.add_argument("--artifacts-dir", type=str, default="", help="Directory containing release archives (.zip, .tar.gz, .exe)")
+    parser.add_argument("--artifacts-dir", type=str, default="", help="Directory containing release archives (.zip, .tar.gz, .exe, .dmg)")
     parser.add_argument("--exe", type=str, default="", help="Path to standalone NewsAlerts.exe")
     parser.add_argument("--installer", type=str, default="", help="Path to NewsAlerts-Setup-*.exe")
     parser.add_argument("--windows-zip", type=str, default="", help="Path to Windows release zip")
     parser.add_argument("--macos-tar", type=str, default="", help="Path to macOS release tar.gz")
+    parser.add_argument("--macos-dmg", type=str, default="", help="Path to macOS release .dmg")
     parser.add_argument("--linux-tar", type=str, default="", help="Path to Linux release tar.gz")
     args = parser.parse_args()
 
@@ -220,6 +230,9 @@ def main() -> None:
     if args.macos_tar:
         verifier.verify_tar_package(Path(args.macos_tar), "macOS")
 
+    if args.macos_dmg:
+        verifier.verify_macos_dmg(Path(args.macos_dmg))
+
     if args.linux_tar:
         verifier.verify_tar_package(Path(args.linux_tar), "Linux")
 
@@ -230,6 +243,7 @@ def main() -> None:
         else:
             win_zips = list(art_dir.glob("**/*Windows*.zip")) + list(art_dir.glob("**/*win*.zip"))
             mac_tars = list(art_dir.glob("**/*macOS*.tar.gz")) + list(art_dir.glob("**/*darwin*.tar.gz"))
+            mac_dmgs = list(art_dir.glob("**/*macOS*.dmg")) + list(art_dir.glob("**/*.dmg"))
             lin_tars = list(art_dir.glob("**/*Linux*.tar.gz")) + list(art_dir.glob("**/*linux*.tar.gz"))
             installers = list(art_dir.glob("**/*Setup*.exe")) + list(art_dir.glob("**/*installer*.exe"))
 
@@ -244,10 +258,13 @@ def main() -> None:
                 verifier.verify_windows_zip(z)
             for m in mac_tars:
                 verifier.verify_tar_package(m, "macOS")
+            for d in mac_dmgs:
+                verifier.verify_macos_dmg(d)
             for l in lin_tars:
                 verifier.verify_tar_package(l, "Linux")
             for inst in installers:
                 verifier.verify_windows_installer(inst)
+
 
 
     print("\n" + "=" * 60)

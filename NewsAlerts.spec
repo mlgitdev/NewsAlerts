@@ -50,6 +50,8 @@ a = Analysis(
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
+icon_file = 'assets/icon.icns' if sys.platform == 'darwin' else 'assets/icon.ico'
+
 exe = EXE(
     pyz,
     a.scripts,
@@ -70,7 +72,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='assets/icon.ico',
+    icon=icon_file,
 )
 
 exe_dir = EXE(
@@ -91,7 +93,7 @@ exe_dir = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='assets/icon.ico',
+    icon=icon_file,
 )
 
 coll = COLLECT(
@@ -104,4 +106,22 @@ coll = COLLECT(
     upx_exclude=[],
     name='NewsAlerts-App',
 )
+
+if sys.platform == 'darwin':
+    app = BUNDLE(
+        coll,
+        name='NewsAlerts.app',
+        icon='assets/icon.icns',
+        bundle_identifier='com.mlgitdev.newsalerts',
+        info_plist={
+            'CFBundleName': 'NewsAlerts',
+            'CFBundleDisplayName': 'NewsAlerts',
+            'CFBundleIdentifier': 'com.mlgitdev.newsalerts',
+            'CFBundleVersion': '2.9.0',
+            'CFBundleShortVersionString': '2.9.0',
+            'NSHighResolutionCapable': True,
+            'LSMinimumSystemVersion': '12.0',
+        },
+    )
+
 

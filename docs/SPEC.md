@@ -307,17 +307,31 @@ NewsAlerts v2.9.0 introduces a **Dual Distribution Model** supporting both zero-
 - **Data Isolation**:
   User configuration (`config.json`), rolling tape logs (`tape_history.json`), and WebView2 local caches remain isolated in `%APPDATA%\NewsAlerts\` and are preserved across software updates.
 
-### 12.4 Inno Setup Packaging (`installer\NewsAlerts.iss`)
+### 12.4 Inno Setup Packaging & Windows Installer (`installer\NewsAlerts.iss`)
 - Ultra-compressed LZMA2 solid archive compiling `dist\NewsAlerts-App` into a standalone setup wizard (`NewsAlerts-Setup-vX.Y.Z.exe`).
 - Automated parameter injection (`/DMyAppVersion=X.Y.Z`) governed by the root `VERSION` Single Source of Truth (SSOT).
 - Fully supported in GitHub Actions CI/CD runners (`windows-latest`) via Chocolatey (`choco install innosetup --no-progress`).
 
-### 12.5 Build & Automation Tasks
+### 12.5 macOS Native Application Bundle & DMG Installer
+- **Native Application Bundle (`~/Applications/NewsAlerts.app`)**:
+  - Constructed automatically by `./install.sh` on macOS.
+  - Embeds native Apple Silicon architecture, Apple standard `.icns` icon (`assets/icon.icns`), and `Contents/Info.plist`.
+  - Automatically indexed by macOS Spotlight (`Cmd + Space` &rarr; "NewsAlerts") and Launchpad, with native Dock pinning.
+- **Apple Disk Image (`NewsAlerts-macOS-arm64.dmg`)**:
+  - Compiled automatically in GitHub Actions release workflows via `hdiutil create`.
+  - Provides the standard macOS drag-and-drop installer experience (`NewsAlerts.app` &rarr; `Applications`).
+
+### 12.6 Linux Desktop & Launcher Integration
+- `install.sh` provisions `~/.local/share/applications/NewsAlerts.desktop` and icons in `~/.local/share/icons/hicolor/256x256/apps/`.
+- Registers universal command `newsalerts` in `~/.local/bin/`.
+
+### 12.7 Build & Automation Tasks
 
 | Tool | Command | Description |
 |:---|:---|:---|
 | **PowerShell** | `.\build.ps1 -Task build` | Compiles both portable `.exe` and unpacked app directory in a single 25s pass |
 | | `.\build.ps1 -Task run` | Launches standalone portable `dist\NewsAlerts.exe` |
+
 | | `.\build.ps1 -Task run-app` | Launches unpacked app `dist\NewsAlerts-App\NewsAlerts.exe` |
 | | `.\build.ps1 -Task install-local` | Installs app to `%LOCALAPPDATA%\Programs\NewsAlerts` and creates shortcuts |
 | | `.\build.ps1 -Task installer` | Compiles Inno Setup installer `dist\NewsAlerts-Setup-vX.Y.Z.exe` |
