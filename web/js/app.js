@@ -12,6 +12,9 @@
     App.alpaca_key_masked = state.alpaca_key_masked;
     App.version = state.version || "";
     App.semver = state.semver || null;
+    App.app_dir = state.app_dir || "";
+    App.secrets_file = state.secrets_file || "";
+    App.has_keys_toml = !!state.has_keys_toml;
 
     renderVersionBadges(App.version);
     Settings.applyUi();

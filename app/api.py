@@ -58,6 +58,8 @@ class Api:
         a = self._app
         kid = a.borrow.key_id
         tv_auth = a.client.get_auth_status() if hasattr(a.client, "get_auth_status") else {}
+        from .config import APP_DIR, find_secrets_file
+        sec_file = find_secrets_file()
         return {
             "version": get_version(),
             "semver": get_version_info(),
@@ -74,6 +76,9 @@ class Api:
             "tv_username": tv_auth.get("username", ""),
             "tv_pro_plan": tv_auth.get("pro_plan", ""),
             "tv_error": tv_auth.get("error", ""),
+            "app_dir": str(APP_DIR),
+            "secrets_file": str(sec_file) if sec_file else "",
+            "has_keys_toml": bool(sec_file and sec_file.is_file()),
         }
 
     def get_version(self) -> dict:
@@ -217,6 +222,25 @@ class Api:
     def open_chart(self, ticker: str):
         webbrowser.open(f"https://www.tradingview.com/chart/?symbol={ticker}")
         return True
+
+    def open_app_dir(self):
+        """Open the central application directory in the native OS file explorer."""
+        from .config import APP_DIR
+        import os
+        import sys
+        import subprocess
+        try:
+            APP_DIR.mkdir(parents=True, exist_ok=True)
+            if sys.platform == "win32":
+                os.startfile(str(APP_DIR))
+            elif sys.platform == "darwin":
+                subprocess.Popen(["open", str(APP_DIR)])
+            else:
+                subprocess.Popen(["xdg-open", str(APP_DIR)])
+            return {"ok": True, "path": str(APP_DIR)}
+        except Exception as e:
+            log.warning("open_app_dir failed: %s", e)
+            return {"ok": False, "error": str(e)}
 
     def pop_tape(self):
         self._app.open_tape_window()

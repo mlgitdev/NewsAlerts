@@ -39,8 +39,13 @@ By default, unauthenticated TradingView connections receive delayed data (~15-mi
 4. Under the **Cookies** section in the left sidebar, click `https://www.tradingview.com`.
 5. Locate the cookie named `sessionid` and double-click to copy its value.
 6. In **NewsAlerts**, click the top-right **Gear Icon (Settings)** or press `S`.
-7. Paste the cookie into the **TradingView Session ID** input field.
+7. Paste the cookie into the **sessionid** input field (and optionally `sessionid_sign`). Input fields are password-masked.
 8. Click **Save Settings**. The status indicator in the top header will transition to **TradingView — Connected (Real-Time)**.
+
+### Credential Storage & Precedence:
+- **GUI Saved (`config.json`)**: Stored under `"tv": { "sessionid": "...", "sessionid_sign": "..." }` in your central application directory (`%APPDATA%\NewsAlerts\` on Windows, `~/Library/Application Support/NewsAlerts/` on macOS, `~/.config/NewsAlerts/` on Linux).
+- **Standalone Secrets (`keys.toml`)**: Alternatively, place cookies in `<APP_DIR>/keys.toml` under `[tradingview]` (`sessionid` and `sessionid_sign`).
+- For complete details, see the [[Configuration & Secrets Guide|Configuration-&-Secrets-Guide]].
 
 ---
 

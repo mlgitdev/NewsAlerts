@@ -134,15 +134,23 @@ class SemVer:
 def _load_version() -> str:
     """Read SemVer string from root VERSION file or PyInstaller bundle."""
     # 1. PyInstaller frozen executable
-    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
-        v_file = Path(sys._MEIPASS) / "VERSION"
-        if v_file.is_file():
-            try:
-                v = v_file.read_text(encoding="utf-8").strip()
-                if v:
-                    return v
-            except Exception:
-                pass
+    if getattr(sys, "frozen", False):
+        exe_dir = Path(sys.executable).resolve().parent
+        candidates = []
+        if hasattr(sys, "_MEIPASS"):
+            candidates.append(Path(sys._MEIPASS) / "VERSION")
+            candidates.append(Path(sys._MEIPASS) / "_internal" / "VERSION")
+        candidates.append(exe_dir / "VERSION")
+        candidates.append(exe_dir / "_internal" / "VERSION")
+        for v_file in candidates:
+            if v_file.is_file():
+                try:
+                    v = v_file.read_text(encoding="utf-8").strip()
+                    if v:
+                        return v
+                except Exception:
+                    pass
+
     # 2. Source checkout / repository root
     root_v = Path(__file__).resolve().parent.parent / "VERSION"
     if root_v.is_file():

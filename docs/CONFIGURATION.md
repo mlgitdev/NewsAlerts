@@ -145,3 +145,29 @@ The **Backup & Sync** tab in Settings allows full disaster recovery, strategy sh
   - `📂 Import Strategies`: Merges or updates strategies into the active running tape.
 - **Factory Defaults Reset (`Destructive`)**:
   - `↺ Restore Factory Defaults`: Reverts configuration to factory baseline while securely preserving `keys.toml`.
+
+---
+
+## 8. Transparent Secrets Storage & Management Architecture
+
+NewsAlerts enforces clean environment separation and complete transparency for user credentials:
+
+| Operating System | Central Application Directory (`APP_DIR`) | Fallback Location |
+| :--- | :--- | :--- |
+| **Windows** | `%APPDATA%\NewsAlerts\` (`C:\Users\<user>\AppData\Roaming\NewsAlerts\`) | `$HOME/.newsalerts\` |
+| **macOS** | `~/Library/Application Support/NewsAlerts/` | `$HOME/.newsalerts/` |
+| **Linux / BSD** | `$XDG_CONFIG_HOME/NewsAlerts/` (default `~/.config/NewsAlerts/`) | `$HOME/.newsalerts/` |
+
+### Direct In-App Inspection:
+In **Settings (`S`) &rarr; About** and **Settings &rarr; Backup & Sync**, the terminal displays the active resolved directory path alongside an interactive **📂 Open Folder** button that launches Windows Explorer, macOS Finder, or the Linux file manager.
+
+### Where Credentials Live:
+1. **Unified Storage (`config.json`)**:
+   By default, credentials entered through the Settings dialog are stored in `<APP_DIR>/config.json` under `"tv"` (cookies), `"borrow"` (Alpaca keys), and `"alerts"` (Telegram bot tokens). All fields are password-masked in the UI and written atomically via temporary file replacement.
+2. **Dedicated Standalone Secrets (`keys.toml`)**:
+   Users who prefer separating private credentials from UI configurations can place a `keys.toml` file in `<APP_DIR>/keys.toml`. When present, values in `keys.toml` override those in `config.json`.
+3. **In-Flight Validation**:
+   - TradingView: Live header badge reflects authenticated session status.
+   - Alpaca: **▶ Test Alpaca Connection** checks account buying power and active status.
+   - Telegram: **✈️ Send Test Message** dispatches an instant probe ping to the configured chat.
+

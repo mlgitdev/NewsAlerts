@@ -20,6 +20,15 @@ class TestApiMethods(unittest.TestCase):
         self.assertIn("alerts", cfg)
         self.assertIn("hotkeys", cfg)
 
+    def test_tv_client_base_filters_omits_country_restriction(self):
+        from app.tv_client import BASE_FILTERS
+        # Verify country filter is not present so foreign-incorporated US-listed stocks (e.g. SAIQ) are included
+        filter_lefts = [f.get("left") for f in BASE_FILTERS if isinstance(f, dict)]
+        self.assertNotIn("country", filter_lefts)
+        self.assertIn("exchange", filter_lefts)
+        self.assertIn("type", filter_lefts)
+        self.assertIn("is_primary", filter_lefts)
+
     def test_get_quote_resolves_symbol(self):
         mock_row = {
             "ticker": "NASDAQ:SMCI",
@@ -201,6 +210,38 @@ class TestApiMethods(unittest.TestCase):
         # Calling with False updates state
         self.assertTrue(self.api.set_on_top(False))
         self.assertEqual(getattr(mock_window, "_on_top_state", None), False)
+
+    def test_get_state_includes_storage_metadata(self):
+        self.mock_app.borrow.key_id = "PKTEST123456"
+        self.mock_app.borrow.secret_key = "SECRET123"
+        self.mock_app.client.get_auth_status.return_value = {"connected": True, "username": "pro_trader"}
+        self.mock_app.screener.status_payload.return_value = {}
+        self.mock_app.screener.last_rows = []
+        self.mock_app.tape.snapshot.return_value = []
+        self.mock_app.tape_window = None
+        self.mock_app.bus.latest_id.return_value = 42
+
+        state = self.api.get_state()
+        self.assertIn("app_dir", state)
+        self.assertIn("secrets_file", state)
+        self.assertIn("has_keys_toml", state)
+        self.assertIsInstance(state["app_dir"], str)
+        self.assertTrue(len(state["app_dir"]) > 0)
+        self.assertIsInstance(state["has_keys_toml"], bool)
+
+    @patch("os.startfile", create=True)
+    def test_open_app_dir_windows(self, mock_startfile):
+        with patch("sys.platform", "win32"):
+            res = self.api.open_app_dir()
+            self.assertTrue(res["ok"])
+            mock_startfile.assert_called_once()
+
+    @patch("subprocess.Popen")
+    def test_open_app_dir_unix(self, mock_popen):
+        with patch("sys.platform", "darwin"):
+            res = self.api.open_app_dir()
+            self.assertTrue(res["ok"])
+            mock_popen.assert_called_once()
 
 
 if __name__ == "__main__":

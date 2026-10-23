@@ -62,7 +62,7 @@ rm -f "$BIN_DIR/newsalerts.bak"
 chmod +x "$BIN_DIR/newsalerts"
 echo "[+] Created executable command at: $BIN_DIR/newsalerts"
 
-# 5. Linux Desktop Launcher Integration
+# 5. OS Application & Desktop Integration
 if [ "$OS_TYPE" = "Linux" ]; then
     mkdir -p "$DESKTOP_DIR" "$ICON_DIR"
     if [ -f "$SCRIPT_DIR/assets/app_icon_transparent.png" ]; then
@@ -74,7 +74,58 @@ if [ "$OS_TYPE" = "Linux" ]; then
         chmod +x "$DESKTOP_DIR/NewsAlerts.desktop"
         echo "[+] Installed desktop entry to: $DESKTOP_DIR/NewsAlerts.desktop"
     fi
+elif [ "$OS_TYPE" = "Darwin" ]; then
+    MAC_APP_DIR="${HOME}/Applications/NewsAlerts.app"
+    mkdir -p "${HOME}/Applications"
+    mkdir -p "${MAC_APP_DIR}/Contents/MacOS"
+    mkdir -p "${MAC_APP_DIR}/Contents/Resources"
+
+    if [ -f "$SCRIPT_DIR/assets/icon.icns" ]; then
+        cp "$SCRIPT_DIR/assets/icon.icns" "${MAC_APP_DIR}/Contents/Resources/icon.icns"
+    fi
+
+    APP_VER="2.9.0"
+    if [ -f "$SCRIPT_DIR/VERSION" ]; then
+        APP_VER="$(cat "$SCRIPT_DIR/VERSION" | tr -d '[:space:]')"
+    fi
+
+    cat << EOF > "${MAC_APP_DIR}/Contents/Info.plist"
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>
+    <string>NewsAlerts</string>
+    <key>CFBundleDisplayName</key>
+    <string>NewsAlerts</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.mlgitdev.newsalerts</string>
+    <key>CFBundleVersion</key>
+    <string>${APP_VER}</string>
+    <key>CFBundleShortVersionString</key>
+    <string>${APP_VER}</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleExecutable</key>
+    <string>NewsAlerts</string>
+    <key>CFBundleIconFile</key>
+    <string>icon.icns</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+</dict>
+</plist>
+EOF
+
+    cat << EOF > "${MAC_APP_DIR}/Contents/MacOS/NewsAlerts"
+#!/usr/bin/env bash
+cd "$SCRIPT_DIR"
+exec "$SCRIPT_DIR/.venv/bin/python" "$SCRIPT_DIR/run_app.py" "\$@"
+EOF
+    chmod +x "${MAC_APP_DIR}/Contents/MacOS/NewsAlerts"
+    echo "[+] Created native macOS Application bundle at: ${MAC_APP_DIR}"
+    echo "    (Available in Spotlight, Launchpad, and Finder Applications)"
 fi
+
 
 echo ""
 echo "======================================================="
