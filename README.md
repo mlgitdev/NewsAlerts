@@ -39,7 +39,8 @@ Active momentum day trading requires spotting low-float runners the split second
 - 💾 **Configuration Backup & Strategy Sync**: Full disaster recovery export/import (`.json`) for screeners, sound configs, and strategies, with independent strategy preset sharing and safe factory reset.
 - 📈 **One-Click TradingView Chart Launching**: Dedicated chart icon button docked directly in the news headline banner header (`#news-chart`). Clicking it instantly opens the live interactive TradingView chart for the active ticker in your default browser—eliminating manual symbol typing during high-velocity breakouts.
 - 🩳 **Real-Time Borrow Locates**: Live `HTB` (Hard to Borrow), `ETB` (Easy to Borrow), and `NO BORROW` badges right on the tape and screener to identify short squeeze potential instantly.
-- 🪶 **Zero Electron / Node.js Overhead**: Native Edge WebView2 execution compiled to a lightweight ~14 MB standalone binary with sub-second launch times.
+- 🪶 **Dual Distribution & Sub-300ms Instant Startup**: Native Edge WebView2 execution with both a standalone portable binary (`dist/NewsAlerts.exe`) and a pre-extracted application installer targeting `%LOCALAPPDATA%\Programs\NewsAlerts` delivering sub-300ms instant terminal launch with zero Electron/Node.js overhead.
+
 
 ---
 

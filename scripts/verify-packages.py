@@ -174,11 +174,33 @@ class PackageVerifier:
         self.log_ok(f"Standalone executable verified: {exe_path.name} ({size_mb:.1f} MB, valid Win32 PE header).")
         return True
 
+    def verify_windows_installer(self, exe_path: Path) -> bool:
+        """Verify Windows Inno Setup installer executable."""
+        print(f"\n[*] Auditing Windows Setup Installer: {exe_path.name} ({exe_path.stat().st_size / 1024 / 1024:.2f} MB)...")
+        if not exe_path.exists():
+            self.log_error(f"Installer executable {exe_path} does not exist!")
+            return False
+
+        size_mb = exe_path.stat().st_size / (1024 * 1024)
+        if size_mb < 5.0:
+            self.log_error(f"Installer size is only {size_mb:.2f} MB, expected >5MB installer bundle!")
+            return False
+
+        with open(exe_path, "rb") as f:
+            header = f.read(2)
+            if header != b"MZ":
+                self.log_error(f"Installer does not start with Win32 MZ magic bytes (got: {header!r})!")
+                return False
+
+        self.log_ok(f"Windows installer verified: {exe_path.name} ({size_mb:.1f} MB, valid Win32 PE header).")
+        return True
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="NewsAlerts Release Package & Binary Verifier")
-    parser.add_argument("--artifacts-dir", type=str, default="", help="Directory containing release archives (.zip, .tar.gz)")
+    parser.add_argument("--artifacts-dir", type=str, default="", help="Directory containing release archives (.zip, .tar.gz, .exe)")
     parser.add_argument("--exe", type=str, default="", help="Path to standalone NewsAlerts.exe")
+    parser.add_argument("--installer", type=str, default="", help="Path to NewsAlerts-Setup-*.exe")
     parser.add_argument("--windows-zip", type=str, default="", help="Path to Windows release zip")
     parser.add_argument("--macos-tar", type=str, default="", help="Path to macOS release tar.gz")
     parser.add_argument("--linux-tar", type=str, default="", help="Path to Linux release tar.gz")
@@ -188,6 +210,9 @@ def main() -> None:
 
     if args.exe:
         verifier.verify_standalone_exe(Path(args.exe))
+
+    if args.installer:
+        verifier.verify_windows_installer(Path(args.installer))
 
     if args.windows_zip:
         verifier.verify_windows_zip(Path(args.windows_zip))
@@ -206,6 +231,7 @@ def main() -> None:
             win_zips = list(art_dir.glob("**/*Windows*.zip")) + list(art_dir.glob("**/*win*.zip"))
             mac_tars = list(art_dir.glob("**/*macOS*.tar.gz")) + list(art_dir.glob("**/*darwin*.tar.gz"))
             lin_tars = list(art_dir.glob("**/*Linux*.tar.gz")) + list(art_dir.glob("**/*linux*.tar.gz"))
+            installers = list(art_dir.glob("**/*Setup*.exe")) + list(art_dir.glob("**/*installer*.exe"))
 
             if not win_zips and not mac_tars and not lin_tars:
                 # Check for any zip or tar.gz
@@ -220,6 +246,9 @@ def main() -> None:
                 verifier.verify_tar_package(m, "macOS")
             for l in lin_tars:
                 verifier.verify_tar_package(l, "Linux")
+            for inst in installers:
+                verifier.verify_windows_installer(inst)
+
 
     print("\n" + "=" * 60)
     print(" PACKAGE VERIFICATION SUMMARY")

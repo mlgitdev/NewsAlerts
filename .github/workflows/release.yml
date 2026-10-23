@@ -82,9 +82,18 @@ jobs:
           pip install -r requirements.txt
           pip install pillow
 
-      - name: Build Standalone Windows Executable
+      - name: Install Inno Setup
+        run: |
+          choco install innosetup --no-progress --no-color
+          echo "C:\Program Files (x86)\Inno Setup 6" >> $env:GITHUB_PATH
+
+      - name: Build Standalone Windows Executable & App Directory
         run: |
           powershell -File .\build.ps1 -Task build
+
+      - name: Compile Inno Setup Windows Installer
+        run: |
+          powershell -File .\build.ps1 -Task installer
 
       - name: Create Windows Release Archive
         run: |
@@ -94,11 +103,14 @@ jobs:
           Copy-Item "assets\hero.jpg" -Destination "release-win\"
           Compress-Archive -Path "release-win\*" -DestinationPath "NewsAlerts-Windows-x64.zip"
 
-      - name: Upload Windows Artifact
+      - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows-release
-          path: NewsAlerts-Windows-x64.zip
+          path: |
+            NewsAlerts-Windows-x64.zip
+            dist/NewsAlerts-Setup-*.exe
+
 
   build-macos:
     name: Package macOS Release (arm64)
@@ -250,11 +262,12 @@ jobs:
         if: success()
         run: |
           mkdir -p dist-release
-          find release-artifacts/ -type f \( -name "*.zip" -o -name "*.tar.gz" \) -exec cp {} dist-release/ \;
+          find release-artifacts/ -type f \( -name "*.zip" -o -name "*.tar.gz" -o -name "*.exe" \) -exec cp {} dist-release/ \;
           if [ -n "$NOTES_PATH" ]; then
             cp "$NOTES_PATH" "dist-release/ReleaseNotes-${VERSION_TAG}.md"
           fi
           ls -la dist-release/
+
 
       - name: Publish Official GitHub Release
         if: success()

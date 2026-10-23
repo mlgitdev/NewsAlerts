@@ -2,7 +2,7 @@
 # Usage: .\build.ps1 [-Task <build|clean|run|check|help>]
 
 param(
-    [ValidateSet("build", "clean", "run", "check", "verify-packages", "wiki-sync", "worktree-new", "worktree-list", "worktree-remove", "worktree-merge", "worktree-prune", "issue-list", "issue-view", "help")]
+    [ValidateSet("build", "clean", "run", "run-app", "install-local", "installer", "check", "verify-packages", "wiki-sync", "worktree-new", "worktree-list", "worktree-remove", "worktree-merge", "worktree-prune", "issue-list", "issue-view", "help")]
     [string]$Task = "build",
 
     [string]$Branch = "",
@@ -16,6 +16,8 @@ Set-Location $ScriptDir
 $VenvPython = Join-Path $ScriptDir ".venv\Scripts\python.exe"
 $VenvPyInstaller = Join-Path $ScriptDir ".venv\Scripts\pyinstaller.exe"
 $DistExe = Join-Path $ScriptDir "dist\NewsAlerts.exe"
+$DistAppDir = Join-Path $ScriptDir "dist\NewsAlerts-App"
+$DistAppExe = Join-Path $DistAppDir "NewsAlerts.exe"
 
 # If running inside a .worktrees subdirectory, inherit parent .venv
 if (-not (Test-Path $VenvPython)) {
@@ -33,10 +35,13 @@ function Show-Help {
     Write-Host "=====================================" -ForegroundColor Cyan
     Write-Host "Usage: .\build.ps1 [-Task <Task>] [-Branch <branch>] [-Base <base>]"
     Write-Host ""
-    Write-Host "Build Tasks:"
-    Write-Host "  build             (default) Build portable NewsAlerts.exe standalone executable" -ForegroundColor Yellow
+    Write-Host "Build & Install Tasks:"
+    Write-Host "  build             (default) Build portable executable and unpacked application folder" -ForegroundColor Yellow
+    Write-Host "  run                         Launch the portable dist\NewsAlerts.exe" -ForegroundColor Yellow
+    Write-Host "  run-app                     Launch the unpacked/installed dist\NewsAlerts-App\NewsAlerts.exe" -ForegroundColor Yellow
+    Write-Host "  install-local               Install app into %LOCALAPPDATA%\Programs\NewsAlerts + shortcuts" -ForegroundColor Yellow
+    Write-Host "  installer                   Compile Inno Setup Windows installer (requires ISCC)" -ForegroundColor Yellow
     Write-Host "  clean                       Remove build/ and dist/ artifacts and caches" -ForegroundColor Yellow
-    Write-Host "  run                         Launch the built dist\NewsAlerts.exe" -ForegroundColor Yellow
     Write-Host "  check                       Verify that secrets/ are excluded from the bundle" -ForegroundColor Yellow
     Write-Host "  verify-packages             Audit and verify standalone executable & release archives" -ForegroundColor Yellow
     Write-Host "  wiki-sync                   Synchronize docs/wiki/ documentation with GitHub Wiki" -ForegroundColor Yellow
@@ -156,21 +161,28 @@ function Build-Executable {
         exit $LASTEXITCODE
     }
 
-    Write-Host "[3/3] Verifying generated executable..." -ForegroundColor Yellow
+    Write-Host "[3/3] Verifying generated build artifacts..." -ForegroundColor Yellow
     if (-not (Test-Path $DistExe)) {
-        Write-Error "Build finished but $DistExe was not found!"
+        Write-Error "Build finished but portable executable $DistExe was not found!"
+        exit 1
+    }
+    if (-not (Test-Path $DistAppExe)) {
+        Write-Error "Build finished but unpacked app $DistAppExe was not found!"
         exit 1
     }
 
-    $item = Get-Item $DistExe
-    $sizeMB = [math]::Round($item.Length / 1MB, 2)
+    $itemExe = Get-Item $DistExe
+    $sizeExeMB = [math]::Round($itemExe.Length / 1MB, 2)
+    
+    $appFiles = Get-ChildItem -Path $DistAppDir -Recurse | Measure-Object -Property Length -Sum
+    $sizeAppMB = [math]::Round($appFiles.Sum / 1MB, 2)
     $sw.Stop()
 
     Write-Host ""
-    Write-Host "[OK] Build Successful!" -ForegroundColor Green
-    Write-Host "     Output:   $DistExe" -ForegroundColor White
-    Write-Host "     Size:     $sizeMB MB" -ForegroundColor White
-    Write-Host "     Duration: $([math]::Round($sw.Elapsed.TotalSeconds, 1)) seconds" -ForegroundColor White
+    Write-Host "[OK] Dual Build Successful!" -ForegroundColor Green
+    Write-Host "     1. Portable: $DistExe ($sizeExeMB MB)" -ForegroundColor White
+    Write-Host "     2. App Dir:  $DistAppDir ($sizeAppMB MB unpacked)" -ForegroundColor White
+    Write-Host "     Duration:    $([math]::Round($sw.Elapsed.TotalSeconds, 1)) seconds" -ForegroundColor White
     Write-Host ""
 
     Verify-Secrets
@@ -178,12 +190,106 @@ function Build-Executable {
 
 function Run-Executable {
     if (-not (Test-Path $DistExe)) {
-        Write-Host "[-] Executable not found at $DistExe. Building first..." -ForegroundColor Yellow
+        Write-Host "[-] Portable executable not found at $DistExe. Building first..." -ForegroundColor Yellow
         Build-Executable
     }
     Write-Host ""
-    Write-Host "[+] Launching $DistExe..." -ForegroundColor Cyan
+    Write-Host "[+] Launching portable $DistExe..." -ForegroundColor Cyan
     Start-Process -FilePath $DistExe
+}
+
+function Run-AppDirectory {
+    if (-not (Test-Path $DistAppExe)) {
+        Write-Host "[-] App directory executable not found at $DistAppExe. Building first..." -ForegroundColor Yellow
+        Build-Executable
+    }
+    Write-Host ""
+    Write-Host "[+] Launching unpacked app from $DistAppExe..." -ForegroundColor Cyan
+    Start-Process -FilePath $DistAppExe
+}
+
+function Install-LocalApp {
+    if (-not (Test-Path $DistAppDir)) {
+        Write-Host "[-] App directory not found at $DistAppDir. Building first..." -ForegroundColor Yellow
+        Build-Executable
+    }
+
+    $targetDir = Join-Path $env:LOCALAPPDATA "Programs\NewsAlerts"
+    Write-Host ""
+    Write-Host "[+] Installing NewsAlerts to $targetDir..." -ForegroundColor Cyan
+
+    $running = Get-Process NewsAlerts -ErrorAction SilentlyContinue
+    if ($running) {
+        Write-Host "[-] Closing running NewsAlerts instance before installation..." -ForegroundColor Yellow
+        $running | Stop-Process -Force -ErrorAction SilentlyContinue
+        Start-Sleep -Milliseconds 800
+    }
+
+    if (-not (Test-Path $targetDir)) {
+        New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
+    }
+
+    Copy-Item -Path "$DistAppDir\*" -Destination $targetDir -Recurse -Force
+    $installedExe = Join-Path $targetDir "NewsAlerts.exe"
+
+    # Create Desktop and Start Menu Shortcuts via WScript.Shell
+    try {
+        $wsh = New-Object -ComObject WScript.Shell
+        
+        # Desktop Shortcut
+        $desktopPath = [Environment]::GetFolderPath("Desktop")
+        $deskShortcut = $wsh.CreateShortcut((Join-Path $desktopPath "NewsAlerts.lnk"))
+        $deskShortcut.TargetPath = $installedExe
+        $deskShortcut.WorkingDirectory = $targetDir
+        $deskShortcut.IconLocation = "$installedExe,0"
+        $deskShortcut.Description = "NewsAlerts Momentum Trading Terminal"
+        $deskShortcut.Save()
+
+        # Start Menu Shortcut
+        $startMenuPath = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs"
+        $smShortcut = $wsh.CreateShortcut((Join-Path $startMenuPath "NewsAlerts.lnk"))
+        $smShortcut.TargetPath = $installedExe
+        $smShortcut.WorkingDirectory = $targetDir
+        $smShortcut.IconLocation = "$installedExe,0"
+        $smShortcut.Description = "NewsAlerts Momentum Trading Terminal"
+        $smShortcut.Save()
+
+        Write-Host "[OK] Installed successfully to $targetDir" -ForegroundColor Green
+        Write-Host "     Shortcuts created: Desktop and Start Menu" -ForegroundColor White
+    } catch {
+        Write-Host "[!] Note: Shortcuts could not be created automatically: $_" -ForegroundColor Yellow
+    }
+}
+
+function Build-InnoInstaller {
+    $isccPaths = @(
+        (Get-Command "iscc" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source),
+        "C:\Program Files (x86)\Inno Setup 6\ISCC.exe",
+        "C:\Program Files\Inno Setup 6\ISCC.exe"
+    )
+    $iscc = $isccPaths | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1
+
+    if (-not $iscc) {
+        Write-Host "[!] Inno Setup compiler (ISCC.exe) not found." -ForegroundColor Yellow
+        Write-Host "    Install Inno Setup 6 (e.g. 'winget install JRSoftware.InnoSetup') to compile installers." -ForegroundColor DarkGray
+        Write-Host "    The Inno script is ready at installer\NewsAlerts.iss" -ForegroundColor DarkGray
+        return
+    }
+
+    if (-not (Test-Path $DistAppDir)) {
+        Build-Executable
+    }
+
+    $issFile = Join-Path $ScriptDir "installer\NewsAlerts.iss"
+    $appVer = (Get-Content (Join-Path $ScriptDir "VERSION") -Raw).Trim()
+    Write-Host "[+] Compiling installer with Inno Setup: $iscc (v$appVer)..." -ForegroundColor Cyan
+    & $iscc "/DMyAppVersion=$appVer" $issFile
+
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "[OK] Installer successfully built in dist\" -ForegroundColor Green
+    } else {
+        Write-Error "Inno Setup compilation failed with code $LASTEXITCODE."
+    }
 }
 
 $WorktreeScript = Join-Path $ScriptDir "scripts\worktree.ps1"
@@ -206,6 +312,12 @@ if ($Task -eq "build") {
     Clean-Artifacts
 } elseif ($Task -eq "run") {
     Run-Executable
+} elseif ($Task -eq "run-app") {
+    Run-AppDirectory
+} elseif ($Task -eq "install-local") {
+    Install-LocalApp
+} elseif ($Task -eq "installer") {
+    Build-InnoInstaller
 } elseif ($Task -eq "check") {
     Verify-Secrets
 } elseif ($Task -eq "verify-packages") {

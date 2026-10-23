@@ -33,14 +33,20 @@ except ImportError:
     from app.version import get_version
 
 if getattr(sys, "frozen", False):
-    BASE_DIR = Path(getattr(sys, "_MEIPASS", Path(sys.executable).resolve().parent))
-    if (BASE_DIR / "web").exists():
-        WEB = BASE_DIR / "web"
-    else:
-        WEB = Path(sys.executable).resolve().parent / "web"
+    exe_dir = Path(sys.executable).resolve().parent
+    meipass = getattr(sys, "_MEIPASS", None)
+    candidates = []
+    if meipass:
+        candidates.append(Path(meipass) / "web")
+        candidates.append(Path(meipass) / "_internal" / "web")
+    candidates.append(exe_dir / "web")
+    candidates.append(exe_dir / "_internal" / "web")
+    WEB = next((p for p in candidates if p.exists()), exe_dir / "web")
+    BASE_DIR = WEB.parent
 else:
     BASE_DIR = Path(__file__).resolve().parent.parent
     WEB = BASE_DIR / "web"
+
 
 
 class App:
