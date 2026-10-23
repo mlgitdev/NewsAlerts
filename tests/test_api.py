@@ -20,6 +20,15 @@ class TestApiMethods(unittest.TestCase):
         self.assertIn("alerts", cfg)
         self.assertIn("hotkeys", cfg)
 
+    def test_tv_client_base_filters_omits_country_restriction(self):
+        from app.tv_client import BASE_FILTERS
+        # Verify country filter is not present so foreign-incorporated US-listed stocks (e.g. SAIQ) are included
+        filter_lefts = [f.get("left") for f in BASE_FILTERS if isinstance(f, dict)]
+        self.assertNotIn("country", filter_lefts)
+        self.assertIn("exchange", filter_lefts)
+        self.assertIn("type", filter_lefts)
+        self.assertIn("is_primary", filter_lefts)
+
     def test_get_quote_resolves_symbol(self):
         mock_row = {
             "ticker": "NASDAQ:SMCI",

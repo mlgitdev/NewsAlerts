@@ -37,7 +37,7 @@ All official releases are produced deterministically through GitHub Actions:
 
 ## Release History
 
-- [v2.9.0 Release Notes](releases/v2.9.0.md) — Introduced Dual Distribution Model (portable single-binary + pre-extracted app in `%LOCALAPPDATA%\Programs\NewsAlerts` with Inno Setup Windows installer), achieving sub-300ms terminal startup and automated GitHub Actions release packaging (Resolves #39).
+- [v2.9.0 Release Notes](releases/v2.9.0.md) — Introduced Dual Distribution Model (portable single-binary + pre-extracted app in `%LOCALAPPDATA%\Programs\NewsAlerts` with Inno Setup Windows installer), achieving sub-300ms terminal startup, storage transparency with one-click folder access, and universal US-listed stock coverage removing foreign jurisdiction restrictions for tickers like `SAIQ` (Resolves #39).
 - [v2.8.1 Release Notes](releases/v2.8.1.md) — Eliminated cross-thread WinForms UI deadlock on save settings and eliminated redundant background auth and bulk asset fetches (Resolves #37).
 
 - [v2.8.0 Release Notes](releases/v2.8.0.md) — TradingView Cloud Watchlist Integration & 1-Click Symbol Quick-Add with 3-second green/red visual flickering feedback (Resolves #33).

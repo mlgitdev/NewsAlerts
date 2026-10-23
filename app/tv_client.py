@@ -22,7 +22,6 @@ UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/130.0 Safari/537.36")
 
 BASE_FILTERS = [
-    {"left": "country", "operation": "equal", "right": "United States"},
     {"left": "type", "operation": "equal", "right": "stock"},
     {"left": "exchange", "operation": "in_range", "right": ["AMEX", "NASDAQ", "NYSE"]},
     {"left": "is_primary", "operation": "equal", "right": True},
