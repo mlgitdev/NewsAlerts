@@ -37,6 +37,7 @@ All official releases are produced deterministically through GitHub Actions:
 
 ## Release History
 
+- [v2.8.1 Release Notes](releases/v2.8.1.md) — Eliminated cross-thread WinForms UI deadlock on save settings and eliminated redundant background auth and bulk asset fetches (Resolves #37).
 - [v2.8.0 Release Notes](releases/v2.8.0.md) — TradingView Cloud Watchlist Integration & 1-Click Symbol Quick-Add with 3-second green/red visual flickering feedback (Resolves #33).
 - [v2.7.2 Release Notes](releases/v2.7.2.md) — Real-time in-flight credential testing for Telegram and Alpaca without saving and reopening Settings (Resolves #31).
 - [v2.7.1 Release Notes](releases/v2.7.1.md) — Issue-First protocol and management skill, standardized templates, automated validation bot, 7-day stale reminders, and post-merge CI release and wiki synchronization.

@@ -58,9 +58,13 @@ class TVClient:
         self.set_cookies(sessionid, sessionid_sign)
 
     def set_cookies(self, sessionid: str, sessionid_sign: str = "") -> None:
+        s_id = (sessionid or "").strip()
+        s_sign = (sessionid_sign or "").strip()
         with self._lock:
-            self.sessionid = (sessionid or "").strip()
-            self.sessionid_sign = (sessionid_sign or "").strip()
+            if s_id == self.sessionid and s_sign == self.sessionid_sign and self.auth_info.get("connected"):
+                return
+            self.sessionid = s_id
+            self.sessionid_sign = s_sign
             self._s.cookies.clear()
             if self.sessionid:
                 self._s.cookies.set("sessionid", self.sessionid, domain=".tradingview.com")
