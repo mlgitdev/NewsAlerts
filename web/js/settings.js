@@ -11,6 +11,9 @@
         if (st) {
           App.alpaca_active = st.alpaca_active;
           App.alpaca_key_masked = st.alpaca_key_masked;
+          App.app_dir = st.app_dir;
+          App.secrets_file = st.secrets_file;
+          App.has_keys_toml = st.has_keys_toml;
         }
       });
       const bg = U.$("#settings");
@@ -301,15 +304,16 @@
         U.el("option", { value: "heuristic" }, "Float-based Heuristic only"));
       modeSel.value = b.mode || "auto";
       modeSel.onchange = () => (b.mode = modeSel.value);
+      const sourceDesc = App.has_keys_toml ? `external keys.toml (${App.secrets_file})` : "saved in config.json";
       const alpacaBanner = App.alpaca_active
         ? U.el("div", {
             style: "grid-column:1/-1;padding:9px 13px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);border-radius:6px;color:#4ade80;font-size:12px;font-weight:500;display:flex;align-items:center;gap:8px;",
-          }, `✓ Live Alpaca API Active · Auto-loaded from secrets/keys.toml (${App.alpaca_key_masked})`)
+          }, `✓ Live Alpaca API Active · Loaded from ${sourceDesc} (${App.alpaca_key_masked})`)
         : null;
 
       const keyHelp = App.alpaca_active
-        ? "Auto-loaded from secrets/keys.toml. Leave blank to keep using keys.toml, or enter here to override."
-        : "Free at alpaca.markets (API Keys section)";
+        ? `Active (${sourceDesc}). Enter new keys here to update config.json.`
+        : "Free at alpaca.markets (API Keys section). Stored in config.json.";
 
       if (alpacaBanner) g.append(alpacaBanner);
       g.append(
@@ -514,6 +518,30 @@
 
       const cardsWrap = U.el("div", { class: "backup-cards-grid" });
 
+      // Storage Directory Transparency & Explorer Access
+      const storageCard = U.el("div", { class: "backup-card", style: "grid-column: 1 / -1; background: #131722; border-color: rgba(59,130,246,0.25);" },
+        U.el("div", { class: "backup-card-head" },
+          U.el("div", { class: "backup-card-title", style: "display:flex;align-items:center;gap:6px;" }, "📁 Central Application Directory (APP_DIR)"),
+          U.el("div", { class: "backup-card-badge", style: "background:rgba(59,130,246,0.15);color:var(--accent);border-color:rgba(59,130,246,0.3);" },
+            App.has_keys_toml ? "keys.toml Active" : "config.json Unified"
+          )
+        ),
+        U.el("div", { class: "backup-card-desc", style: "display:flex;flex-direction:column;gap:6px;" },
+          U.el("div", {}, "Active storage path where terminal settings, API keys, session cookies, and rolling tape history reside:"),
+          U.el("code", { style: "font-family:var(--mono);background:var(--bg, #0d111a);padding:6px 10px;border-radius:4px;border:1px solid var(--border-2);color:var(--accent);font-size:12px;word-break:break-all;user-select:all;" }, App.app_dir || "%APPDATA%\\NewsAlerts"),
+          U.el("div", { class: "muted", style: "font-size:11.5px;" },
+            "Manifest: config.json (Settings/Credentials), tape_history.json (Tape Cache), app.log (Diagnostics), optional keys.toml (Secret Override)."
+          )
+        ),
+        U.el("div", { class: "backup-card-actions", style: "margin-top:8px;" },
+          U.el("button", {
+            class: "btn sm",
+            style: "display:inline-flex;align-items:center;gap:6px;",
+            onclick: () => App.api().open_app_dir()
+          }, "📂 Open App Data Folder in Explorer / Finder")
+        )
+      );
+
       // Card 1: Full Configuration Backup
       const fullCard = U.el("div", { class: "backup-card" },
         U.el("div", { class: "backup-card-head" },
@@ -644,7 +672,7 @@
         )
       );
 
-      cardsWrap.append(fullCard, stratCard, resetCard);
+      cardsWrap.append(storageCard, fullCard, stratCard, resetCard);
       wrap.append(header, cardsWrap);
       return wrap;
     },
@@ -771,10 +799,31 @@
         U.el("h3", {}, "Project & Documentation"),
         ...Settings.field("GitHub Repository", linkGh, "Source code, release downloads, and issue tracker"),
         ...Settings.field("Documentation Wiki", linkWiki, "Terminal manual, rules engine, and strategy guides"),
-        U.el("h3", {}, "System & Semantic Versioning"),
+        U.el("h3", {}, "System & Storage Transparency"),
         ...Settings.field("Semantic Version", U.el("span", { style: "color:var(--up);font-family:var(--mono);font-weight:700" }, `v${ver} [Major: ${sem.major}, Minor: ${sem.minor}, Patch: ${sem.patch}]`), "Strictly conforms to SemVer 2.0.0 (MAJOR.MINOR.PATCH)"),
         ...Settings.field("Platform Engine", U.el("span", { style: "color:var(--text);font-family:var(--mono);font-size:12px" }, "Python 3.10+ · Native pywebview · Cross-Platform Audio")),
-        ...Settings.field("Data Storage", U.el("span", { style: "color:var(--text);font-family:var(--mono);font-size:12px" }, "%APPDATA%\\NewsAlerts\\ or OS Application Support")),
+        ...Settings.field("Central App Directory",
+          U.el("div", { style: "display:flex;align-items:center;gap:8px;flex-wrap:wrap;" },
+            U.el("code", { style: "font-family:var(--mono);background:#131722;padding:4px 8px;border-radius:4px;border:1px solid var(--border-2);color:var(--accent);word-break:break-all;font-size:11.5px;user-select:all;" }, App.app_dir || "%APPDATA%\\NewsAlerts"),
+            U.el("button", {
+              class: "btn sm",
+              style: "display:inline-flex;align-items:center;gap:4px;white-space:nowrap;",
+              onclick: () => App.api().open_app_dir()
+            }, "📂 Open Folder")
+          ),
+          "Active resolved OS directory storing config.json, tape_history.json, app.log, and optional keys.toml"
+        ),
+        ...Settings.field("Credential Storage",
+          U.el("div", { style: "display:flex;align-items:center;gap:8px;font-size:12px;" },
+            U.el("span", { style: "color:" + (App.has_keys_toml ? "var(--up)" : "var(--accent)") + ";font-weight:600;" },
+              App.has_keys_toml ? "Override: keys.toml" : "Unified: config.json"
+            ),
+            U.el("span", { class: "muted" },
+              App.has_keys_toml ? `(${App.secrets_file})` : "(Managed via In-App Settings)"
+            )
+          ),
+          "Credentials (TradingView cookies, Alpaca keys, Telegram tokens) are password-masked and saved atomically"
+        ),
         ...Settings.field("TradingView Feeds", U.el("span", { style: "color:var(--up);font-weight:600" }, c.tv?.sessionid ? "Connected (Real-Time)" : "Unauthenticated (15m Delay)")),
         ...Settings.field("Borrow Locates", U.el("span", { style: "color:var(--text)" }, "Alpaca API + Live TradingView Feeds")),
         ...Settings.field("Push Notifications", U.el("span", { style: "color:var(--text)" }, "Telegram Asynchronous Queue Worker"))

@@ -256,6 +256,8 @@ Optional tape sound (default off — the tape is noisy).
 
 ## 10. Settings & Integrations
 TradingView `sessionid`/`sessionid_sign` & real-time connection status · poll intervals · re-entry window · alert volume (0%–100%) · unified pause alerts toggle · news recency & provider · sounds · tape universe & strategy thresholds · interactive Strategy Builder (`+ Add Strategy`, triggers, family, deletion) · Backup / Import & Export tab (Full config backup `.json`, Strategies `.json` export/import, factory reset) · Alpaca keys for short borrow locates · Telegram Bot Token, Chat ID, and independent toggles for Screener alerts and Tape momentum alerts (with per-symbol cooldown) · customizable keyboard shortcuts & hotkeys with interactive re-binding and institutional defaults · always-on-top · font size.
+- **Storage Transparency & Direct Directory Access**: Settings → About and Settings → Backup & Sync display the active resolved OS directory (`APP_DIR`) on disk alongside a one-click `📂 Open App Data Folder` button (spawning Windows Explorer, macOS Finder, or Linux file manager).
+- **Credential Storage Architecture**: Credentials entered in the GUI are stored in `<APP_DIR>/config.json` with password masking and atomic writes. Alternatively, a standalone `<APP_DIR>/keys.toml` file can be used for separated secret management (which takes priority when present).
 
 ## 11. Architecture
 ```

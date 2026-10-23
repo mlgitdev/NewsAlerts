@@ -29,7 +29,12 @@ Clicking the chart link in your Telegram app on mobile or desktop instantly open
 3. BotFather will provide an **HTTP API Token** (e.g. `123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ`).
 4. Start a direct message with your newly created bot and click **Start**.
 5. To find your personal `chat_id`, search for `@userinfobot` in Telegram, click Start, and note your numeric ID.
-6. In **NewsAlerts**, open **Settings** (`S`) &rarr; **Telegram Alerts**.
-7. Enter your **Bot Token** and **Chat ID**.
-8. Click **Test Telegram Alert** to send an instant verification message.
+6. In **NewsAlerts**, open **Settings** (`S`) &rarr; **Sound Alerts**.
+7. Enter your **Bot Token** (password-masked) and **Chat ID**.
+8. Click **✈️ Send Test Message** to send an instant verification message to your Telegram chat.
 9. Check **Enable Telegram Dispatching** and click **Save Settings**.
+
+### Credential Storage & Precedence:
+- **GUI Saved (`config.json`)**: Stored under `"alerts": { "telegram_bot_token": "...", "telegram_chat_id": "..." }` in your central application directory (`%APPDATA%\NewsAlerts\` on Windows, `~/Library/Application Support/NewsAlerts/` on macOS, `~/.config/NewsAlerts/` on Linux).
+- **Standalone Secrets (`keys.toml`)**: Alternatively, place keys in `<APP_DIR>/keys.toml` under `[telegram]` (`bot_token` and `admin_chat_id`).
+- For complete details, see the [[Configuration & Secrets Guide|Configuration-&-Secrets-Guide]].

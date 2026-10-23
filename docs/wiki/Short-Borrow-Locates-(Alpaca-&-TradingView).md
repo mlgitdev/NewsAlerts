@@ -22,6 +22,12 @@ NewsAlerts queries real-time shortability availability via the **Alpaca Brokerag
 
 1. Log into your [Alpaca Account](https://alpaca.markets) (Live or Paper trading).
 2. Generate an **API Key ID** and **Secret Key**.
-3. In NewsAlerts, open **Settings** (`S`) &rarr; **Alpaca API**.
-4. Enter your `key_id` and `secret_key`.
-5. Click **Save Settings**. Borrow locate indicators will update automatically on every scan cycle.
+3. In NewsAlerts, open **Settings** (`S`) &rarr; **Short Borrow**.
+4. Enter your `key_id` and `secret_key` (fields are password-masked).
+5. Click **▶ Test Alpaca Connection** to verify your account status and buying power in real time.
+6. Click **Save Settings**. Borrow locate indicators will update automatically on every scan cycle.
+
+### Credential Storage & Precedence:
+- **GUI Saved (`config.json`)**: Stored under `"borrow": { "alpaca_key_id": "...", "alpaca_secret_key": "...", "mode": "auto" }` in your central application directory (`%APPDATA%\NewsAlerts\` on Windows, `~/Library/Application Support/NewsAlerts/` on macOS, `~/.config/NewsAlerts/` on Linux).
+- **Standalone Secrets (`keys.toml`)**: Alternatively, place keys in `<APP_DIR>/keys.toml` under `[alpaca]` for isolated management.
+- For complete details, see the [[Configuration & Secrets Guide|Configuration-&-Secrets-Guide]].
