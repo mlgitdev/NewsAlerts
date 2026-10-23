@@ -54,3 +54,7 @@ Built on a native, ultra-responsive architecture (`pywebview` + Vanilla ES6+/CSS
 
 7. **Full State Backup & Disaster Recovery**:
    The Backup & Sync Center allows traders to export full application backups, synchronize tactical strategies independently, or execute clean factory resets while securely preserving user API keys.
+
+8. **Broker Closing-Only & Banned Stock Filter**:
+   Eliminate rejected orders and wasted attention on broker-restricted micro-caps. Interactive topbar toggle (`[🚫 Banned: ON / OFF]`) and 1-click `🚫` blacklisting immediately hide un-tradeable stocks from both the Screener and Tape while silencing alert chimes.
+

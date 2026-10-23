@@ -219,10 +219,24 @@
         }
       }, "+");
 
+      const isBanned = window.App && App.config && App.config.banned_symbols && App.config.banned_symbols.map((x) => x.toUpperCase()).includes((sym || "").toUpperCase());
+      const banBtn = U.el("button", {
+        class: "btn-ban-sym" + (isBanned ? " is-banned" : ""),
+        title: isBanned ? `Symbol ${sym} is banned (closing-only). Click to unban.` : `Ban ${sym} (IB Closing-Only / Restricted)`,
+        onclick: (e) => {
+          e.stopPropagation();
+          if (window.App) {
+            if (isBanned) App.unbanSymbol(News.ticker || sym);
+            else App.banSymbol(News.ticker || sym);
+            News.renderHead();
+          }
+        }
+      }, "🚫");
+
       News.head.replaceChildren(
         U.el("div", { class: "news-head" }, U.logo(i.logoid, sym),
           U.el("div", {},
-            U.el("div", { class: "name" }, sym, " ", addBtn,
+            U.el("div", { class: "name" }, sym, " ", addBtn, " ", banBtn,
               i.sp != null ? U.el("span", { class: "num", style: "font-weight:500;margin-left:6px" }, U.price(i.sp)) : null,
               i.sc != null ? U.el("span", { class: "num " + U.cls(i.sc), style: "font-weight:600;margin-left:6px;font-size:12.5px" }, U.pct(i.sc)) : null,
               bTag),

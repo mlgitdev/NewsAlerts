@@ -196,6 +196,8 @@ DEFAULT_CONFIG = {
             {"id": "local_default", "title": "Momentum Watchlist", "symbols": []}
         ],
     },
+    "banned_symbols": ["YMAT"],
+    "filter_banned": False,
     "ui": {"always_on_top": False, "font_size": 13, "news_width": 420, "tape_height": 300},
 }
 

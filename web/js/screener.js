@@ -285,13 +285,24 @@
         html: c.label + (sortK === c.k ? `<span class="arr">${s.sort.dir === "desc" ? "↓" : "↑"}</span>` : ""),
       }))));
       const d = Screener.data;
-      const sessName = { pre: "Pre-market", regular: "Regular hours", post: "Post-market" }[d ? d.session : Screener.session()];
-      Screener.title.innerHTML = `${U.esc(s.name)} <span class="sub">· ${sessName}${d ? ` · ${d.rows.length} symbols` : ""}</span>`;
-      const cnt = U.$("#tab-count-" + s.id); if (cnt) cnt.textContent = d ? d.rows.length : "";
       if (!d) { Screener.tbody.replaceChildren(U.el("tr", {}, U.el("td", { colspan: cols.length, class: "empty" }, U.el("div", { class: "big" }, "⏳"), "Loading screener…"))); return; }
-      if (!d.rows.length) { Screener.tbody.replaceChildren(U.el("tr", {}, U.el("td", { colspan: cols.length, class: "empty" }, U.el("div", { class: "big" }, "🔍"), "No symbols match these filters right now. You'll hear the bell when one shows up."))); return; }
+
+      let activeRows = d.rows;
+      if (window.App && App.config && App.config.filter_banned && App.config.banned_symbols && App.config.banned_symbols.length) {
+        const bannedSet = new Set(App.config.banned_symbols.map((s) => s.toUpperCase()));
+        activeRows = activeRows.filter((r) => {
+          const sym = (r.symbol || "").toUpperCase();
+          const tkr = (r.ticker || "").split(":").pop().toUpperCase();
+          return !bannedSet.has(sym) && !bannedSet.has(tkr);
+        });
+      }
+
+      const sessName = { pre: "Pre-market", regular: "Regular hours", post: "Post-market" }[d.session || Screener.session()];
+      Screener.title.innerHTML = `${U.esc(s.name)} <span class="sub">· ${sessName} · ${activeRows.length} symbols${activeRows.length !== d.rows.length ? ` (${d.rows.length - activeRows.length} banned hidden)` : ""}</span>`;
+      const cnt = U.$("#tab-count-" + s.id); if (cnt) cnt.textContent = activeRows.length;
+      if (!activeRows.length) { Screener.tbody.replaceChildren(U.el("tr", {}, U.el("td", { colspan: cols.length, class: "empty" }, U.el("div", { class: "big" }, "🔍"), "No symbols match these filters right now. You'll hear the bell when one shows up."))); return; }
       const frag = document.createDocumentFragment();
-      for (const r of Screener.sorted(d.rows)) {
+      for (const r of Screener.sorted(activeRows)) {
         const tr = U.el("tr", { "data-t": r.ticker });
         if (r.ticker === Screener.selected) tr.classList.add("sel");
         if (r.is_new && !Screener.flashed.has(r.ticker + r.first_seen)) { tr.classList.add("new"); Screener.flashed.add(r.ticker + r.first_seen); }
@@ -313,7 +324,19 @@
                 }
               }
             }, "+");
-            td.append(U.el("div", { class: "sym" }, U.logo(r.logoid, r.symbol), U.el("span", { class: "tkr" }, r.symbol), addBtn, bTag, r.is_new ? U.el("span", { class: "tag-new" }, "NEW") : null));
+            const isBanned = window.App && App.config && App.config.banned_symbols && App.config.banned_symbols.map((x) => x.toUpperCase()).includes((r.symbol || "").toUpperCase());
+            const banBtn = U.el("button", {
+              class: "btn-ban-sym" + (isBanned ? " is-banned" : ""),
+              title: isBanned ? `Symbol ${r.symbol} is banned (closing-only). Click to unban.` : `Ban ${r.symbol} (IB Closing-Only / Restricted)`,
+              onclick: (e) => {
+                e.stopPropagation();
+                if (window.App) {
+                  if (isBanned) App.unbanSymbol(r.symbol || r.ticker);
+                  else App.banSymbol(r.symbol || r.ticker);
+                }
+              }
+            }, "🚫");
+            td.append(U.el("div", { class: "sym" }, U.logo(r.logoid, r.symbol), U.el("span", { class: "tkr" }, r.symbol), addBtn, banBtn, bTag, r.is_new ? U.el("span", { class: "tag-new" }, "NEW") : null));
           } else if (c.k === "desc") {
             td.append(U.el("div", { class: "desc", title: r.desc }, r.desc));
           } else if (c.k === "news_ts") {

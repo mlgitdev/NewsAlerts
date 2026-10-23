@@ -243,6 +243,36 @@ class TestApiMethods(unittest.TestCase):
             self.assertTrue(res["ok"])
             mock_popen.assert_called_once()
 
+    def test_banned_symbols_api_methods(self):
+        cfg = {"banned_symbols": ["YMAT"], "filter_banned": False}
+        self.mock_app.cfg.get.return_value = cfg
+
+        # Ban new symbol
+        res = self.api.ban_symbol("NASDAQ:GCT")
+        self.assertTrue(res["ok"])
+        self.assertEqual(res["symbol"], "GCT")
+        self.assertIn("GCT", cfg["banned_symbols"])
+        self.mock_app.cfg.update.assert_called()
+        self.mock_app.bus.emit.assert_called_with("config", cfg)
+
+        # Unban symbol
+        res2 = self.api.unban_symbol("YMAT")
+        self.assertTrue(res2["ok"])
+        self.assertNotIn("YMAT", cfg["banned_symbols"])
+
+        # Toggle filter_banned
+        res3 = self.api.toggle_filter_banned()
+        self.assertTrue(res3["ok"])
+        self.assertTrue(res3["filter_banned"])
+        self.assertTrue(cfg["filter_banned"])
+
+        # Set filter_banned explicitly
+        res4 = self.api.toggle_filter_banned(False)
+        self.assertTrue(res4["ok"])
+        self.assertFalse(res4["filter_banned"])
+        self.assertFalse(cfg["filter_banned"])
+
 
 if __name__ == "__main__":
     unittest.main()
+

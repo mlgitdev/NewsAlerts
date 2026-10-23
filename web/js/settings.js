@@ -359,6 +359,111 @@
       return g;
     },
 
+    tab_banned(c) {
+      c.banned_symbols = c.banned_symbols || [];
+      const wrap = U.el("div", { class: "banned-pane" });
+
+      const header = U.el("div", {},
+        U.el("h3", { style: "margin:0 0 6px;font-size:14px;color:var(--text);" }, "🚫 Banned & Closing-Only Stocks (IB / Broker Filter)"),
+        U.el("p", { class: "muted", style: "margin:0;font-size:12px;line-height:1.4;" },
+          "Exclude stocks in 'closing-only' status (or un-tradeable penny stocks like YMAT) from both the Screener table and the Tape stream. Audio chimes and Telegram alerts are also automatically suppressed for banned tickers.")
+      );
+
+      // Active toggle switch
+      const toggleWrap = U.el("div", { style: "display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:6px;" });
+      const toggleCb = U.el("input", { type: "checkbox", id: "cfg-filter-banned", style: "cursor:pointer;width:16px;height:16px;" });
+      toggleCb.checked = !!c.filter_banned;
+      toggleCb.onchange = () => {
+        c.filter_banned = toggleCb.checked;
+      };
+      const toggleLbl = U.el("label", { for: "cfg-filter-banned", style: "cursor:pointer;font-size:12.5px;font-weight:600;color:var(--text);" },
+        "Enable Closing-Only Filter (Hide banned stocks on Screener & Tape)"
+      );
+      toggleWrap.append(toggleCb, toggleLbl);
+
+      // Input row for adding symbols manually
+      const addBar = U.el("div", { class: "banned-add-bar" });
+      const input = U.el("input", {
+        type: "text",
+        class: "input banned-input",
+        placeholder: "Enter symbol to ban (e.g. YMAT, GCT)...",
+        maxlength: 10,
+        spellcheck: "false",
+        autocomplete: "off",
+      });
+      const addBtn = U.el("button", { class: "btn sm primary", style: "display:inline-flex;align-items:center;gap:4px;" }, "+ Add Symbol");
+
+      const chipsWrap = U.el("div", { class: "banned-chips-wrap" });
+      const countBadge = U.el("span", { class: "sub", style: "margin-left:8px;font-weight:normal;" });
+
+      const renderChips = () => {
+        chipsWrap.replaceChildren();
+        const syms = c.banned_symbols || [];
+        countBadge.textContent = `(${syms.length} symbol${syms.length === 1 ? "" : "s"})`;
+        if (!syms.length) {
+          chipsWrap.append(U.el("div", { class: "muted", style: "font-size:12px;padding:8px;" },
+            "No symbols banned yet. Use the 🚫 icon in Screener or Tape rows, or add tickers above."));
+          return;
+        }
+        syms.forEach((sym, idx) => {
+          const chip = U.el("div", { class: "banned-chip" },
+            U.el("span", {}, sym),
+            U.el("button", {
+              class: "banned-chip-remove",
+              title: `Remove ${sym} from banned list`,
+              onclick: () => {
+                c.banned_symbols.splice(idx, 1);
+                renderChips();
+              }
+            }, "✕")
+          );
+          chipsWrap.append(chip);
+        });
+      };
+
+      const handleAdd = () => {
+        const val = input.value.trim().toUpperCase().replace(/[^A-Z0-9.-]/g, "");
+        if (!val) return;
+        if (!c.banned_symbols.includes(val)) {
+          c.banned_symbols.push(val);
+          renderChips();
+          input.value = "";
+        } else {
+          U.toast("info", `${val} already exists`, `Symbol is already in the banned list.`);
+        }
+        input.focus();
+      };
+
+      addBtn.onclick = handleAdd;
+      input.onkeydown = (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          handleAdd();
+        }
+      };
+
+      addBar.append(input, addBtn);
+
+      const listHeader = U.el("div", { style: "display:flex;align-items:center;justify-content:space-between;" },
+        U.el("div", { style: "font-size:12.5px;font-weight:600;color:var(--text);" }, "Banned Tickers List", countBadge),
+        U.el("button", {
+          class: "btn sm",
+          style: "font-size:11px;",
+          onclick: () => {
+            if (c.banned_symbols.length && confirm("Clear all banned symbols from the list?")) {
+              c.banned_symbols = [];
+              renderChips();
+            }
+          }
+        }, "Clear All")
+      );
+
+      renderChips();
+
+      wrap.append(header, toggleWrap, addBar, listHeader, chipsWrap);
+      return wrap;
+    },
+
     tab_hotkeys(c) {
       if (!c.hotkeys) {
         c.hotkeys = {};

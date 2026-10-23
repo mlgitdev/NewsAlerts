@@ -60,3 +60,9 @@ Unlike web-based scanners that erase your tape history the moment you refresh or
 - **Capacity**: Retains up to 5,000 historical momentum prints.
 - **Automatic Pruning**: Automatically purges prints older than 4 days (96 hours).
 - **Off-Hours & Weekend Review**: Re-open NewsAlerts on Saturday or Sunday to study historical breakout prints, volume surges, and catalyst timings from the entire previous trading week.
+
+---
+
+## 🚫 Broker Banned / Closing-Only Stock Filter
+
+Each event card on the running tape features a dedicated `🚫` blacklist button alongside the symbol. Clicking it adds the symbol to your banned tickers list. When the topbar **`[🚫 Banned: ON]`** filter is active, tape prints for banned stocks are automatically hidden from view and audio chimes are suppressed.
