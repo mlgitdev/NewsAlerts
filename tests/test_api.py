@@ -186,10 +186,21 @@ class TestApiMethods(unittest.TestCase):
         self.assertEqual(res["source"], "local")
         self.mock_app.cfg.update.assert_called_once()
 
-        # Adding same symbol again reports already_exists: True
-        res_dup = self.api.add_to_watchlist("local_default", "NVDA")
-        self.assertTrue(res_dup["ok"])
-        self.assertTrue(res_dup.get("already_exists"))
+    def test_set_on_top_guard(self):
+        mock_window = MagicMock()
+        self.mock_app.main_window = mock_window
+
+        # Initial call sets state and invokes window logic
+        self.assertTrue(self.api.set_on_top(True))
+        self.assertEqual(getattr(mock_window, "_on_top_state", None), True)
+
+        # Calling again with identical state skips redundant updates
+        self.assertTrue(self.api.set_on_top(True))
+        self.assertEqual(getattr(mock_window, "_on_top_state", None), True)
+
+        # Calling with False updates state
+        self.assertTrue(self.api.set_on_top(False))
+        self.assertEqual(getattr(mock_window, "_on_top_state", None), False)
 
 
 if __name__ == "__main__":

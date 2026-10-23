@@ -41,12 +41,18 @@
       return !!(bg && bg.classList.contains("show"));
     },
 
+    _currentOnTop: null,
+
     applyUi() {
       const ui = App.config.ui;
       document.documentElement.style.setProperty("--fs", (ui.font_size || 13) + "px");
       document.documentElement.style.setProperty("--row-h", Math.round((ui.font_size || 13) * 2.3) + "px");
       document.body.classList.toggle("bright", !!ui.tape_bright);
-      App.api().set_on_top(!!ui.always_on_top);
+      const onTop = !!ui.always_on_top;
+      if (Settings._currentOnTop !== onTop) {
+        Settings._currentOnTop = onTop;
+        App.api().set_on_top(onTop);
+      }
     },
 
     // -- helpers

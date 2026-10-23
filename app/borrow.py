@@ -84,8 +84,12 @@ class BorrowService:
                 k, s = load_alpaca_secrets()
                 key_id = key_id or k
                 secret_key = secret_key or s
-            self.key_id = (key_id or "").strip()
-            self.secret_key = (secret_key or "").strip()
+            kid = (key_id or "").strip()
+            sec = (secret_key or "").strip()
+            if kid == self.key_id and sec == self.secret_key and mode == self.mode and len(self._cache) > 0:
+                return
+            self.key_id = kid
+            self.secret_key = sec
             self.mode = mode
             if self.key_id and self.secret_key and self.mode in ("auto", "alpaca"):
                 threading.Thread(target=self._sync_bulk_assets, daemon=True, name="alpaca-bulk-assets").start()

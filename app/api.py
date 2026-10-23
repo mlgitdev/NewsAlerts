@@ -233,8 +233,32 @@ class Api:
 
     def set_on_top(self, on: bool):
         try:
-            if self._app.main_window is not None:
-                self._app.main_window.on_top = bool(on)
+            w = self._app.main_window
+            if w is None:
+                return True
+            target = bool(on)
+            if getattr(w, "_on_top_state", None) == target:
+                return True
+            w._on_top_state = target
+
+            import sys
+            if sys.platform == "win32":
+                import ctypes
+                hwnd = None
+                try:
+                    from webview.platforms import winforms
+                    form = winforms.BrowserView.instances.get(w.uid)
+                    if form is not None and hasattr(form, "Handle"):
+                        hwnd = form.Handle.ToInt64()
+                except Exception:
+                    pass
+                if hwnd:
+                    HWND_TOPMOST = -1 if target else -2
+                    SWP_FLAGS = 0x0002 | 0x0001 | 0x0010  # SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE
+                    ctypes.windll.user32.SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_FLAGS)
+                    return True
+
+            w.on_top = target
         except Exception:
             pass
         return True
