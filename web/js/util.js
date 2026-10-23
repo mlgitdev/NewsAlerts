@@ -76,7 +76,23 @@
       body: JSON.stringify({ on }),
     }).then((r) => r.json()),
     clear_tape: () => fetch("/api/clear_tape", { method: "POST" }).then((r) => r.json()),
+    ban_symbol: (symbol) => fetch("/api/ban_symbol", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ symbol }),
+    }).then((r) => r.json()),
+    unban_symbol: (symbol) => fetch("/api/unban_symbol", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ symbol }),
+    }).then((r) => r.json()),
+    toggle_filter_banned: (enabled) => fetch("/api/toggle_filter_banned", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enabled }),
+    }).then((r) => r.json()),
   };
+
 
   const App = {
     config: null,

@@ -285,7 +285,8 @@
         const next = !current;
         App.config.filter_banned = next;
         updateFilterBannedButton();
-        await App.api().toggle_filter_banned(next);
+        Screener.renderTable();
+        Tape.renderAll();
         U.toast(
           next ? "info" : "muted",
           `Closing-Only Filter ${next ? "ON" : "OFF"}`,
@@ -293,8 +294,11 @@
             ? `Hiding ${App.config.banned_symbols?.length || 0} banned symbols from Screener & Tape.`
             : `Showing all symbols on Screener & Tape.`
         );
-        Screener.renderTable();
-        Tape.renderAll();
+        try {
+          await App.api().toggle_filter_banned(next);
+        } catch (e) {
+          console.error("toggle_filter_banned error:", e);
+        }
       };
     }
     updateFilterBannedButton();
@@ -306,7 +310,10 @@
     App.config.banned_symbols = App.config.banned_symbols || [];
     if (!App.config.banned_symbols.includes(sym)) {
       App.config.banned_symbols.push(sym);
-      await App.api().ban_symbol(sym);
+      updateFilterBannedButton();
+      Screener.renderTable();
+      Tape.renderAll();
+      if (window.News && News.renderHead) News.renderHead();
       U.toast(
         "warn",
         `🚫 Symbol Banned: ${sym}`,
@@ -316,10 +323,11 @@
         null,
         3500
       );
-      updateFilterBannedButton();
-      Screener.renderTable();
-      Tape.renderAll();
-      if (window.News && News.renderHead) News.renderHead();
+      try {
+        await App.api().ban_symbol(sym);
+      } catch (e) {
+        console.error("ban_symbol error:", e);
+      }
     } else {
       U.toast("info", `${sym} already in banned list`, `Symbol is already cataloged in Closing-Only list.`);
     }
@@ -332,14 +340,19 @@
     const idx = App.config.banned_symbols.indexOf(sym);
     if (idx !== -1) {
       App.config.banned_symbols.splice(idx, 1);
-      await App.api().unban_symbol(sym);
-      U.toast("info", `Unbanned: ${sym}`, `${sym} removed from banned list.`);
       updateFilterBannedButton();
       Screener.renderTable();
       Tape.renderAll();
       if (window.News && News.renderHead) News.renderHead();
+      U.toast("info", `Unbanned: ${sym}`, `${sym} removed from banned list.`);
+      try {
+        await App.api().unban_symbol(sym);
+      } catch (e) {
+        console.error("unban_symbol error:", e);
+      }
     }
   };
+
 
 
   function onNewSymbols(p) {

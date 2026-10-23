@@ -298,7 +298,38 @@ def make_app(api, web_dir: Path) -> Bottle:
             log.exception("Error in /api/set_on_top: %s", e)
             return json_resp({"ok": False})
 
+    @app.route("/api/ban_symbol", method=["POST"])
+    def ban_symbol():
+        try:
+            data = request.json or {}
+            symbol = data.get("symbol", "")
+            return json_resp(api.ban_symbol(symbol))
+        except Exception as e:
+            log.exception("Error in /api/ban_symbol: %s", e)
+            return json_resp({"ok": False, "error": str(e)})
+
+    @app.route("/api/unban_symbol", method=["POST"])
+    def unban_symbol():
+        try:
+            data = request.json or {}
+            symbol = data.get("symbol", "")
+            return json_resp(api.unban_symbol(symbol))
+        except Exception as e:
+            log.exception("Error in /api/unban_symbol: %s", e)
+            return json_resp({"ok": False, "error": str(e)})
+
+    @app.route("/api/toggle_filter_banned", method=["POST"])
+    def toggle_filter_banned():
+        try:
+            data = request.json or {}
+            enabled = data.get("enabled", None)
+            return json_resp(api.toggle_filter_banned(enabled))
+        except Exception as e:
+            log.exception("Error in /api/toggle_filter_banned: %s", e)
+            return json_resp({"ok": False, "error": str(e)})
+
     return app
+
 
 
 def start_server(api, web_dir: Path, port: int = 49281) -> tuple[str, ThreadingWSGIServer]:
