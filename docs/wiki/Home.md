@@ -9,7 +9,7 @@ Built on a native, ultra-responsive architecture (`pywebview` + Vanilla ES6+/CSS
     <img src="https://raw.githubusercontent.com/mlgitdev/NewsAlerts/main/docs/img/terminal.png" alt="NewsAlerts Real-Time Momentum Terminal" width="100%" style="border-radius:10px; border:1px solid #2a3347; box-shadow:0 10px 30px rgba(0,0,0,0.5);" />
   </a>
   <br>
-  <small><em>Live institutional terminal capture (v2.8.0): Real-time screener with 1-click watchlist quick-add, high-of-day momentum tape, TradingView cloud watchlist selector, and catalyst news wire.</em></small>
+  <small><em>Live institutional terminal capture (v2.10.2): Real-time screener with 1-click watchlist quick-add, high-of-day momentum tape, TradingView cloud watchlist selector, interactive topbar 🚫 Banned / Closing-Only filter, and catalyst news wire.</em></small>
 </p>
 
 ---
