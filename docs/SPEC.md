@@ -204,12 +204,12 @@ Clicking a row selects it and loads news in the right pane (§7).
 | Medium Float – High Rel Vol – Price $20+ | 20M ≤ float < 100M, rel vol ≥ 5, price ≥ 20 |
 | Medium Float – High Rel Vol – Price under $20 | 20M ≤ float < 100M, rel vol ≥ 5, price < 20 |
 | Medium Float – Med Rel Vol – Price $20+ | 20M ≤ float < 100M, 2 ≤ rel vol < 5, price ≥ 20 |
-| Large Cap / High Float – Momentum Squeeze | float ≥ 100M, price ≥ 1.05 × lowest in 5 min or change\|5 ≥ 5% (monitors SMCI, NVDA, TSLA) |
+| Large Cap / High Float – Momentum Squeeze | float ≥ 100M, price ≥ 1.05 × lowest in 5 min near crest or regular-session change\|5 ≥ 5% (monitors SMCI, NVDA, TSLA) |
 | Large Cap / High Float – High Rel Vol – Price $20+ | float ≥ 100M, rel vol ≥ 2, price ≥ 20 |
 | Squeeze Alert – 52wk Breakout | price ≥ 52w high (fires on cross) |
-| Squeeze Alert – Up 10% in 5min | price ≥ 1.10 × lowest in 5 min or change\|5 ≥ 10% (high-velocity spike) |
-| Squeeze Alert – Up 10% in 10min | price ≥ 1.10 × lowest price in last 10 min (up-only within active 10m window) |
-| Squeeze Alert – Up 5% in 5min | price ≥ 1.05 × lowest price in last 5 min (up-only within active 5m window) |
+| Squeeze Alert – Up 10% in 5min | price ≥ 1.10 × lowest in 5 min near crest or regular-session change\|5 ≥ 10% (strictly upward trajectory) |
+| Squeeze Alert – Up 10% in 10min | price ≥ 1.10 × lowest price in last 10 min (up-only near crest within active 10m window) |
+| Squeeze Alert – Up 5% in 5min | price ≥ 1.05 × lowest price in last 5 min (up-only near crest within active 5m window) |
 
 ### 8.2.1 Tape Header Quick-Filter Popout
 The tape header features an interactive `[🔔 Strategies N/M]` popout button allowing traders to filter active strategy streams directly from the running tape:

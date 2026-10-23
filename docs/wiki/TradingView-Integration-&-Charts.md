@@ -71,6 +71,7 @@ By default, unauthenticated TradingView connections receive delayed data (~15-mi
 - **Location**: Positioned directly above the News pane (`#news-pane`).
 - **Dynamic Watchlist Dropdown**: Displays all custom watchlists registered to your authenticated TradingView account, along with their current symbol count.
 - **On-Demand Cloud Sync (`🔄`)**: Click the refresh button to pull any newly added watchlists or external edits without restarting the application.
+- **5-Minute Periodic Auto-Refresh**: In addition to manual on-demand syncing (`🔄`), NewsAlerts automatically synchronizes with TradingView every 5 minutes in the background, updating list counts whenever symbols are removed or added externally.
 - **Connection Badge**: Shows `[TV Cloud]` when authenticated with TradingView, or `[Local]` when operating in offline/fallback mode.
 
 ### 2. 1-Click Quick-Add (`+`) Buttons

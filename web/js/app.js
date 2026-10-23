@@ -591,22 +591,29 @@
     const badge = U.$("#watchlist-status-badge");
     if (!select) return;
 
-    async function loadWatchlists() {
-      if (syncBtn) syncBtn.classList.add("rotating");
+    async function loadWatchlists(silent = false) {
+      if (syncBtn && !silent) syncBtn.classList.add("rotating");
       try {
         const res = await App.api().get_watchlists();
         if (select) {
+          const currentVal = select.value || (res && res.active_id) || "";
           select.replaceChildren();
           const wls = res.watchlists || [];
           if (!wls.length) {
             select.append(U.el("option", { value: "" }, "No watchlists found"));
           } else {
+            let matched = false;
             wls.forEach((w) => {
               const opt = U.el("option", { value: w.id }, `${w.title} (${w.count || 0})`);
-              if (w.id === res.active_id) opt.selected = true;
+              if (w.id === currentVal) {
+                opt.selected = true;
+                matched = true;
+              }
               select.append(opt);
             });
-            if (res.active_id) {
+            if (matched) {
+              select.value = currentVal;
+            } else if (res.active_id) {
               select.value = res.active_id;
             } else if (wls[0]) {
               select.value = wls[0].id;
@@ -632,7 +639,7 @@
           badge.className = "watchlist-status-badge local";
         }
       } finally {
-        if (syncBtn) syncBtn.classList.remove("rotating");
+        if (syncBtn && !silent) syncBtn.classList.remove("rotating");
       }
     }
 
@@ -652,12 +659,18 @@
 
     if (syncBtn) {
       syncBtn.onclick = () => {
-        loadWatchlists();
+        loadWatchlists(false);
         U.toast("info", "🔄 Watchlists Synced", "Refreshed TradingView custom watchlists", null, 2000);
       };
     }
 
-    await loadWatchlists();
+    // Auto-refresh watchlist synchronization every 5 minutes (300,000 ms)
+    if (App._wlInterval) clearInterval(App._wlInterval);
+    App._wlInterval = setInterval(() => {
+      loadWatchlists(true);
+    }, 5 * 60 * 1000);
+
+    await loadWatchlists(false);
   }
 
   async function handleAddToWatchlist(btn, symbol) {

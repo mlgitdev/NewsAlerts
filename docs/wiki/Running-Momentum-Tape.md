@@ -47,8 +47,8 @@ Active traders can toggle momentum strategies on the fly without ever leaving th
   - 🟢 **Mint Bullet**: Low Float Momo & RelVol Surges
   - 🟡 **Sand Bullet**: Medium Float Momentum
   - 🟣 **Violet Bullet**: Large Cap / High Float Squeezes
-  - 🔵 **Cyan Bullet**: Squeeze Alerts (52w Breakouts, 5% / 10% Velocity Surges)
 - **Instant Client-Side Filtering**: Toggling any strategy immediately hides/shows matching historical rows and mutes associated audio chimes and Telegram alerts.
+- **Strict Upward Surge Geometry & Anti-Spam**: Squeeze alerts (`Up 5% in 5min`, `Up 10% in 10min`) enforce strictly upward rolling trajectories near the surge crest (`price >= max_p * 0.975`). Flat consolidation phases, pullback selloffs, and duplicate alerts at the same price are automatically suppressed.
 
 ---
 

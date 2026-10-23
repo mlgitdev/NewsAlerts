@@ -244,40 +244,69 @@ class TapeWorker(threading.Thread):
             elif trig == "squeeze":
                 window_sec = float(strat.get("window_min", 5)) * 60
                 up_pct = float(strat.get("up_pct", 5))
+                is_reg_session = session in ("reg", "regular")
                 chg5 = r.get("change|5")
                 chg15 = r.get("change|15")
 
                 surge = False
-                # 1. Historical rolling window check (if symbol has been tracked in memory)
+                # 1. Historical rolling window check (tick-by-tick real-time history)
                 if st.hist:
                     win = now - window_sec
-                    lows = [h[1] for h in st.hist if h[0] >= win and h[1]]
-                    if lows and (now - st.hist[0][0] >= 30 or len(st.hist) >= 3):
-                        if price >= min(lows) * (1 + up_pct / 100):
-                            surge = True
+                    pts = [(t, p) for t, p, _ in st.hist if t >= win and p is not None and p > 0]
+                    pts_with_curr = pts + [(now, price)]
+                    if len(pts_with_curr) >= 2 and (now - pts_with_curr[0][0] >= 15 or len(pts_with_curr) >= 3):
+                        min_p = min(p for _, p in pts_with_curr)
+                        max_p = max(p for _, p in pts_with_curr)
+                        t_min = min(t for t, p in pts_with_curr if p == min_p)
+                        t_max = max(t for t, p in pts_with_curr if p == max_p)
 
-                # 2. Server-side velocity: TradingView 5-min/15-min change if available
-                if not surge:
+                        # Upward momentum requirements:
+                        # a) Low occurred before high (strictly upward trajectory, never declining)
+                        # b) Surge gain from window low to current price is at least up_pct
+                        # c) Current price is actively near the peak of the surge (>= 97.5% of peak, not dumping)
+                        if t_min < t_max and min_p > 0:
+                            surge_pct = (price - min_p) / min_p * 100
+                            if surge_pct >= up_pct and price >= max_p * 0.975:
+                                surge = True
+
+                # 2. Server-side velocity: ONLY valid during regular session (TradingView change|5 / change|15)
+                # In premarket/postmarket, TradingView change|5 is static against regular close and must not be used.
+                if not surge and is_reg_session and not st.hist:
                     server_chg = chg5 if window_sec <= 300 else (chg15 or chg5)
                     if server_chg is not None and server_chg >= up_pct:
-                        surge = True
+                        if high is not None and price >= high * 0.975:
+                            surge = True
 
-                # 3. New entry velocity: if symbol just entered universe with session/postmarket surge
+                # 3. New entry velocity on freshly entering universe:
+                # Only allowed if price is actively AT or near high of day (never on stocks falling back)
                 if not surge and not st.hist:
                     session_chg = lg.get("chg")
                     if session_chg is not None and session_chg >= up_pct:
-                        surge = True
+                        if high is not None and price >= high * 0.975:
+                            surge = True
 
                 if surge and _match(strat, v):
                     last_t = st.last_fire.get(name, 0)
                     last_p = st.last_fire_price.get(name)
-                    # During active time window, only trigger if price is strictly higher
-                    # than the previous alert price for this strategy (never on price drops/flat).
-                    if (now - last_t < window_sec) and last_p is not None:
-                        if price > last_p:
-                            fired = True
-                    else:
+
+                    if last_p is None or last_t == 0:
                         fired = True
+                    else:
+                        # Anti-spam & progression rules:
+                        # Once alerted at last_p, NEVER re-alert at the same or lower price.
+                        # Require at least +1% advance above last_p during ongoing run,
+                        # OR if previous window has elapsed, require a new low followed by a new surge.
+                        if price >= last_p * 1.01:
+                            fired = True
+                        elif now - last_t >= window_sec and st.hist:
+                            pts_after = [(t, p) for t, p, _ in st.hist if t >= last_t and p is not None and p > 0]
+                            if pts_after:
+                                new_min = min(p for _, p in pts_after)
+                                t_new_min = min(t for t, p in pts_after if p == new_min)
+                                if (now > t_new_min and new_min > 0 and
+                                        (price - new_min) / new_min * 100 >= up_pct and
+                                        price > last_p):
+                                    fired = True
 
             if fired and now - st.last_fire.get(name, 0) >= cooldown:
                 st.last_fire[name] = now
