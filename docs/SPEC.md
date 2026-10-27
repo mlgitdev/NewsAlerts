@@ -170,17 +170,70 @@ Click header to sort; sort persisted per screen. Positive values green, negative
 ### 6.5 Click → news
 Clicking a row selects it and loads news in the right pane (§7).
 
-## 7. News pane
-- Header: symbol, name, price/chg, borrow locate status, description, float, bid/ask spread, session VWAP, and TradingView chart button.
+## 7. News & Catalyst Intelligence Pane
+The right-hand pane combines real-time catalyst PR headlines with deep SEC EDGAR regulatory filing intelligence:
+
+### 7.1 Header & Action Controls
+- **Symbol Overview**: Displays selected ticker, company name, real-time price & % change, borrow locate status (`ETB` / `HTB` / `NO BORROW`), short description, float, bid/ask spread, and session VWAP.
+- **TradingView Cloud Watchlist Bar (`#watchlist-bar`)**: Docked directly above the News pane with active list selector dropdown, on-demand sync button (`🔄`), and status.
+- **1-Click Chart Launching (`#news-chart`)**: Dedicated chart icon button opens the live interactive TradingView chart for the symbol in the default browser.
+- **1-Click BamSEC Directory Hub (`#news-bamsec-btn`)**: Dedicated button (`[📑 BamSEC ↗]`) opens the company's full filing and financial statement directory on `bamsec.com`.
 - **Custom Symbol Search & Watchlist**:
-  - Sticky institutional search bar at top of news pane supporting any US common equity ticker (e.g. `SMCI`, `AAPL`, `NVDA`, `NASDAQ:SMCI`).
+  - Sticky institutional search bar supporting any US common equity ticker (e.g. `SMCI`, `AAPL`, `NVDA`, `NASDAQ:SMCI`).
   - Strict US market scoping (AMEX, NASDAQ, NYSE common stocks).
   - Pinned quick-access chips (`[ SMCI × ] [ NVDA × ] [ AAPL × ]`) for rapid watchlist switching and removal.
-- List of headlines within recency window, newest first: time (ET, + "12m ago"), provider badge
-  (Benzinga highlighted orange), title.
-- Click headline → expands inline story text; "Open" opens original URL in default browser.
-- Auto-refresh every 30 s while symbol selected; new headline → subtle highlight (+ optional sound).
-- Empty state: Hero graphic with immediate guidance to select from Screener, Tape, or enter a custom US symbol.
+
+### 7.2 Zero-Lag Catalyst Wire News
+- **Real-Time Headlines**: Streaming headlines within the selected recency window (1h, 12h, 24h, 7d).
+- **Provider Badges**: Benzinga wire PRs highlighted in institutional orange (`BENZINGA`), with TradingView, Seeking Alpha, and GlobeNewswire badges.
+- **Inline Story Expansion**: Clicking any headline expands story text inline; "Open article ↗" opens the original source URL in the browser.
+- **Auto-Refresh**: Background refresh every 30s while a ticker is selected; new headlines trigger subtle border pulse (+ optional audio bell).
+- **Empty State**: Hero graphic with immediate guidance to select a symbol from the Screener or Tape, or enter a custom US symbol.
+
+### 7.3 BamSEC Real-Time SEC Filings & Dilution Radar
+- **Architecture & Scraper (`app/bamsec.py`)**:
+  - `BamSECService` executes high-speed retrieval of company SEC filings directly from BamSEC (`https://www.bamsec.com/search?q={ticker}`).
+  - Built using standard library regex HTML extraction (`re`, `html.unescape`) with zero heavy third-party parsing overhead.
+  - Multi-threaded, thread-safe TTL cache (120s) preventing redundant external requests across rapid tab/symbol switching.
+- **Backend API Contract (`GET /api/bamsec?ticker={ticker}&force={0|1}`)**:
+  - Returns structured JSON payload:
+    ```json
+    {
+      "ticker": "NCPL",
+      "filings": [
+        {
+          "form": "F-3",
+          "title": "Shelf registration",
+          "date": "10/20/26",
+          "url": "https://www.bamsec.com/filing/...",
+          "group": "offering"
+        }
+      ],
+      "category_counts": {
+        "all": 42,
+        "news": 7,
+        "offering": 5,
+        "ownership": 7,
+        "financial": 4
+      },
+      "url": "https://www.bamsec.com/search?q=NCPL",
+      "count": 42,
+      "updated_at": 1729000000.0
+    }
+    ```
+- **Category Classification & Institutional Form Badges**:
+  - **News (`8-K`, `6-K`)**: Material announcements, press releases, dividend notices (Mint / Green badge).
+  - **Offerings & Dilution (`S-1`, `S-3`, `F-1`, `F-3`, `424B`, `DRS`, `RW`)**: Secondary offerings, warrants, shelf registrations, dilution alerts (Rose / Red badge).
+  - **Ownership & Insiders (`Form 3`, `Form 4`, `Form 5`, `SC 13D`, `SC 13G`)**: Major insider trades, activist stakes, 10%+ owners (Purple badge).
+  - **Financials (`10-K`, `10-Q`, `20-F`)**: Annual and quarterly earnings reports (Electric Blue badge).
+  - **Proxies & Other (`DEF 14A`, `POS AM`, etc.)**: Shareholder meetings and general SEC filings (Slate badge).
+- **Dual Display Modes (Configurable in Settings &rarr; General)**:
+  1. **Collapsible Accordion Drawer (`drawer`)**: Docked at the top of the Wire News view with quick filing summary counts (`News`, `Dilution`, `Insiders`) and expand/collapse toggle. State saved in `news.bamsec_drawer_open`.
+  2. **Dedicated Sub-Tabs View (`tabs`)**: Full-height tabbed navigation switching between `📰 Wire News` and `📑 BamSEC Filings` with real-time text search and filter pills.
+- **Navigation & Focus Rule**:
+  - Selecting any ticker from the Screener or Tape automatically resets active sub-tab view back to `📰 Wire News` (or keeps drawer open if in drawer mode), ensuring traders never miss immediate catalyst news.
+- **On-The-Fly Layout Toggle**:
+  - Interactive header button (`⊞ Tabs View` / `⊟ Drawer View`) dynamically toggles between display modes on the fly.
 
 ## 8. Tape (running momentum events)
 ### 8.1 Universe & engine
@@ -269,6 +322,7 @@ TradingView `sessionid`/`sessionid_sign` & real-time connection status · poll i
 app/
   main.py        – starts pywebview windows, wires API + workers
   api.py         – JS↔Python bridge (pywebview js_api)
+  bamsec.py      – BamSEC SEC EDGAR filings scraper, category parser, and TTL cache
   config.py      – load/save %APPDATA%\NewsAlerts\config.json, defaults
   sessions.py    – ET clock, session detection, field mapping
   tv_client.py   – scanner + news HTTP client (cookie, retries, backoff)

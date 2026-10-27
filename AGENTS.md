@@ -122,6 +122,17 @@ All new features, user requests, enhancements, bug fixes, refactorings, and opti
 ### 6. Repository Skill Reference
 - For full operational workflows, CLI syntax, and examples, consult the [`issue` skill](.agents/skills/issue/SKILL.md).
 
+### 7. Mandatory Specification-First Protocol (`docs/SPEC.md` SSOT)
+The architectural and technical Single Source of Truth for NewsAlerts is [`docs/SPEC.md`](docs/SPEC.md). All AI agents must adhere to the Specification-First development lifecycle:
+1. **Verify Requirements First**:
+   - Before writing code, changing UI layout, or creating new endpoints/services, the Agent **MUST verify requirements and established contracts in [`docs/SPEC.md`](docs/SPEC.md)** first.
+   - Do not make assumptions on how a feature should behave or how data should be formatted when the specification defines it.
+2. **Synchronize Specification with Features**:
+   - Whenever an added feature, API route, data structure, layout mode, or configuration parameter is implemented, the Agent **MUST update [`docs/SPEC.md`](docs/SPEC.md)** to reflect the delivered capability.
+   - A feature implementation is strictly considered **incomplete** if `docs/SPEC.md` does not document its architecture, behavior, and data contracts.
+3. **Architecture Section Parity**:
+   - Any new backend module (e.g. `app/bamsec.py`) or frontend asset must be added to Section 11 (*Architecture*) of `docs/SPEC.md`.
+
 ---
 
 ## 6. Branch & Pull Request Protocol
@@ -222,6 +233,8 @@ Agents MUST execute the following verification steps prior to opening a PR:
    Verify standalone binary integrity, PE magic headers, and absence of secret files.
 5. **Wiki & Footer Version Audit**:
    Verify that any new features or behaviors are documented in `docs/wiki/` and that `docs/wiki/_Footer.md` version matches root `VERSION`.
+6. **Specification Parity Audit**:
+   Verify that [`docs/SPEC.md`](docs/SPEC.md) accurately documents any new features, API endpoints, configuration keys, or UI panels introduced in the branch.
 
 ---
 
