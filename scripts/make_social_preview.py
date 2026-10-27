@@ -65,12 +65,17 @@ def create_social_preview(output_path: Path):
 
     draw.text((126, 48), "NewsAlerts", font=font_bold_42, fill=(255, 255, 255))
     
-    # Version Badge
-    try:
-        from app.version import __version__
-        ver_text = f"v{__version__}"
-    except ImportError:
-        ver_text = "v2.4.2"
+    # Version Badge (Dynamic from VERSION file as SSOT)
+    ver_file = base_dir / "VERSION"
+    if ver_file.exists():
+        ver_text = f"v{ver_file.read_text('utf-8').strip()}"
+    else:
+        try:
+            from app.version import __version__
+            ver_text = f"v{__version__}"
+        except ImportError:
+            ver_text = "v2.11.0"
+
     v_bbox = draw.textbbox((0, 0), ver_text, font=font_mono_13)
     vw = v_bbox[2] - v_bbox[0] + 16
     vx = 126 + 236
@@ -79,22 +84,24 @@ def create_social_preview(output_path: Path):
     draw.text((vx + 8, vy + 4), ver_text, font=font_mono_13, fill=(52, 211, 153))
 
     # Slogan / Value Proposition
-    draw.text((48, 134), "Real-Time Momentum Intelligence", font=font_bold_26, fill=(52, 211, 153))
+    draw.text((48, 130), "Real-Time Momentum Intelligence", font=font_bold_26, fill=(52, 211, 153))
 
     sub_line1 = "Institutional-grade US small-cap momentum screener, high-of-day"
-    sub_line2 = "running tape, and zero-lag catalyst news wire built for active day traders."
-    draw.text((48, 172), sub_line1, font=font_reg_15, fill=(148, 163, 184))
-    draw.text((48, 194), sub_line2, font=font_reg_15, fill=(148, 163, 184))
+    sub_line2 = "running tape, zero-lag catalyst news, and BamSEC SEC EDGAR filings."
+    draw.text((48, 166), sub_line1, font=font_reg_15, fill=(148, 163, 184))
+    draw.text((48, 186), sub_line2, font=font_reg_15, fill=(148, 163, 184))
 
     # Core Features (with custom glowing indicator dots)
     bullets = [
         ((34, 201, 147), "Zero-Latency Inbound Alerts", "Audio bells & instant Telegram push alerts"),
         ((34, 211, 238), "Running Momentum Tape", "Warrior-style HOD & squeeze breakout prints"),
-        ((251, 191, 36), "Zero-Lag Catalyst Wire", "Eliminates retail 5-15 minute charting delay"),
+        ((251, 191, 36), "Zero-Lag Catalyst Wire", "Real-time Benzinga PRs without retail delay"),
+        ((244, 63, 94), "BamSEC SEC Filings Radar", "Spot shelf registrations (F-3/S-3) & dilution risk"),
+        ((59, 130, 246), "TradingView Cloud Sync", "Real-time cloud watchlist sync & 1-click quick-add"),
         ((168, 85, 247), "Institutional Short Locates", "Real-time ETB · HTB · NO BORROW badges"),
     ]
 
-    by = 246
+    by = 224
     for dot_color, title_txt, desc_txt in bullets:
         # Glowing status dot
         draw.ellipse([48, by + 4, 58, by + 14], fill=dot_color)
@@ -104,7 +111,7 @@ def create_social_preview(output_path: Path):
         t_bbox = draw.textbbox((70, by), title_txt, font=font_bold_16)
         tx_end = t_bbox[2]
         draw.text((tx_end + 8, by + 1), f"·  {desc_txt}", font=font_reg_13, fill=(100, 116, 139))
-        by += 40
+        by += 33
 
     # Architecture & OS Pills at bottom
     pills = [
@@ -163,11 +170,11 @@ def create_social_preview(output_path: Path):
     strat_path = base_dir / "docs" / "img" / "strategies.png"
     if strat_path.exists():
         strat_img = Image.open(strat_path).convert("RGBA")
-        strat_w, strat_h = 250, 245
+        strat_w, strat_h = 245, 230
         strat_resized = strat_img.resize((strat_w, strat_h), Image.Resampling.LANCZOS)
         strat_rounded = round_corners(strat_resized, 10)
 
-        sx, sy = 670, 325
+        sx, sy = 665, 320
 
         # Shadow
         strat_shadow = Image.new("RGBA", (strat_w + 50, strat_h + 50), (0, 0, 0, 0))
@@ -181,8 +188,8 @@ def create_social_preview(output_path: Path):
         img.paste(strat_rounded, (sx, sy), strat_rounded)
 
     # 8. Overlaid Live Inbound Alert Badge
-    bx, by = 935, 340
-    bw, bh = 295, 66
+    bx, by = 925, 320
+    bw, bh = 305, 64
     # Shadow
     b_shadow = Image.new("RGBA", (bw + 40, bh + 40), (0, 0, 0, 0))
     bsdraw = ImageDraw.Draw(b_shadow)
@@ -196,25 +203,62 @@ def create_social_preview(output_path: Path):
     draw.rounded_rectangle([bx, by + 4, bx + 4, by + bh - 4], radius=2, fill=(34, 201, 147, 255))
 
     # Alert notification tag
-    draw.rounded_rectangle([bx + 14, by + 12, bx + 36, by + 32], radius=4, fill=(34, 201, 147, 40))
-    draw.text((bx + 20, by + 14), "!", font=font_bold_16, fill=(34, 201, 147))
+    draw.rounded_rectangle([bx + 12, by + 11, bx + 34, by + 31], radius=4, fill=(34, 201, 147, 40))
+    draw.text((bx + 18, by + 13), "!", font=font_bold_16, fill=(34, 201, 147))
 
-    draw.text((bx + 46, by + 13), "WORX", font=font_bold_16, fill=(255, 255, 255))
-    draw.text((bx + 98, by + 13), "+94.20%", font=font_bold_16, fill=(74, 222, 128))
+    draw.text((bx + 42, by + 12), "WORX", font=font_bold_16, fill=(255, 255, 255))
+    draw.text((bx + 94, by + 12), "+94.20%", font=font_bold_16, fill=(74, 222, 128))
     
     # HTB tag
-    draw.rounded_rectangle([bx + 172, by + 14, bx + 210, by + 30], radius=4, fill=(234, 179, 8, 255))
-    draw.text((bx + 177, by + 15), "HTB", font=font_mono_11, fill=(0, 0, 0))
+    draw.rounded_rectangle([bx + 168, by + 13, bx + 206, by + 29], radius=4, fill=(234, 179, 8, 255))
+    draw.text((bx + 173, by + 14), "HTB", font=font_mono_11, fill=(0, 0, 0))
 
-    draw.text((bx + 46, by + 38), "HOD Squeeze · 5m Vol +64,906%", font=font_mono_11, fill=(56, 189, 248))
+    draw.text((bx + 42, by + 37), "HOD Squeeze · 5m Vol +64,906%", font=font_mono_11, fill=(56, 189, 248))
 
-    # Save
+    # 9. Overlaid BamSEC Dilution Radar Alert Badge
+    fx, fy = 890, 400
+    fw, fh = 345, 64
+    # Shadow
+    f_shadow = Image.new("RGBA", (fw + 40, fh + 40), (0, 0, 0, 0))
+    fsdraw = ImageDraw.Draw(f_shadow)
+    fsdraw.rounded_rectangle([15, 15, fw + 15, fh + 15], radius=12, fill=(0, 0, 0, 220))
+    f_shadow = f_shadow.filter(ImageFilter.GaussianBlur(12))
+    img.paste(f_shadow, (fx - 15, fy - 15), f_shadow)
+
+    # Banner Card
+    draw.rounded_rectangle([fx, fy, fx + fw, fy + fh], radius=10, fill=(15, 23, 40, 248), outline=(244, 63, 94, 110), width=1)
+    # Accent indicator bar on left (Rose / Red for Dilution Alert)
+    draw.rounded_rectangle([fx, fy + 4, fx + 4, fy + fh - 4], radius=2, fill=(244, 63, 94, 255))
+
+    # F-3 tag badge
+    draw.rounded_rectangle([fx + 12, fy + 12, fx + 48, fy + 30], radius=4, fill=(244, 63, 94, 45), outline=(244, 63, 94, 140), width=1)
+    draw.text((fx + 17, fy + 13), "F-3", font=font_mono_11, fill=(251, 113, 133))
+
+    draw.text((fx + 56, fy + 12), "NCPL", font=font_bold_16, fill=(255, 255, 255))
+    draw.text((fx + 104, fy + 12), "Shelf Registration", font=font_bold_14, fill=(244, 63, 94))
+
+    draw.text((fx + 56, fy + 37), "BamSEC SEC EDGAR · Dilution Radar Active", font=font_mono_11, fill=(148, 163, 184))
+
+    # Save PNG and JPG versions
     output_path.parent.mkdir(parents=True, exist_ok=True)
     img.save(output_path, "PNG", optimize=True)
     print(f"Successfully generated {output_path} ({W}x{H})")
+
+    # Also save as hero.jpg
+    hero_jpg_path = base_dir / "assets" / "hero.jpg"
+    img_rgb = img.convert("RGB")
+    img_rgb.save(hero_jpg_path, "JPEG", quality=95, optimize=True)
+    print(f"Successfully generated {hero_jpg_path}")
+
+    # Also save to web/img/hero.jpg
+    web_hero_path = base_dir / "web" / "img" / "hero.jpg"
+    web_hero_path.parent.mkdir(parents=True, exist_ok=True)
+    img_rgb.save(web_hero_path, "JPEG", quality=95, optimize=True)
+    print(f"Successfully generated {web_hero_path}")
 
 
 if __name__ == "__main__":
     out_file = Path(__file__).resolve().parent.parent / "assets" / "social_preview.png"
     create_social_preview(out_file)
+
 
