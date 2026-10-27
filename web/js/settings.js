@@ -104,7 +104,18 @@
         U.el("h3", {}, "Window"),
         ...Settings.field("Always on top", Settings.check(c.ui, "always_on_top")),
         ...Settings.field("Font size (px)", Settings.num(c.ui, "font_size")),
-        ...Settings.field("Bright tape colors", Settings.check(c.ui, "tape_bright", "Warrior-style solid row colors")));
+        ...Settings.field("Bright tape colors", Settings.check(c.ui, "tape_bright", "Warrior-style solid row colors")),
+        U.el("h3", {}, "BamSEC SEC Filings & Catalysts"),
+        ...Settings.field("Enable BamSEC Filings", Settings.check(c.news, "bamsec_enabled", "Fetch and display live SEC filings from BamSEC for the active symbol")),
+        ...Settings.field("Display Layout Mode", (() => {
+          const sel = U.el("select", {},
+            U.el("option", { value: "drawer" }, "⚡ Collapsible Drawer (Top Accordion)"),
+            U.el("option", { value: "tabs" }, "📑 Sub-Tabs (Wire News / BamSEC Filings)")
+          );
+          sel.value = c.news.bamsec_mode || "drawer";
+          sel.onchange = () => (c.news.bamsec_mode = sel.value);
+          return sel;
+        })(), "Choose between a collapsible top drawer above news headlines or dedicated pane sub-tabs."));
       return g;
     },
 

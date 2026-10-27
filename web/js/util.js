@@ -36,6 +36,7 @@
       body: JSON.stringify({ focused }),
     }).then((r) => r.json()).catch(() => {}),
     get_news: (ticker, force) => fetch(`/api/news?ticker=${encodeURIComponent(ticker)}&force=${force ? "1" : "0"}`).then((r) => r.json()),
+    get_bamsec: (ticker, force) => fetch(`/api/bamsec?ticker=${encodeURIComponent(ticker)}&force=${force ? "1" : "0"}`).then((r) => r.json()),
     get_story: (id) => fetch(`/api/story?id=${encodeURIComponent(id)}`).then((r) => r.json()),
     get_quote: (ticker) => fetch(`/api/quote?ticker=${encodeURIComponent(ticker)}`).then((r) => r.json()),
     play_sound: (path) => fetch("/api/play_sound", {

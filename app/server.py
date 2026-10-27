@@ -214,6 +214,16 @@ def make_app(api, web_dir: Path) -> Bottle:
             log.exception("Error in /api/quote: %s", e)
             return json_resp(None)
 
+    @app.route("/api/bamsec", method=["GET"])
+    def get_bamsec():
+        ticker = request.query.get("ticker", "")
+        force = request.query.get("force", "0") in ("1", "true", "True")
+        try:
+            return json_resp(api.get_bamsec(ticker, force=force))
+        except Exception as e:
+            log.exception("Error in /api/bamsec: %s", e)
+            return json_resp({"ticker": ticker, "company": ticker, "bamsec_url": "", "categories": {}, "all_filings": [], "total": 0, "error": str(e)})
+
     @app.route("/api/play_sound", method=["POST"])
     def play_sound():
         try:

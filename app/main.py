@@ -9,6 +9,7 @@ import webview
 
 try:
     from .api import Api, Bus
+    from .bamsec import BamSECService
     from .borrow import BorrowService
     from .config import APP_DIR, Config
     from .news import AlpacaNews, CombinedNews, NewsService, TradingViewNews
@@ -21,6 +22,7 @@ try:
     from .version import get_version
 except ImportError:
     from app.api import Api, Bus
+    from app.bamsec import BamSECService
     from app.borrow import BorrowService
     from app.config import APP_DIR, Config
     from app.news import AlpacaNews, CombinedNews, NewsService, TradingViewNews
@@ -64,6 +66,7 @@ class App:
         tv_news = TradingViewNews(self.client)
         self.alp_news = AlpacaNews(self.borrow.key_id, self.borrow.secret_key)
         self.news = NewsService(CombinedNews([self.alp_news, tv_news]))
+        self.bamsec = BamSECService()
         ac = c.get("alerts", {})
         is_paused = bool(ac.get("mute", False))
         self.telegram = TelegramService(

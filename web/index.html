@@ -143,8 +143,27 @@
             </div>
             <div class="news-chips-row" id="news-chips"></div>
           </div>
+
+          <!-- BAMSEC SUB-TABS (When in Tabs mode) -->
+          <div class="news-subtabs" id="news-subtabs" style="display:none">
+            <button class="news-subtab active" data-subtab="wire" id="subtab-wire">📰 Wire News</button>
+            <button class="news-subtab" data-subtab="bamsec" id="subtab-bamsec">
+              <span>📑 BamSEC Filings</span>
+              <span class="subtab-badge" id="bamsec-tab-badge">0</span>
+            </button>
+            <div class="spacer"></div>
+            <button class="btn-mode-toggle" id="btn-bamsec-mode-toggle" title="Switch between Drawer and Sub-Tabs layout">⊞ Tabs View</button>
+          </div>
+
+          <!-- COLLAPSIBLE BAMSEC DRAWER (When in Drawer mode) -->
+          <div class="bamsec-drawer" id="bamsec-drawer" style="display:none"></div>
+
+          <!-- REGULAR NEWS WIRE CONTROLS & FEED -->
           <div class="news-tools" id="news-tools"></div>
           <div class="pane-body" id="news-list"></div>
+
+          <!-- BAMSEC FULL TAB VIEW (When BamSEC tab is active) -->
+          <div class="pane-body bamsec-full-view" id="bamsec-full-view" style="display:none"></div>
         </section>
       </div>
 
