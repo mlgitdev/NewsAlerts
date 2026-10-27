@@ -187,3 +187,21 @@ NewsAlerts provides an integrated filtering and blacklisting engine:
    - View, add, or remove banned tickers (`config.json` &rarr; `banned_symbols`).
    - Add tickers manually using the `+ Add Symbol` input.
 
+---
+
+## 10. BamSEC SEC Filings Intelligence & Opt-Out Configuration
+
+NewsAlerts integrates live SEC EDGAR filing intelligence via BamSEC (by AlphaSense) directly in the News pane:
+1. **Default Opt-In (`news.bamsec_enabled: true`)**:
+   - Enabled by default to provide day traders with immediate access to offerings (S-1/S-3/F-3/424B), dilution, insider filings (Form 3/4/SC 13D), and material disclosures (8-K/6-K).
+2. **Complete Opt-Out Option (`Settings → General`)**:
+   - Unchecking **Enable BamSEC Filings** completely removes all BamSEC visual elements from the interface:
+     - The `[📑 BamSEC ↗]` external launch button in the news header is omitted.
+     - The `📑 N SEC` count badge is omitted.
+     - The collapsible top drawer and sub-tabs navigation are completely removed.
+     - The layout mode toggle button (`⊞ Tabs View` / `⊟ Drawer View`) is omitted.
+   - Completely halts background network requests and scraping calls to BamSEC (`/api/bamsec`), saving network bandwidth and compute for traders who only require pure wire news.
+3. **Display Layout Modes (`news.bamsec_mode`)**:
+   - `⚡ Collapsible Drawer (Top Accordion)`: Default accordion above news headlines with category filter pills and color-coded badges.
+   - `📑 Sub-Tabs (Wire News / BamSEC Filings)`: Dedicated full-pane explorer with instant keyword search and category filters.
+

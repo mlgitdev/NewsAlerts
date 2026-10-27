@@ -234,6 +234,15 @@ The right-hand pane combines real-time catalyst PR headlines with deep SEC EDGAR
   - Selecting any ticker from the Screener or Tape automatically resets active sub-tab view back to `📰 Wire News` (or keeps drawer open if in drawer mode), ensuring traders never miss immediate catalyst news.
 - **On-The-Fly Layout Toggle**:
   - Interactive header button (`⊞ Tabs View` / `⊟ Drawer View`) dynamically toggles between display modes on the fly.
+- **Optional Opt-In / Complete Opt-Out Capability (`news.bamsec_enabled`)**:
+  - **Default Opt-In**: Enabled by default (`news.bamsec_enabled: true`).
+  - **Complete Opt-Out Removal**: When unchecked in **Settings &rarr; General** (`news.bamsec_enabled: false`):
+    - **Header Directory Button**: The `[📑 BamSEC ↗]` button is completely omitted from the news pane header.
+    - **Filing Count Badge**: The `📑 N SEC` count badge next to borrow locates is completely omitted from the news pane header.
+    - **Drawer & Sub-Tabs**: Both the `#bamsec-drawer` accordion and `#news-subtabs` navigation bars are completely hidden.
+    - **Layout Toggle**: The layout switcher button is omitted.
+    - **Network & Resource Suppression**: Background calls to `/api/bamsec` are completely halted on symbol selection, manual refresh, and timer polling, saving network requests and client memory.
+    - **Immediate Reactive Toggle**: Saving Settings dynamically updates the active News pane in real time without requiring application restart.
 
 ## 8. Tape (running momentum events)
 ### 8.1 Universe & engine
@@ -316,6 +325,10 @@ TradingView `sessionid`/`sessionid_sign` & real-time connection status · poll i
   - Quick-action `🚫` ban buttons next to ticker symbols in Screener rows, Tape momentum cards, and News header.
   - Dedicated **Settings &rarr; 🚫 Banned Stocks** manager with chip list, one-click unban buttons, manual ticker entry (`+ Add Symbol`), and clear all action.
   - Suppresses audio chimes and Telegram alerts for blacklisted tickers when active. Persisted in `config.json` under `banned_symbols` (default `["YMAT"]`) and `filter_banned`.
+- **BamSEC SEC Filings Settings (`news`)**:
+  - `bamsec_enabled` (bool, default `true`): Master opt-in toggle controlling BamSEC utilization across the terminal. When disabled, all BamSEC buttons, badges, drawers, and tabs are removed from the DOM, and all network calls to `/api/bamsec` are halted.
+  - `bamsec_mode` (`"drawer"` | `"tabs"`, default `"drawer"`): Default layout mode when BamSEC is enabled.
+  - `bamsec_drawer_open` (bool, default `true`): Drawer expansion state persistence.
 
 ## 11. Architecture
 ```

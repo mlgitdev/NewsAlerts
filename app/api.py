@@ -170,6 +170,9 @@ class Api:
         return self._app.news.story(story_id)
 
     def get_bamsec(self, ticker: str, force: bool = False):
+        cfg = getattr(self._app, "config", {}).get("news", {})
+        if not cfg.get("bamsec_enabled", True):
+            return {"ticker": ticker, "company": ticker, "bamsec_url": "", "categories": {}, "all_filings": [], "total": 0, "disabled": True}
         if hasattr(self._app, "bamsec"):
             return self._app.bamsec.get_filings(ticker, force=force)
         return {"ticker": ticker, "company": ticker, "bamsec_url": "", "categories": {}, "all_filings": [], "total": 0, "error": "BamSEC not available"}

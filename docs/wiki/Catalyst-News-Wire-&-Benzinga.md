@@ -40,3 +40,8 @@ NewsAlerts connects directly to low-latency institutional news wires—including
    - `1h` · `2h` · `4h` · `8h` · `12h` · `24h` · `3d` · `7d`
 5. **Market Catalyst Verification**:
    Instantly verify whether a runner is moving on legitimate corporate news (FDA clearance, defense contract, earnings beat) or sympathy / chatroom momentum.
+6. **BamSEC Real-Time SEC Filings & Opt-Out Capability**:
+   - Integrated SEC EDGAR filings explorer powered by BamSEC (by AlphaSense) directly beside wire news headlines.
+   - Dual presentation modes: **⚡ Collapsible Accordion Drawer** at the top of the news panel or **📑 Sub-Tabs View** (`📰 Wire News` / `📑 BamSEC Filings`).
+   - Categorized filings with color-coded badges: News (6-K/8-K), Dilution & Offerings (S-1/S-3/F-3/424B), Ownership (Form 3/4/SC 13D), and Financials (10-K/10-Q).
+   - **Togglable Opt-Out in Settings**: Enabled by default (`news.bamsec_enabled = true`), but can be completely disabled in **Settings &rarr; General**. When opted out, all BamSEC header buttons, badges, drawers, sub-tabs, and background scraper network requests are completely suppressed.
