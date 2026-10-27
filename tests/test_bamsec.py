@@ -205,5 +205,41 @@ class TestBamSECServerRoute(unittest.TestCase):
         self.api.get_bamsec.assert_called_with("AIOK", force=True)
 
 
+class TestBamSECApiOptOut(unittest.TestCase):
+    def test_default_config_opt_in(self):
+        from app.config import DEFAULT_CONFIG
+        self.assertIn("news", DEFAULT_CONFIG)
+        self.assertTrue(DEFAULT_CONFIG["news"].get("bamsec_enabled", False))
+
+    def test_api_get_bamsec_when_enabled(self):
+        from app.api import Api
+        mock_app = MagicMock()
+        mock_app.config = {"news": {"bamsec_enabled": True}}
+        mock_app.bamsec = MagicMock()
+        mock_app.bamsec.get_filings.return_value = {
+            "ticker": "AIOK",
+            "total": 3,
+            "all_filings": [{"form": "8-K"}]
+        }
+        api = Api(mock_app)
+        res = api.get_bamsec("AIOK", force=True)
+        self.assertEqual(res["ticker"], "AIOK")
+        self.assertEqual(res["total"], 3)
+        self.assertNotIn("disabled", res)
+        mock_app.bamsec.get_filings.assert_called_once_with("AIOK", force=True)
+
+    def test_api_get_bamsec_when_disabled_opt_out(self):
+        from app.api import Api
+        mock_app = MagicMock()
+        mock_app.config = {"news": {"bamsec_enabled": False}}
+        mock_app.bamsec = MagicMock()
+        api = Api(mock_app)
+        res = api.get_bamsec("AIOK", force=True)
+        self.assertEqual(res["ticker"], "AIOK")
+        self.assertEqual(res["total"], 0)
+        self.assertTrue(res.get("disabled"))
+        mock_app.bamsec.get_filings.assert_not_called()
+
+
 if __name__ == "__main__":
     unittest.main()

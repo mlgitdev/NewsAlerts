@@ -227,12 +227,22 @@
       await News.load(false, true);
 
       // Trigger BamSEC filing load
-      News.loadBamsec(ticker, false);
+      News.bamsecActiveTab = "wire";
+      const cfg = App.config.news || {};
+      if (cfg.bamsec_enabled !== false) {
+        News.loadBamsec(ticker, false);
+      } else {
+        News.bamsecData = null;
+        News.renderBamsec();
+      }
 
       clearInterval(News.timer);
       News.timer = setInterval(() => {
         News.load(true);
-        News.loadBamsec(News.ticker, false);
+        const c = App.config.news || {};
+        if (c.bamsec_enabled !== false) {
+          News.loadBamsec(News.ticker, false);
+        }
       }, Math.max(10, App.config.poll.news_sec) * 1000);
     },
 
@@ -241,22 +251,28 @@
       const sym = i.symbol || (News.ticker ? News.ticker.split(":").pop() : "");
       if (!sym) return;
 
+      const cfg = App.config.news || {};
+      const bamsecEnabled = cfg.bamsec_enabled !== false;
+
       const refresh = U.el("button", { class: "icon-btn", id: "news-refresh", title: "Refresh", html: U.icons.refresh });
       const chart = U.el("button", { class: "icon-btn", id: "news-chart", title: "Open chart on TradingView", html: U.icons.chart });
       refresh.onclick = () => {
         News.load(true);
-        News.loadBamsec(News.ticker, true);
+        if (bamsecEnabled) News.loadBamsec(News.ticker, true);
       };
       chart.onclick = () => App.api().open_chart(News.ticker);
 
-      // Direct BamSEC external launch button
-      const bamsecUrl = (News.bamsecData && News.bamsecData.bamsec_url) ? News.bamsecData.bamsec_url : `https://www.bamsec.com/search?q=${sym}`;
-      const bamsecBtn = U.el("button", {
-        class: "btn-bamsec-link",
-        id: "news-bamsec-btn",
-        title: `Open ${sym} filings directly on BamSEC in browser`,
-        onclick: () => App.api().open_url(bamsecUrl)
-      }, "📑 BamSEC ↗");
+      // Direct BamSEC external launch button (ONLY if BamSEC is enabled)
+      let bamsecBtn = null;
+      if (bamsecEnabled) {
+        const bamsecUrl = (News.bamsecData && News.bamsecData.bamsec_url) ? News.bamsecData.bamsec_url : `https://www.bamsec.com/search?q=${sym}`;
+        bamsecBtn = U.el("button", {
+          class: "btn-bamsec-link",
+          id: "news-bamsec-btn",
+          title: `Open ${sym} filings directly on BamSEC in browser`,
+          onclick: () => App.api().open_url(bamsecUrl)
+        }, "📑 BamSEC ↗");
+      }
 
       const b = i.borrow || { status: "na", label: "N/A" };
       const bTag = U.el("span", {
@@ -265,14 +281,13 @@
         title: `Borrow: ${b.label} (${b.status === "easy" ? "Easy to borrow" : b.status === "hard" ? "Hard to borrow" : b.status === "none" ? "No borrow available" : "N/A"})`
       }, b.label);
 
-      // BamSEC filings badge in header
+      // BamSEC filings badge in header (ONLY if BamSEC is enabled)
       let bamsecBadge = null;
-      if (News.bamsecData && News.bamsecData.total > 0) {
+      if (bamsecEnabled && News.bamsecData && News.bamsecData.total > 0) {
         bamsecBadge = U.el("span", {
           class: "tag-bamsec-count",
           title: `${News.bamsecData.total} SEC Filings found on BamSEC. Click to view.`,
           onclick: () => {
-            const cfg = App.config.news || {};
             if (cfg.bamsec_mode === "tabs") {
               News.switchSubtab("bamsec");
             } else {
@@ -354,6 +369,13 @@
 
     async loadBamsec(ticker, force) {
       if (!ticker) return;
+      const cfg = App.config.news || {};
+      if (cfg.bamsec_enabled === false) {
+        News.bamsecData = null;
+        News.renderBamsec();
+        News.renderHead();
+        return;
+      }
       News.bamsecLoading = true;
       try {
         const res = await App.api().get_bamsec(ticker, !!force);
@@ -367,6 +389,22 @@
         console.warn("BamSEC load failed:", err);
       } finally {
         News.bamsecLoading = false;
+      }
+    },
+
+    onConfigChanged() {
+      const cfg = App.config.news || {};
+      if (cfg.bamsec_enabled === false) {
+        News.bamsecData = null;
+        News.bamsecActiveTab = "wire";
+        News.renderBamsec();
+        News.renderHead();
+      } else {
+        News.renderBamsec();
+        News.renderHead();
+        if (News.ticker && !News.bamsecData) {
+          News.loadBamsec(News.ticker, false);
+        }
       }
     },
 

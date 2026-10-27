@@ -31,6 +31,7 @@
         if (App.updateFilterBannedButton) App.updateFilterBannedButton();
         Screener.renderBar(); Screener.renderTable(); Tape.renderAll(); News.syncTools();
         if (window.News && News.renderHead) News.renderHead();
+        if (window.News && News.onConfigChanged) News.onConfigChanged();
       };
       U.$("#settings-cancel").onclick = () => Settings.close();
       U.$("#settings-close").onclick = () => Settings.close();
@@ -106,13 +107,28 @@
         ...Settings.field("Font size (px)", Settings.num(c.ui, "font_size")),
         ...Settings.field("Bright tape colors", Settings.check(c.ui, "tape_bright", "Warrior-style solid row colors")),
         U.el("h3", {}, "BamSEC SEC Filings & Catalysts"),
-        ...Settings.field("Enable BamSEC Filings", Settings.check(c.news, "bamsec_enabled", "Fetch and display live SEC filings from BamSEC for the active symbol")),
+        ...Settings.field("Enable BamSEC Filings", (() => {
+          c.news = c.news || {};
+          if (c.news.bamsec_enabled === undefined) c.news.bamsec_enabled = true;
+          const chk = Settings.check(c.news, "bamsec_enabled", "Fetch and display live SEC filings from BamSEC for the active symbol");
+          const input = chk.querySelector("input");
+          input.addEventListener("change", () => {
+            const sel = U.$("#settings-bamsec-mode-select");
+            if (sel) {
+              sel.disabled = !input.checked;
+              sel.style.opacity = input.checked ? "1" : "0.45";
+            }
+          });
+          return chk;
+        })(), "Opt-in or fully remove BamSEC filings, badges, and background network calls across the terminal."),
         ...Settings.field("Display Layout Mode", (() => {
-          const sel = U.el("select", {},
+          const sel = U.el("select", { id: "settings-bamsec-mode-select" },
             U.el("option", { value: "drawer" }, "⚡ Collapsible Drawer (Top Accordion)"),
             U.el("option", { value: "tabs" }, "📑 Sub-Tabs (Wire News / BamSEC Filings)")
           );
           sel.value = c.news.bamsec_mode || "drawer";
+          sel.disabled = c.news.bamsec_enabled === false;
+          sel.style.opacity = c.news.bamsec_enabled === false ? "0.45" : "1";
           sel.onchange = () => (c.news.bamsec_mode = sel.value);
           return sel;
         })(), "Choose between a collapsible top drawer above news headlines or dedicated pane sub-tabs."));

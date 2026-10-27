@@ -114,7 +114,12 @@
     _lastSave: 0,
     saveConfig(immediate) {
       clearTimeout(App._saveT);
-      const go = () => { App._saveT = null; App._lastSave = Date.now(); App.api().save_config(App.config); };
+      const go = () => {
+        App._saveT = null;
+        App._lastSave = Date.now();
+        App.api().save_config(App.config);
+        if (window.News && News.onConfigChanged) News.onConfigChanged();
+      };
       if (immediate) go(); else App._saveT = setTimeout(go, 250);
     },
   };

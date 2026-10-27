@@ -37,6 +37,7 @@ All official releases are produced deterministically through GitHub Actions:
 
 ## Release History
 
+- [v2.11.1 Release Notes](releases/v2.11.1.md) — Added toggleable opt-out capability for BamSEC SEC filings in Settings (opt-in by default), with complete DOM element unmounting, background scraper and network call suppression, and instant reactive live update on save (Resolves #61).
 - [v2.11.0 Release Notes](releases/v2.11.0.md) — Integrated real-time BamSEC (by AlphaSense) SEC EDGAR filings intelligence into the News pane with both Collapsible Accordion Drawer and Sub-Tabs layouts, color-coded badges for material news, offerings & dilution, ownership, and financials, one-click browser launching, and F11 full-screen showcase protocol (Resolves #57).
 - [v2.10.3 Release Notes](releases/v2.10.3.md) — Implemented missing backend `/api/ban_symbol`, `/api/unban_symbol`, and `/api/toggle_filter_banned` routes, added client `_api` helpers, and switched blacklisting UI flow to synchronous optimistic rendering to eliminate button state freezes and count desync (Resolves #54).
 - [v2.10.2 Release Notes](releases/v2.10.2.md) — Fixed topbar banned filter badge count synchronization upon saving Settings, standardized bare and qualified ticker matching across Screener, Tape, and News, and updated flagship terminal and settings showcase media across documentation (Resolves #48).
