@@ -169,6 +169,11 @@ class Api:
     def get_story(self, story_id: str):
         return self._app.news.story(story_id)
 
+    def get_bamsec(self, ticker: str, force: bool = False):
+        if hasattr(self._app, "bamsec"):
+            return self._app.bamsec.get_filings(ticker, force=force)
+        return {"ticker": ticker, "company": ticker, "bamsec_url": "", "categories": {}, "all_filings": [], "total": 0, "error": "BamSEC not available"}
+
     def reset_config(self):
         """Restore all application configurations back to factory defaults."""
         c = self._app.cfg.reset()

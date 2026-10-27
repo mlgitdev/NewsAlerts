@@ -161,7 +161,14 @@ DEFAULT_CONFIG = {
         "telegram_bot_token": "",
         "telegram_chat_id": "",
     },
-    "news": {"recency_hours": 12, "benzinga_only": False, "custom_symbols": []},
+    "news": {
+        "recency_hours": 12,
+        "benzinga_only": False,
+        "custom_symbols": [],
+        "bamsec_enabled": True,
+        "bamsec_mode": "drawer",
+        "bamsec_drawer_open": True,
+    },
     "screens": [
         {
             "id": "s1",
