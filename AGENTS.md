@@ -183,6 +183,19 @@ Whenever application code, UI layout, configuration options, hotkeys, trading st
      ```
    - *Automated safeguard*: `scripts/sync_wiki.py` automatically inspects and updates `docs/wiki/_Footer.md` against root `VERSION` before pushing to `NewsAlerts.wiki.git`.
 
+### 6. Documentation Screenshots, Chrome Full-Screen & Hero Pitch Showcase Protocol
+When capturing terminal screenshots for `README.md`, `docs/img/`, or release notes:
+1. **Mandatory Version Bump First**:
+   - Always update the root `VERSION` file (SSOT) *before* capturing screenshots so that the topbar version badge (e.g., `v2.11.0`) rendered in the UI accurately matches the new release.
+2. **Native Chrome Full-Screen (F11) Captures (Zero Cropping)**:
+   - Use the active Chrome application tab in full-screen mode (`F11` or uncropped native viewport).
+   - This captures 100% pure terminal interface without browser address bars, tabs, or OS borders—eliminating the need to manually crop images.
+3. **Strict Credential & Identity Scrambling (Mandatory Privacy)**:
+   - If any captured window or modal contains private API tokens, session IDs, account numbers, personal usernames, or bot credentials, they **MUST be scrambled, masked, or blurred** (e.g., `sessionid=••••••••`, `AKIA...****`, `user_anon`). Never expose live credentials or private account names in public showcase imagery.
+4. **Hero Image Pitch Brochure Aesthetic**:
+   - Showcase and hero imagery (`web/img/hero.jpg`, `assets/hero.jpg`, `assets/social_preview.png`) must look like a high-end, institutional pitch brochure in a single unified image, clearly highlighting flagship terminal capabilities (Momentum Screener, Running Tape, Benzinga Wire, BamSEC SEC Filings, TradingView Cloud Watchlist Sync).
+
+
 ---
 
 ## 7. Local Verification Gate Before PR Creation
