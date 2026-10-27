@@ -209,6 +209,8 @@
         News.bamsecData = null;
         News.bamsecSearchTerm = "";
       }
+      // Always return to wire news tab when selecting any ticker
+      News.bamsecActiveTab = "wire";
       News.ticker = ticker;
       News.info = info || null;
       News.renderHead();
