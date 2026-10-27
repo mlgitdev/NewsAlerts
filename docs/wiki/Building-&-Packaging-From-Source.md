@@ -13,7 +13,15 @@ The repository includes a **Universal Cross-Platform `Makefile`** compatible wit
 git clone https://github.com/mlgitdev/NewsAlerts.git
 cd NewsAlerts
 
-# Create virtual environment and compile dual build (portable .exe + unpacked app folder)
+# Auto-detect OS & prepare virtual environment with all dependencies
+make env
+
+# Or explicit platform-specific setup:
+# make env-win    # Windows
+# make env-linux  # Linux
+# make env-mac    # macOS
+
+# Compile dual build (portable .exe + unpacked app folder)
 make build
 
 # Launch the portable standalone binary

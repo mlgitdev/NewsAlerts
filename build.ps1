@@ -2,7 +2,7 @@
 # Usage: .\build.ps1 [-Task <build|clean|run|check|help>]
 
 param(
-    [ValidateSet("build", "clean", "run", "run-app", "install-local", "installer", "check", "verify-packages", "wiki-sync", "worktree-new", "worktree-list", "worktree-remove", "worktree-merge", "worktree-prune", "issue-list", "issue-view", "help")]
+    [ValidateSet("build", "env", "clean", "run", "run-app", "install-local", "installer", "check", "verify-packages", "wiki-sync", "worktree-new", "worktree-list", "worktree-remove", "worktree-merge", "worktree-prune", "issue-list", "issue-view", "help")]
     [string]$Task = "build",
 
     [string]$Branch = "",
@@ -36,6 +36,7 @@ function Show-Help {
     Write-Host "Usage: .\build.ps1 [-Task <Task>] [-Branch <branch>] [-Base <base>]"
     Write-Host ""
     Write-Host "Build & Install Tasks:"
+    Write-Host "  env                         Prepare virtual environment (.venv) and install dependencies" -ForegroundColor Yellow
     Write-Host "  build             (default) Build portable executable and unpacked application folder" -ForegroundColor Yellow
     Write-Host "  run                         Launch the portable dist\NewsAlerts.exe" -ForegroundColor Yellow
     Write-Host "  run-app                     Launch the unpacked/installed dist\NewsAlerts-App\NewsAlerts.exe" -ForegroundColor Yellow
@@ -306,7 +307,10 @@ function Get-GhCli {
     return $null
 }
 
-if ($Task -eq "build") {
+if ($Task -eq "env") {
+    Ensure-Environment
+    Write-Host "[OK] Virtual environment and dependencies are ready." -ForegroundColor Green
+} elseif ($Task -eq "build") {
     Build-Executable
 } elseif ($Task -eq "clean") {
     Clean-Artifacts

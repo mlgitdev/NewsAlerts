@@ -55,19 +55,201 @@ Active momentum day trading requires spotting low-float runners the split second
   <small><em>Live institutional terminal capture (v2.11.0): Real-time screener with 1-click watchlist quick-add, high-of-day momentum tape, TradingView cloud watchlist selector, interactive topbar 🚫 Banned / Closing-Only filter, catalyst news wire, and BamSEC SEC filings intelligence.</em></small>
 </p>
 
-| Terminal Feature | Live Interface Capture |
-| :---: | :---: |
-| <div align="center"><br><h3><b>⚡ Real-Time Momentum Screener</b></h3><b>Sub-second low-float scanner built for intraday velocity</b><br><br>• <b>Live Inbound Symbol Badges</b>: Instant visual <code>NEW</code> badge the exact second a ticker enters criteria.<br>• <b>Dynamic Momentum Filtering</b>: Real-time scan criteria on Float, Price, % Change, and Relative Volume.<br>• <b>Live Shortability Indicators</b>: Broker-grade <code>NO BORROW</code>, <code>HTB</code>, and <code>ETB</code> badges on every row.<br><br></div> | <a href="docs/img/screener.png"><img src="docs/img/screener.png" alt="Momentum Screener" width="460" /></a> |
-| <div align="center"><br><h3><b>🌊 High-of-Day (HOD) & Squeeze Tape</b></h3><b>Warrior-Trading style real-time momentum prints</b><br><br>• <b>High-Velocity Prints</b>: Real-time prints streaming new high-of-day momentum triggers and velocity surges.<br>• <b>Large-Cap & Micro-Cap Coverage</b>: Monitors both low-float runners and high-float momentum squeezes (e.g. SMCI, NVDA, TSLA).<br>• <b>Relative Volume Velocity</b>: Live 5-minute relative volume surges (e.g. +4000%) alongside daily rates.<br>• <b>4-Day Local Persistence</b>: Automatic local disk caching for off-hours and weekend trade reviews.<br><br></div> | <a href="docs/img/tape.png"><img src="docs/img/tape.png" alt="Running Momentum Tape" width="460" /></a> |
-| <div align="center"><br><h3><b>🎯 Tape Strategies Quick-Filter Menu</b></h3><b>Instant floating strategy popout directly on the tape</b><br><br>• <b>Header Popout Toggles</b>: Click <code>Strategies 11/13</code> on the tape header to toggle strategies on the fly without leaving the tape.<br>• <b>Color-Coded Bullet Indicators</b>: Direct visual correlation with tape print highlight families (mint, sand, violet, cyan).<br>• <b>Select / Unselect All</b>: Instant master toggle to enable or disable all strategy streams with one click.<br><br></div> | <a href="docs/img/tape_strategies_menu.png"><img src="docs/img/tape_strategies_menu.png" alt="Tape Strategies Quick-Filter Menu" width="460" /></a> |
-| <div align="center"><br><h3><b>🚫 Broker Closing-Only & Banned Stock Filter</b></h3><b>1-click blacklist to eliminate un-tradeable broker stocks</b><br><br>• <b>Topbar Interactive Filter Pill</b>: Toggle <code>[🚫 Banned: ON / OFF]</code> on the top header to instantly hide blacklisted stocks across Screener and Tape.<br>• <b>1-Click Blacklist Buttons</b>: Click <code>🚫</code> directly beside tickers in Screener rows, Tape cards, and News header.<br>• <b>Dedicated Settings Manager</b>: Interactive chips with <code>✕</code> removal, manual <code>+ Add Symbol</code> input bar, and clear all.<br>• <b>Alert Suppression</b>: Automatic suppression of audio chimes and Telegram alerts for banned tickers.<br><br></div> | <a href="docs/img/banned_stocks.png"><img src="docs/img/banned_stocks.png" alt="Banned Stocks Filter Settings" width="460" /></a> |
-| <div align="center"><br><h3><b>⚙️ Interactive Strategy Builder</b></h3><b>Custom trading strategy engine with live rule editing</b><br><br>• <b>Add Custom Strategies</b>: Click <code>+ Add Strategy</code> to define custom float bounds, relative volume, price, and velocity windows.<br>• <b>Multiple Trigger Types</b>: Choose between <code>New HOD</code>, <code>52w Breakout</code>, or <code>Up X% in N min</code> surges.<br>• <b>Family Classification</b>: Tag strategies as Low Float, Med Float, Large Cap, Squeeze, or Custom.<br>• <b>Inline Preset Sync</b>: Instant <code>💾 Export</code> and <code>📂 Import</code> buttons right in the strategies table.<br><br></div> | <a href="docs/img/strategy_builder.png"><img src="docs/img/strategy_builder.png" alt="Interactive Strategy Builder" width="460" /></a> |
-| <div align="center"><br><h3><b>💾 Backup & Strategy Sync Center</b></h3><b>Full terminal disaster recovery and strategy distribution</b><br><br>• <b>Full Application Backup</b>: Export complete terminal state (screeners, sound alerts, hotkeys, tape universe) into portable JSON.<br>• <b>Tape Strategies Only Sync</b>: Share tactical strategy configurations independently with trading partners.<br>• <b>Factory Reset Safeguard</b>: One-click restore back to factory defaults while securely preserving secret keys.<br><br></div> | <a href="docs/img/backup_sync.png"><img src="docs/img/backup_sync.png" alt="Configuration Backup and Sync" width="460" /></a> |
-| <div align="center"><br><h3><b>📰 Instant Catalyst Confirmation</b></h3><b>Zero-lag Benzinga & PR news wire with on-demand US symbol search</b><br><br>• <b>Custom US Symbol Search</b>: Inspect real-time quotes, float, borrow locates, and Benzinga headlines for any US equity (AMEX, NASDAQ, NYSE).<br>• <b>Interactive Watchlist Chips</b>: Pinned quick-access chips for rapid one-click ticker switching.<br>• <b>Eliminate the 15-Minute Lag</b>: Retail charts lag by 5–15 min; NewsAlerts surfaces wire PRs the moment they cross.<br>• <b>One-Click Chart Popout</b>: Dedicated chart icon button opens the live TradingView chart in your browser.<br>• <b>Custom Time Horizon</b>: Filter news stories from the last 1 hour to 7 days with a single click.<br><br></div> | <a href="docs/img/news.png"><img src="docs/img/news.png" alt="Catalyst News Wire" width="460" /></a> |
-| <div align="center"><br><h3><b>📑 BamSEC Real-Time SEC Filings & Dilution Radar</b></h3><b>Zero-latency SEC EDGAR filing intelligence & dilution risk radar</b><br><br>• <b>Real-Time SEC Filings</b>: Spot shelf registrations (<code>F-3</code>, <code>S-3</code>), dilution offerings (<code>424B</code>), insider stakes (<code>Form 3/4</code>), and material events (<code>8-K/6-K</code>).<br>• <b>Dual Display Modes (Drawer vs Sub-Tabs)</b>: Toggle between collapsible accordion drawer and full-height sub-tabs via <code>⊞ Layout</code> or Settings.<br>• <b>Category Filter Pills</b>: Instant filtering across All, News (8-K/6-K), Offerings & Dilution, Ownership & Insiders, and Financials.<br>• <b>Color-Coded Badges</b>: Institutional badges immediately highlighting dilution risk (rose/red), material PR (green), and ownership (purple).<br>• <b>1-Click External BamSEC Hub</b>: Direct browser launch button to inspect full filing documents and financial tables on BamSEC.<br><br></div> | <a href="docs/img/bamsec.png"><img src="docs/img/bamsec.png" alt="BamSEC Real-Time SEC Filings" width="460" /></a> |
-| <div align="center"><br><h3><b>🩳 Institutional Short Borrow Locates</b></h3><b>Real-time broker-grade locate availability and short squeeze detection</b><br><br>• <b>Alpaca Market Integration</b>: Direct broker locate feeds for real-time borrow availability.<br>• <b>Color-Coded Status</b>: Instant <code>ETB</code> (Easy), <code>HTB</code> (Hard), and <code>NO BORROW</code> badges.<br>• <b>Short Squeeze Edge</b>: Identify short-squeeze candidates instantly before volume cascades.<br><br></div> | <a href="docs/img/borrow.png"><img src="docs/img/borrow.png" alt="Short Borrow Settings" width="460" /></a> |
-| <div align="center"><br><h3><b>📲 Instant Telegram Push Alerts</b></h3><b>Sub-second mobile & desktop DM delivery when momentum triggers fire</b><br><br>• <b>Live Push Alerts</b>: Instant Telegram direct notifications with strategy triggers and volume surges.<br>• <b>Comprehensive Ticker Stats</b>: Symbol, Price, % Change, Volume, Float, and Borrow status in every alert.<br>• <b>One-Click Chart Linking</b>: Instant direct link to TradingView chart for rapid execution.<br><br></div> | <a href="docs/img/telegram_alerts.png"><img src="docs/img/telegram_alerts.png" alt="Telegram Push Notifications" width="460" /></a> |
-| <div align="center"><br><h3><b>📋 TradingView Watchlist Sync & Quick-Add</b></h3><b>Seamless cloud watchlist synchronization & 1-click symbol adding</b><br><br>• <b>Dynamic Watchlist Bar</b>: Integrated selector bar docked directly above the News pane with list dropdown and on-demand sync (<code>🔄</code>).<br>• <b>1-Click Quick-Add (<code>+</code>) Buttons</b>: Embedded next to tickers in Screener rows, Tape prints, and News header.<br>• <b>3-Second Visual Flickering Feedback</b>: Silent green flickering glow (<code>✓</code>) on add/existing symbol; red flickering glow (<code>✕</code>) with toast alert on failure.<br>• <b>Institutional Formatting</b>: Automatic exchange qualification (e.g. <code>NCPL</code> &rarr; <code>NASDAQ:NCPL</code>) before cloud push.<br><br></div> | <a href="docs/img/watchlist_sync.png"><img src="docs/img/watchlist_sync.png" alt="TradingView Watchlist Sync" width="460" /></a> |
+<table width="100%">
+  <thead>
+    <tr>
+      <th width="32%" align="left">Terminal Capability &amp; Strategic Edge</th>
+      <th width="68%" align="center">Live Institutional Interface Capture (Native Resolution)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td width="32%" valign="top">
+        <h3>⚡ Real-Time Momentum Screener</h3>
+        <p><b>Sub-second low-float scanner built for intraday velocity</b></p>
+        <ul>
+          <li><b>Live Inbound Badges</b>: Instant visual <code>NEW</code> badge the exact second a ticker enters criteria.</li>
+          <li><b>Dynamic Momentum Filtering</b>: Real-time scan criteria on Float, Price, % Change, and Relative Volume.</li>
+          <li><b>Live Shortability Indicators</b>: Broker-grade <code>NO BORROW</code>, <code>HTB</code>, and <code>ETB</code> badges on every row.</li>
+        </ul>
+      </td>
+      <td width="68%" align="center" valign="middle">
+        <a href="docs/img/screener.png" target="_blank">
+          <img src="docs/img/screener.png" alt="Real-Time Momentum Screener" width="100%" style="border-radius:8px; border:1px solid #2a3347; box-shadow:0 4px 16px rgba(0,0,0,0.35);" />
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td width="32%" valign="top">
+        <h3>🌊 High-of-Day (HOD) &amp; Squeeze Tape</h3>
+        <p><b>Warrior-Trading style real-time momentum prints</b></p>
+        <ul>
+          <li><b>High-Velocity Prints</b>: Real-time prints streaming new high-of-day momentum triggers and velocity surges.</li>
+          <li><b>Broad Coverage</b>: Monitors both low-float runners and high-float momentum squeezes (e.g. SMCI, NVDA, TSLA).</li>
+          <li><b>Relative Volume Velocity</b>: Live 5-minute relative volume surges (e.g. +4000%) alongside daily rates.</li>
+          <li><b>4-Day Local Persistence</b>: Automatic local disk caching for off-hours and weekend trade reviews.</li>
+        </ul>
+      </td>
+      <td width="68%" align="center" valign="middle">
+        <a href="docs/img/tape.png" target="_blank">
+          <img src="docs/img/tape.png" alt="Running Momentum Tape" width="100%" style="border-radius:8px; border:1px solid #2a3347; box-shadow:0 4px 16px rgba(0,0,0,0.35);" />
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td width="32%" valign="top">
+        <h3>🎯 Tape Strategies Quick-Filter Menu</h3>
+        <p><b>Instant floating strategy popout directly on the tape</b></p>
+        <ul>
+          <li><b>Header Popout Toggles</b>: Click <code>Strategies 11/13</code> on the tape header to toggle strategies on the fly without leaving the tape.</li>
+          <li><b>Color-Coded Bullet Indicators</b>: Direct visual correlation with tape print highlight families (mint, sand, violet, cyan).</li>
+          <li><b>Select / Unselect All</b>: Instant master toggle to enable or disable all strategy streams with one click.</li>
+        </ul>
+      </td>
+      <td width="68%" align="center" valign="middle">
+        <a href="docs/img/tape_strategies_menu.png" target="_blank">
+          <img src="docs/img/tape_strategies_menu.png" alt="Tape Strategies Quick-Filter Menu" width="100%" style="border-radius:8px; border:1px solid #2a3347; box-shadow:0 4px 16px rgba(0,0,0,0.35);" />
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td width="32%" valign="top">
+        <h3>🚫 Broker Closing-Only &amp; Banned Stock Filter</h3>
+        <p><b>1-click blacklist to eliminate un-tradeable broker stocks</b></p>
+        <ul>
+          <li><b>Topbar Interactive Filter Pill</b>: Toggle <code>[🚫 Banned: ON / OFF]</code> on the top header to instantly hide blacklisted stocks across Screener and Tape.</li>
+          <li><b>1-Click Blacklist Buttons</b>: Click <code>🚫</code> directly beside tickers in Screener rows, Tape cards, and News header.</li>
+          <li><b>Dedicated Settings Manager</b>: Interactive chips with <code>✕</code> removal, manual <code>+ Add Symbol</code> input bar, and clear all.</li>
+          <li><b>Alert Suppression</b>: Automatic suppression of audio chimes and Telegram alerts for banned tickers.</li>
+        </ul>
+      </td>
+      <td width="68%" align="center" valign="middle">
+        <a href="docs/img/banned_stocks.png" target="_blank">
+          <img src="docs/img/banned_stocks.png" alt="Banned Stocks Filter Settings" width="100%" style="border-radius:8px; border:1px solid #2a3347; box-shadow:0 4px 16px rgba(0,0,0,0.35);" />
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td width="32%" valign="top">
+        <h3>⚙️ Interactive Strategy Builder</h3>
+        <p><b>Custom trading strategy engine with live rule editing</b></p>
+        <ul>
+          <li><b>Add Custom Strategies</b>: Click <code>+ Add Strategy</code> to define custom float bounds, relative volume, price, and velocity windows.</li>
+          <li><b>Multiple Trigger Types</b>: Choose between <code>New HOD</code>, <code>52w Breakout</code>, or <code>Up X% in N min</code> surges.</li>
+          <li><b>Family Classification</b>: Tag strategies as Low Float, Med Float, Large Cap, Squeeze, or Custom.</li>
+          <li><b>Inline Preset Sync</b>: Instant <code>💾 Export</code> and <code>📂 Import</code> buttons right in the strategies table.</li>
+        </ul>
+      </td>
+      <td width="68%" align="center" valign="middle">
+        <a href="docs/img/strategy_builder.png" target="_blank">
+          <img src="docs/img/strategy_builder.png" alt="Interactive Strategy Builder" width="100%" style="border-radius:8px; border:1px solid #2a3347; box-shadow:0 4px 16px rgba(0,0,0,0.35);" />
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td width="32%" valign="top">
+        <h3>💾 Backup &amp; Strategy Sync Center</h3>
+        <p><b>Full terminal disaster recovery and strategy distribution</b></p>
+        <ul>
+          <li><b>Full Application Backup</b>: Export complete terminal state (screeners, sound alerts, hotkeys, tape universe) into portable JSON.</li>
+          <li><b>Tape Strategies Only Sync</b>: Share tactical strategy configurations independently with trading partners.</li>
+          <li><b>Factory Reset Safeguard</b>: One-click restore back to factory defaults while securely preserving secret keys.</li>
+        </ul>
+      </td>
+      <td width="68%" align="center" valign="middle">
+        <a href="docs/img/backup_sync.png" target="_blank">
+          <img src="docs/img/backup_sync.png" alt="Configuration Backup and Sync" width="100%" style="border-radius:8px; border:1px solid #2a3347; box-shadow:0 4px 16px rgba(0,0,0,0.35);" />
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td width="32%" valign="top">
+        <h3>📰 Instant Catalyst Confirmation</h3>
+        <p><b>Zero-lag Benzinga &amp; PR news wire with on-demand US symbol search</b></p>
+        <ul>
+          <li><b>Custom US Symbol Search</b>: Inspect real-time quotes, float, borrow locates, and Benzinga headlines for any US equity (AMEX, NASDAQ, NYSE).</li>
+          <li><b>Interactive Watchlist Chips</b>: Pinned quick-access chips for rapid one-click ticker switching.</li>
+          <li><b>Eliminate the 15-Minute Lag</b>: Retail charts lag by 5–15 min; NewsAlerts surfaces wire PRs the moment they cross.</li>
+          <li><b>One-Click Chart Popout</b>: Dedicated chart icon button opens the live TradingView chart in your browser.</li>
+          <li><b>Custom Time Horizon</b>: Filter news stories from the last 1 hour to 7 days with a single click.</li>
+        </ul>
+      </td>
+      <td width="68%" align="center" valign="middle">
+        <a href="docs/img/news.png" target="_blank">
+          <img src="docs/img/news.png" alt="Catalyst News Wire" width="100%" style="border-radius:8px; border:1px solid #2a3347; box-shadow:0 4px 16px rgba(0,0,0,0.35);" />
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td width="32%" valign="top">
+        <h3>📑 BamSEC Real-Time SEC Filings &amp; Dilution Radar</h3>
+        <p><b>Zero-latency SEC EDGAR filing intelligence &amp; dilution risk radar</b></p>
+        <ul>
+          <li><b>Real-Time SEC Filings</b>: Spot shelf registrations (<code>F-3</code>, <code>S-3</code>), dilution offerings (<code>424B</code>), insider stakes (<code>Form 3/4</code>), and material events (<code>8-K/6-K</code>).</li>
+          <li><b>Dual Display Modes (Drawer vs Sub-Tabs)</b>: Toggle between collapsible accordion drawer and full-height sub-tabs via <code>⊞ Layout</code> or Settings.</li>
+          <li><b>Category Filter Pills</b>: Instant filtering across All, News (8-K/6-K), Offerings &amp; Dilution, Ownership &amp; Insiders, and Financials.</li>
+          <li><b>Color-Coded Badges</b>: Institutional badges highlighting dilution risk (rose/red), material PR (green), and ownership (purple).</li>
+          <li><b>1-Click External BamSEC Hub</b>: Direct browser launch button to inspect full filing documents and financial tables on BamSEC.</li>
+          <li><b>Togglable Opt-Out</b>: Fully enabled out-of-the-box, or toggle off in Settings to completely remove from DOM and suppress background network queries.</li>
+        </ul>
+      </td>
+      <td width="68%" align="center" valign="middle">
+        <a href="docs/img/bamsec.png" target="_blank">
+          <img src="docs/img/bamsec.png" alt="BamSEC Real-Time SEC Filings" width="100%" style="border-radius:8px; border:1px solid #2a3347; box-shadow:0 4px 16px rgba(0,0,0,0.35);" />
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td width="32%" valign="top">
+        <h3>🩳 Institutional Short Borrow Locates</h3>
+        <p><b>Real-time broker-grade locate availability and short squeeze detection</b></p>
+        <ul>
+          <li><b>Alpaca Market Integration</b>: Direct broker locate feeds for real-time borrow availability.</li>
+          <li><b>Color-Coded Status</b>: Instant <code>ETB</code> (Easy), <code>HTB</code> (Hard), and <code>NO BORROW</code> badges.</li>
+          <li><b>Short Squeeze Edge</b>: Identify short-squeeze candidates instantly before volume cascades.</li>
+        </ul>
+      </td>
+      <td width="68%" align="center" valign="middle">
+        <a href="docs/img/borrow.png" target="_blank">
+          <img src="docs/img/borrow.png" alt="Short Borrow Settings" width="100%" style="border-radius:8px; border:1px solid #2a3347; box-shadow:0 4px 16px rgba(0,0,0,0.35);" />
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td width="32%" valign="top">
+        <h3>📲 Instant Telegram Push Alerts</h3>
+        <p><b>Sub-second mobile &amp; desktop DM delivery when momentum triggers fire</b></p>
+        <ul>
+          <li><b>Live Push Alerts</b>: Instant Telegram direct notifications with strategy triggers and volume surges.</li>
+          <li><b>Comprehensive Ticker Stats</b>: Symbol, Price, % Change, Volume, Float, and Borrow status in every alert.</li>
+          <li><b>One-Click Chart Linking</b>: Instant direct link to TradingView chart for rapid execution.</li>
+        </ul>
+      </td>
+      <td width="68%" align="center" valign="middle">
+        <a href="docs/img/telegram_alerts.png" target="_blank">
+          <img src="docs/img/telegram_alerts.png" alt="Telegram Push Notifications" width="100%" style="border-radius:8px; border:1px solid #2a3347; box-shadow:0 4px 16px rgba(0,0,0,0.35);" />
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td width="32%" valign="top">
+        <h3>📋 TradingView Watchlist Sync &amp; Quick-Add</h3>
+        <p><b>Seamless cloud watchlist synchronization &amp; 1-click symbol adding</b></p>
+        <ul>
+          <li><b>Dynamic Watchlist Bar</b>: Integrated selector bar docked directly above the News pane with list dropdown and on-demand sync (<code>🔄</code>).</li>
+          <li><b>1-Click Quick-Add (<code>+</code>) Buttons</b>: Embedded next to tickers in Screener rows, Tape prints, and News header.</li>
+          <li><b>3-Second Visual Flickering Feedback</b>: Silent green flickering glow (<code>✓</code>) on add/existing symbol; red flickering glow (<code>✕</code>) with toast alert on failure.</li>
+          <li><b>Institutional Formatting</b>: Automatic exchange qualification (e.g. <code>NCPL</code> &rarr; <code>NASDAQ:NCPL</code>) before cloud push.</li>
+        </ul>
+      </td>
+      <td width="68%" align="center" valign="middle">
+        <a href="docs/img/watchlist_sync.png" target="_blank">
+          <img src="docs/img/watchlist_sync.png" alt="TradingView Watchlist Sync" width="100%" style="border-radius:8px; border:1px solid #2a3347; box-shadow:0 4px 16px rgba(0,0,0,0.35);" />
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 ---
 
@@ -76,8 +258,10 @@ Active momentum day trading requires spotting low-float runners the split second
 NewsAlerts includes a **Universal Cross-Platform `Makefile`** providing identical developer and build commands across **Windows, macOS, and Linux**:
 
 ```bash
+make env                             # Auto-detect OS & prepare virtualenv (.venv) with dependencies
+# Platform-specific env targets:     # make env-win | make env-linux | make env-mac
 make run                             # Launch desktop application
-make build                           # Build standalone executable (Windows) or install dependencies (Unix)
+make build                           # Compile standalone executable / distribution package
 make test                            # Run full automated unit test suite
 make verify                          # Run Deterministic Package Verification Gate
 make check                           # Audit for credential leaks
@@ -88,6 +272,7 @@ make issue-list                      # List open issues (Issue-First Protocol)
 make issue-view ISSUE=<number>       # Inspect specific issue details
 make help                            # Display usage guide and detected platform
 ```
+
 
 ### Windows Prerequisite for `make`:
 Windows does not include GNU `make` by default. Install it in seconds:
