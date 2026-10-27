@@ -3,7 +3,7 @@
 # Compatible with Windows (GNU Make / ezwinports / winget), Linux, and macOS
 # -----------------------------------------------------------------------------
 
-.PHONY: all build run run-app install-local installer test verify check clean worktree-list worktree-new wiki-sync help
+.PHONY: all env env-win env-linux env-mac build run run-app install-local installer test verify check clean worktree-list worktree-new wiki-sync help
 
 # Platform Detection
 ifeq ($(OS),Windows_NT)
@@ -20,6 +20,7 @@ ifeq ($(OS),Windows_NT)
         PYTHON := .venv/Scripts/python.exe
     endif
 
+    CMD_ENV           := $(POWERSHELL) -File ./build.ps1 -Task env
     CMD_BUILD         := $(POWERSHELL) -File ./build.ps1 -Task build
     CMD_RUN           := $(POWERSHELL) -File ./build.ps1 -Task run
     CMD_RUN_APP       := $(POWERSHELL) -File ./build.ps1 -Task run-app
@@ -52,7 +53,8 @@ else
         PYTHON := .venv/bin/python
     endif
 
-    CMD_BUILD         := $(PYTHON) -m pip install -r requirements.txt
+    CMD_ENV           := test -d .venv || $(PYTHON) -m venv .venv; .venv/bin/pip install --upgrade pip && .venv/bin/pip install -r requirements.txt
+    CMD_BUILD         := $(PYTHON) -m PyInstaller --clean -y NewsAlerts.spec
     CMD_RUN           := ./run.sh
     CMD_RUN_APP       := ./run.sh
     CMD_INSTALL_LOCAL := mkdir -p ~/.local/share/NewsAlerts && cp -r . ~/.local/share/NewsAlerts/
@@ -75,8 +77,24 @@ ISSUE ?=
 
 all: help
 
+env:
+	@echo "[*] [$(PLATFORM)] Preparing virtual environment and dependencies..."
+	@$(CMD_ENV)
+
+env-win:
+	@echo "[*] [Windows] Preparing Windows virtual environment (.venv) and installing dependencies..."
+	@powershell -NoProfile -ExecutionPolicy Bypass -File ./build.ps1 -Task env
+
+env-linux:
+	@echo "[*] [Linux] Preparing Linux virtual environment (.venv) and installing dependencies..."
+	@bash -c "test -d .venv || python3 -m venv .venv; .venv/bin/pip install --upgrade pip; .venv/bin/pip install -r requirements.txt"
+
+env-mac:
+	@echo "[*] [macOS] Preparing macOS virtual environment (.venv) and installing dependencies..."
+	@bash -c "test -d .venv || python3 -m venv .venv; .venv/bin/pip install --upgrade pip; .venv/bin/pip install -r requirements.txt"
+
 build:
-	@echo "[*] [$(PLATFORM)] Executing build task..."
+	@echo "[*] [$(PLATFORM)] Compiling standalone distribution binaries..."
 	@$(CMD_BUILD)
 
 run:
@@ -134,8 +152,14 @@ wiki-sync:
 help:
 	@echo "NewsAlerts Universal Makefile [Platform: $(PLATFORM)]"
 	@echo "======================================================="
-	@echo "Targets:"
-	@echo "  make build          Dual build: portable .exe & unpacked app directory [Windows]"
+	@echo "Environment & Setup Targets:"
+	@echo "  make env            Auto-detect OS, prepare virtualenv (.venv) & install dependencies"
+	@echo "  make env-win        Prepare Windows virtual environment & install dependencies"
+	@echo "  make env-linux      Prepare Linux virtual environment & install dependencies"
+	@echo "  make env-mac        Prepare macOS virtual environment & install dependencies"
+	@echo ""
+	@echo "Build & Execution Targets:"
+	@echo "  make build          Compile standalone binary / dual distribution package (after make env)"
 	@echo "  make run            Launch portable standalone executable"
 	@echo "  make run-app        Launch unpacked application from dist/NewsAlerts-App/"
 	@echo "  make install-local  Install app to %LOCALAPPDATA%\Programs\NewsAlerts + shortcuts"
@@ -144,10 +168,11 @@ help:
 	@echo "  make verify         Run Deterministic Package Verification Gate"
 	@echo "  make check          Audit staged/local files for credentials and secrets"
 	@echo "  make clean          Remove build/, dist/, and cached artifacts"
+	@echo ""
+	@echo "Workflow & Wiki Targets:"
 	@echo "  make worktree-list  List active Git worktrees under .worktrees/"
 	@echo "  make worktree-new   Create a new isolated worktree (BRANCH=feat/... [BASE=main])"
 	@echo "  make issue-list     List open repository issues via GitHub CLI"
 	@echo "  make issue-view     Inspect details for an issue (ISSUE=<number>)"
 	@echo "  make wiki-sync      Synchronize docs/wiki/ documentation with GitHub Wiki"
 	@echo "  make help           Show this usage guide"
-
