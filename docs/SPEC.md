@@ -500,7 +500,7 @@ Optional tape sound (default off — the tape is noisy).
 - **Rich Message Format**: Includes Symbol, Strategy name, Session, Price, Change %, Volume, Float, Relative Volume (daily + 5m%), Short Borrow Status (`HTB` / `ETB` / `NO BORROW` / `N/A`), 52w range position, and a direct TradingView chart link.
 - **Per-Symbol Cooldown**: A per-ticker cooldown (default 60s, configurable in Settings) prevents rapid duplicate push notifications when a runner repeatedly prints new HODs in seconds.
 
-## 9. Sounds & Alert Controls
+## 9. Sounds & Dual Alert Controls Architecture
 - **System Sounds**: Lists all `.wav` files in `C:\Windows\Media` (Windows Notify, Ding, chimes, Alarm01–10, etc.).
 - **Separate Sound Pickers**: **New screener symbol**, **New news**, **Tape event**; ▶ test button each.
 - **Async Throttled Playback**: Played async via `winsound.PlaySound(path, SND_FILENAME | SND_ASYNC)`; throttled to 1 per 1.5 s.
@@ -509,10 +509,19 @@ Optional tape sound (default off — the tape is noisy).
   - Clicking or dragging across the triangle instantly adjusts the volume.
   - Per-process waveform audio volume synchronized seamlessly via Windows WinMM `waveOutSetVolume` without external dependencies.
   - Clicking the speaker icon quickly toggles mute / restores prior volume level.
-- **Unified Alert Pause (The Bell Button)**:
-  - Single master toggle for active alerts vs. paused alerts.
-  - Clicking the bell button **both mutes audio chimes AND suspends sending push notifications to Telegram** (for both Screener new symbols and Tape momentum alerts).
-  - Visual status feedback: when active, shows normal green-tinted bell; when paused, shows slashed bell (`bellOff`) with pulsing red warning indicator.
+- **Dual Independent Alert Toggles**:
+  - **In-App Audio Alerts Bell (`#btn-mute`)**:
+    - Dedicated audio alert toggle button in the topbar.
+    - Clicking toggles local workstation waveform audio chimes on or off (`alerts.mute`).
+    - Visual feedback: Vibrant green bell (`#38efb0`) when active; red-tinted slashed bell (`#ff6b7e`) with pulsing glow (`pausePulse`) when muted.
+    - Decoupled from Telegram: muting local audio does NOT silence mobile/desktop Telegram push notifications.
+  - **Telegram Push Alerts Bell (`#btn-telegram`)**:
+    - Dedicated Telegram alert toggle button in the topbar adjacent to the audio bell.
+    - Custom icon featuring the iconic Telegram paper airplane combined with a bell badge.
+    - Clicking toggles Telegram push notification dispatch on or off (`alerts.telegram_enabled`).
+    - Visual feedback: Vibrant Telegram Blue (`#29b6f6`) when active; red-tinted slashed Telegram+bell (`#ff6b7e`) with pulsing glow (`pausePulse`) when paused.
+    - Directly synchronized with Settings &rarr; Alerts &rarr; *Enable Telegram Alerts*.
+    - Designed specifically for active desk workflows: traders sitting in front of the terminal can silence mobile Telegram notifications with 1 click while preserving local audio alert chimes.
 
 ## 10. Settings & Integrations
 TradingView `sessionid`/`sessionid_sign` & real-time connection status · poll intervals · re-entry window · alert volume (0%–100%) · unified pause alerts toggle · news recency & provider · sounds · tape universe & strategy thresholds · interactive Strategy Builder (`+ Add Strategy`, triggers, family, deletion) · Backup / Import & Export tab (Full config backup `.json`, Strategies `.json` export/import, factory reset) · Alpaca keys for short borrow locates · Telegram Bot Token, Chat ID, and independent toggles for Screener alerts and Tape momentum alerts (with per-symbol cooldown) · customizable keyboard shortcuts & hotkeys with interactive re-binding and institutional defaults · always-on-top · font size.

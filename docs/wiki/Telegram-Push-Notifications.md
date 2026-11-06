@@ -4,6 +4,18 @@ NewsAlerts includes a dedicated **Asynchronous Telegram Worker Queue** that disp
 
 ---
 
+## 📲 Dedicated Topbar Telegram Alert Toggle (`#btn-telegram`)
+
+Starting in **v2.12.0**, traders have a dedicated 1-click Telegram alert toggle button in the topbar header:
+- **Icon**: High-precision vector emblem combining the iconic Telegram paper airplane with a docked alert bell badge.
+- **Visual Feedback**:
+  - **Active State** (Telegram Blue `#29b6f6`): Telegram notifications are dispatched in real-time.
+  - **Paused State** (Red-tinted `#ff6b7e` slashed emblem with `pausePulse` glow): Telegram alerts are suppressed.
+- **Desk Workflow Independence**: When sitting directly in front of the terminal, click `#btn-telegram` to silence redundant mobile phone alerts while keeping local PC audio chimes active.
+- **Bidirectional Sync**: Automatically stays synchronized with Settings &rarr; Alerts &rarr; *Enable Telegram Alerts*.
+
+---
+
 ## 📲 Alert Payload Anatomy
 
 Every Telegram alert dispatched by NewsAlerts is formatted for immediate trading comprehension:

@@ -211,7 +211,7 @@ class ScreenerWorker(threading.Thread):
                 for t in alert_syms:
                     if t in by_t:
                         row_data = by_t[t]
-                        if self.telegram and c["alerts"].get("telegram_enabled", True) and not is_paused:
+                        if self.telegram and c["alerts"].get("telegram_enabled", True):
                             cached = self.news.cached(t)
                             fresh = NewsService.recent(cached, c["news"]["recency_hours"]) if cached else []
                             latest_title = fresh[0]["title"] if fresh else ""

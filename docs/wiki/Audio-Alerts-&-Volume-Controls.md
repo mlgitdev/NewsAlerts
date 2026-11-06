@@ -4,14 +4,15 @@ Auditory alerting allows momentum traders to keep their eyes on charting softwar
 
 ---
 
-## 🔔 Master Bell Toggle (The Bell)
+## 🔔 In-App Audio Alerts Bell (`#btn-mute`)
 
 - Located in the top-right header of the terminal (bell icon).
-- **Hotkey**: Press `M` to toggle mute.
-- **Unified Control**: Clicking the bell immediately:
-  1. Mutes all audible chimes and bells.
-  2. Pauses outgoing Telegram alert dispatching.
-- The bell icon dynamically displays an amber strikethrough badge when muted.
+- **Hotkey**: Press `M` to toggle in-app audio mute.
+- **Dedicated Audio Control**: Clicking the bell immediately mutes or resumes local workstation audio chimes without affecting outgoing Telegram push alerts.
+- **Visual Feedback**:
+  - **Active**: Vibrant green bell (`#38efb0`).
+  - **Muted**: Red-tinted slashed bell (`#ff6b7e`) with pulsing alert indicator (`pausePulse`).
+- Paired alongside the dedicated **Telegram Push Alerts Bell** (`#btn-telegram`), giving traders independent controls for desk vs. mobile alerting.
 
 ---
 

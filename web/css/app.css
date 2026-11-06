@@ -290,6 +290,31 @@ button, input, select { font: inherit; color: inherit; }
   border-color: rgba(34, 201, 147, 0.7);
   box-shadow: 0 0 8px rgba(34, 201, 147, 0.3);
 }
+
+/* Telegram Push Alert Bell States */
+.icon-btn#btn-telegram.paused {
+  background: rgba(246, 70, 93, 0.14);
+  border-color: rgba(246, 70, 93, 0.55);
+  color: #ff6b7e;
+  box-shadow: 0 0 10px rgba(246, 70, 93, 0.25);
+  animation: pausePulse 2.5s infinite;
+}
+.icon-btn#btn-telegram.paused:hover {
+  background: rgba(246, 70, 93, 0.24);
+  border-color: rgba(246, 70, 93, 0.85);
+  color: #fff;
+  transform: translateY(-1px);
+}
+.icon-btn#btn-telegram:not(.paused) {
+  color: #29b6f6;
+  border-color: rgba(41, 182, 246, 0.45);
+}
+.icon-btn#btn-telegram:not(.paused):hover {
+  border-color: rgba(41, 182, 246, 0.8);
+  box-shadow: 0 0 8px rgba(41, 182, 246, 0.35);
+  color: #64b5f6;
+  transform: translateY(-1px);
+}
 @keyframes pausePulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.65; }
