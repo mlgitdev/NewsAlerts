@@ -133,6 +133,28 @@ class TestAlertControlsDecoupling(unittest.TestCase):
             paused=False,
         )
 
+    def test_api_get_state_exposes_alerts_config_for_initial_launch_sync(self):
+        saved_config = {
+            "alerts": {
+                "mute": True,
+                "telegram_enabled": False,
+            }
+        }
+        mock_app = MagicMock()
+        mock_app.cfg.get.return_value = saved_config
+        mock_app.sounds.list_sounds.return_value = []
+        mock_app.borrow.key_id = ""
+        mock_app.borrow.secret_key = ""
+        mock_app.screener.get_latest_data.return_value = {}
+        mock_app.tape.recent.return_value = []
+        mock_app.tape_window = None
+
+        api = Api(mock_app)
+        state = api.get_state()
+
+        self.assertEqual(state["config"]["alerts"]["mute"], True)
+        self.assertEqual(state["config"]["alerts"]["telegram_enabled"], False)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -16,6 +16,8 @@
     App.secrets_file = state.secrets_file || "";
     App.has_keys_toml = !!state.has_keys_toml;
 
+    updateMuteBtn();
+    updateTelegramBtn();
     renderVersionBadges(App.version);
     Settings.applyUi();
 
@@ -51,6 +53,8 @@
     U.$("#btn-mute").onclick = toggleMute;
     const btnTg = U.$("#btn-telegram");
     if (btnTg) btnTg.onclick = toggleTelegram;
+    updateMuteBtn();
+    updateTelegramBtn();
     U.$("#btn-alerts").onclick = toggleDrawer;
     U.$("#btn-settings").onclick = () => Settings.open();
     const brand = U.$("#btn-brand-about") || U.$(".brand");
@@ -272,6 +276,9 @@
       ? "Telegram Alerts ACTIVE — Click to pause / mute"
       : "Telegram Alerts PAUSED — Click to resume";
   }
+
+  App.updateMuteBtn = updateMuteBtn;
+  App.updateTelegramBtn = updateTelegramBtn;
 
   function onConfig(c) {
     App.config = c;
