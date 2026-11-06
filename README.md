@@ -30,7 +30,7 @@ Active momentum day trading requires spotting low-float runners the split second
 
 **NewsAlerts bridges this gap with a focused, zero-bloat institutional trading terminal designed for pure execution speed:**
 
-- ⚡ **Zero-Latency Inbound Alerts**: Plays an instant audio chime (with interactive volume control & one-click pause) and sends Telegram push notifications the exact second a ticker breaches your screening criteria.
+- ⚡ **Zero-Latency Inbound Alerts & Dual Topbar Toggles**: Instant audio chimes (with interactive volume control & dedicated in-app audio bell) alongside independent Telegram push notifications with a dedicated 1-click topbar toggle (Telegram paper plane + bell) to silence mobile phone alerts when operating directly at your desk.
 - 🌊 **Running Momentum Tape**: Warrior-Trading style High of Day (HOD) and Squeeze Breakout prints with 4-day local disk persistence for weekend and off-hours trade review.
 - 🎯 **Interactive Strategy Builder & Tape Quick-Filter**: Construct customized momentum rules (`+ Add Strategy`) with trigger selectors, float ranges, and surge velocities in Settings, with instant one-click toggles right from the tape header (`Strategies 11/13`).
 - 📋 **TradingView Cloud Watchlist Sync & 1-Click Quick-Add**: Real-time cloud watchlist selector bar docked directly above news headlines, paired with 1-click quick-add (`+`) buttons next to tickers in the Screener, Tape, and News header. Features 3-second green/red flickering feedback and instant cloud sync directly into your TradingView Desktop app.
@@ -52,7 +52,7 @@ Active momentum day trading requires spotting low-float runners the split second
     <img src="docs/img/terminal.png" alt="NewsAlerts Real-Time Momentum Terminal" width="100%" style="border-radius:10px; border:1px solid #2a3347; box-shadow:0 8px 24px rgba(0,0,0,0.45);" />
   </a>
   <br>
-  <small><em>Live institutional terminal capture (v2.11.0): Real-time screener with 1-click watchlist quick-add, high-of-day momentum tape, TradingView cloud watchlist selector, interactive topbar 🚫 Banned / Closing-Only filter, catalyst news wire, and BamSEC SEC filings intelligence.</em></small>
+  <small><em>Live institutional terminal capture (v2.12.0): Real-time screener with 1-click watchlist quick-add, high-of-day momentum tape, TradingView cloud watchlist selector, dual in-app audio & Telegram alert toggles, interactive topbar 🚫 Banned / Closing-Only filter, catalyst news wire, and BamSEC SEC filings intelligence.</em></small>
 </p>
 
 <table width="100%">

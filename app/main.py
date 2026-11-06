@@ -73,7 +73,7 @@ class App:
             bot_token=ac.get("telegram_bot_token", ""),
             chat_id=ac.get("telegram_chat_id", ""),
             enabled=bool(ac.get("telegram_enabled", True)),
-            paused=is_paused
+            paused=False
         )
         self.sounds = SoundPlayer(volume=int(ac.get("volume", 80)))
         self.sounds.muted = is_paused

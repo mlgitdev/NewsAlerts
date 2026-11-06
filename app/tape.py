@@ -192,7 +192,7 @@ class TapeWorker(threading.Thread):
                 self.sounds.play(c["alerts"]["sound_tape"])
 
             # Send Telegram push alert for matching tape momentum events
-            tg_on = c["alerts"].get("telegram_enabled", True) and c["alerts"].get("telegram_tape_enabled", True) and not is_paused
+            tg_on = c["alerts"].get("telegram_enabled", True) and c["alerts"].get("telegram_tape_enabled", True)
             if self.telegram and tg_on:
                 tg_cd = float(c["alerts"].get("telegram_tape_cooldown_sec", 60))
                 for ev in unbanned_events:

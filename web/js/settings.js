@@ -143,8 +143,8 @@
         ...Settings.field("Volume (%)", Settings.num(a, "volume"), "Alert chime volume (0% to 100%)."),
         ...Settings.field("Re-entry window (min)", Settings.num(a, "reentry_min"),
           "A symbol that drops out and comes back within this window will not ring again."),
-        ...Settings.field("Pause alerts (mute & stop sending)", Settings.check(a, "mute"),
-          "When active, sound chimes are muted and Telegram notifications are suppressed."),
+        ...Settings.field("Mute in-app audio alerts", Settings.check(a, "mute"),
+          "When active, local terminal sound chimes are muted. (Telegram alerts are toggled independently via the topbar Telegram icon or below)."),
         ...Settings.field("Quiet while app focused", Settings.check(a, "quiet_when_focused")),
         U.el("h3", {}, "News"),
         ...Settings.field("Play news sound", Settings.check(a, "news_sound_enabled", "New symbol has fresh news / new headline for selected symbol")),
@@ -153,7 +153,7 @@
         ...Settings.field("Play tape sound", Settings.check(a, "tape_sound_enabled", "Fires on every enabled-strategy event (noisy)")),
         ...Settings.field("Tape sound", Settings.sound(a, "sound_tape")),
         U.el("h3", {}, "Telegram Bot Push Alerts"),
-        ...Settings.field("Enable Telegram Alerts", Settings.check(a, "telegram_enabled", "Master toggle for Telegram notifications")),
+        ...Settings.field("Enable Telegram Alerts", Settings.check(a, "telegram_enabled", "Master toggle for Telegram notifications (can also be toggled directly via the topbar Telegram bell icon)")),
         ...Settings.field("Tape Momentum Alerts", Settings.check(a, "telegram_tape_enabled", "Send push alert when a momentum symbol pops up on the tape (e.g. HOD / Squeeze breakout)")),
         ...Settings.field("Tape Alert Cooldown (sec)", Settings.num(a, "telegram_tape_cooldown_sec"), "Minimum seconds between alerts for the same symbol to prevent spam (default: 60s)"),
         ...Settings.field("Bot Token", Settings.text(a, "telegram_bot_token", "password", "Optional (from @BotFather)"), "Leave blank to read from AppData\\NewsAlerts\\keys.toml or local keys.toml"),
@@ -516,7 +516,8 @@
       });
 
       const HOTKEY_ITEMS = [
-        { key: "mute", label: "Master Mute / Pause Alerts", desc: "Instantly suppresses alert audio chimes and Telegram alerts." },
+        { key: "mute", label: "Mute In-App Audio Alerts", desc: "Instantly suppresses in-app audio chimes." },
+        { key: "toggle_telegram", label: "Toggle Telegram Alerts", desc: "Toggles Telegram push notifications on or off." },
         { key: "popout_tape", label: "Pop-Out Tape Window", desc: "Launches the floating, detached running tape window." },
         { key: "pause_tape", label: "Pause / Resume Tape Stream", desc: "Holds incoming tape momentum alerts in buffer or resumes stream." },
         { key: "settings", label: "Open Settings Modal", desc: "Toggles this settings dialog for feeds, audio, and strategies." },

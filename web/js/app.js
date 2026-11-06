@@ -49,6 +49,8 @@
     initWatchlistControl();
     initFilterBannedControl();
     U.$("#btn-mute").onclick = toggleMute;
+    const btnTg = U.$("#btn-telegram");
+    if (btnTg) btnTg.onclick = toggleTelegram;
     U.$("#btn-alerts").onclick = toggleDrawer;
     U.$("#btn-settings").onclick = () => Settings.open();
     const brand = U.$("#btn-brand-about") || U.$(".brand");
@@ -234,6 +236,7 @@
   }
 
   function toggleMute() {
+    if (!App.config.alerts) App.config.alerts = {};
     App.config.alerts.mute = !App.config.alerts.mute;
     updateMuteBtn();
     App.saveConfig(true);
@@ -247,13 +250,33 @@
     btn.classList.toggle("paused", isPaused);
     btn.classList.toggle("active", isPaused);
     btn.title = isPaused
-      ? "Alerts PAUSED (Sound & Telegram suppressed) — Click to resume"
-      : "Alerts ACTIVE (Sound & Telegram enabled) — Click to pause";
+      ? "In-App Audio Alerts MUTED — Click to resume"
+      : "In-App Audio Alerts ACTIVE — Click to mute";
+  }
+
+  function toggleTelegram() {
+    if (!App.config.alerts) App.config.alerts = {};
+    App.config.alerts.telegram_enabled = !(App.config.alerts.telegram_enabled !== false);
+    updateTelegramBtn();
+    App.saveConfig(true);
+  }
+
+  function updateTelegramBtn() {
+    const btn = U.$("#btn-telegram");
+    if (!btn) return;
+    const isEnabled = App.config?.alerts?.telegram_enabled !== false;
+    btn.innerHTML = isEnabled ? U.icons.tgBell : U.icons.tgBellOff;
+    btn.classList.toggle("paused", !isEnabled);
+    btn.classList.toggle("active", !isEnabled);
+    btn.title = isEnabled
+      ? "Telegram Alerts ACTIVE — Click to pause / mute"
+      : "Telegram Alerts PAUSED — Click to resume";
   }
 
   function onConfig(c) {
     App.config = c;
     updateMuteBtn();
+    updateTelegramBtn();
     updateFilterBannedButton();
     if (c.alerts?.volume !== undefined) {
       renderVolume(c.alerts.volume);
@@ -531,15 +554,30 @@
         }
       }
 
-      // Master Mute
+      // Master Mute (In-App Audio)
       if (matchKey("mute", "m")) {
         e.preventDefault();
         toggleMute();
         const isMuted = !!App.config?.alerts?.mute;
         U.toast(
           "info",
-          isMuted ? "🔔 Alerts Muted" : "🔔 Alerts Active",
-          isMuted ? "Audio chimes & Telegram alerts paused" : "Audio chimes & Telegram alerts active",
+          isMuted ? "🔔 In-App Audio Muted" : "🔔 In-App Audio Active",
+          isMuted ? "In-app audio alert chimes paused" : "In-app audio alert chimes active",
+          null,
+          2500
+        );
+        return;
+      }
+
+      // Telegram Alerts Toggle
+      if (matchKey("toggle_telegram", "")) {
+        e.preventDefault();
+        toggleTelegram();
+        const isEnabled = App.config?.alerts?.telegram_enabled !== false;
+        U.toast(
+          "info",
+          isEnabled ? "📲 Telegram Alerts Active" : "📲 Telegram Alerts Paused",
+          isEnabled ? "Telegram push notifications enabled" : "Telegram push notifications paused",
           null,
           2500
         );

@@ -8,7 +8,8 @@ NewsAlerts is built for rapid keyboard-driven workflow. Use these hotkeys to nav
 
 | Shortcut | Action | Description |
 | :---: | :--- | :--- |
-| **`M`** | **Master Mute** | Instantly toggles audio bell chimes and Telegram alert dispatching. |
+| **`M`** | **Mute In-App Audio** | Instantly toggles local terminal audio alert chimes on or off. |
+| **Configurable** | **Toggle Telegram Alerts** | Toggles mobile & desktop Telegram push notifications on or off. |
 | **`T`** | **Pop-Out Tape** | Opens the detached, floating running tape window. |
 | **`Space`** | **Pause / Resume** | Pauses or resumes real-time tape and screener stream updates. |
 | **`S`** | **Open Settings** | Launches the modal settings window for feeds, audio, and strategies. |
